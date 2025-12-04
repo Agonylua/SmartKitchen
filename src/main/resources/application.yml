@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mariadb://10.1.1.1:3306/smartKitchen
+    username: agonylua
+    password: wei.liu-liu
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+mqtt:
+  url: tcp://localhost:1883           # 支持 ssl:// 也行
+  username: admin                     # 不需要认证可以删掉这两行
+  password: public
+  client-id-prefix: mqtt-service
+  completion-timeout: 5000
+  qos: 1
+
+  logging:
+    level:
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql: TRACE
