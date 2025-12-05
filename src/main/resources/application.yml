@@ -14,14 +14,12 @@ spring:
     show-sql: true
 
 mqtt:
-  url: tcp://localhost:1883           # 支持 ssl:// 也行
-  username: admin                     # 不需要认证可以删掉这两行
+  url: mqtt://10.1.1.1:1883
+  clientId: spring-mqtt-client
+  username: admin
   password: public
-  client-id-prefix: mqtt-service
-  completion-timeout: 5000
-  qos: 1
+  default-topic: A/B/+,C/B/+
 
-  logging:
-    level:
-      org.hibernate.SQL: DEBUG
-      org.hibernate.type.descriptor.sql: TRACE
+logging:
+  level:
+    org.springframework.integration: DEBUG  # 文章推荐，用于追踪通道订阅
