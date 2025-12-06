@@ -8,15 +8,11 @@ import java.util.Optional;
 
 public interface DeviceRepository extends JpaRepository<Device, Long> {
 
-    Optional<Device> findByNumber(String number);
+    Optional<Device> findBySn(String sn);
     Optional<Device> findByName(String name);
-    Optional<Device> findByIsOnline(String number);
-
     List<Device> findByStatus(String status);
 
-    // 组合查询
-    boolean existsByNumber(String number);
+    boolean existsBySn(String sn);
     boolean existsByName(String name);
-    boolean IsOnline(String number);
 
 }

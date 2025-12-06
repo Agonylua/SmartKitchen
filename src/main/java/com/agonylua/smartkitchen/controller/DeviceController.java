@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,10 +31,10 @@ public class DeviceController {
                 .orElse(ApiResponse.error("[get]设备不存在"));
     }
 
-    // 按 Number 查询
-    @GetMapping("/number/{number}")
-    public ApiResponse<Device> getByNumber(@PathVariable String number) {
-        return deviceRepository.findByNumber(number)
+    // 按 SN 查询
+    @GetMapping("/sn/{sn}")
+    public ApiResponse<Device> getBySN(@PathVariable String sn) {
+        return deviceRepository.findBySn(sn)
                 .map(ApiResponse::success)
                 .orElse(ApiResponse.error("[get]设备不存在"));
     }
@@ -51,12 +50,12 @@ public class DeviceController {
     // 新增
     @PostMapping
     public ApiResponse<Device> create(@Valid @RequestBody DeviceDto dto) {
-        if (deviceRepository.existsByNumber((dto.getNumber()))) {
+        if (deviceRepository.existsBySn((dto.getSn()))) {
             return ApiResponse.error("[create]设备已存在");
         }
 
         Device device = new Device();
-        device.setNumber(dto.getNumber());
+        device.setSn(dto.getSn());
         device.setName(dto.getName());
 
         return ApiResponse.success(deviceRepository.save(device));
