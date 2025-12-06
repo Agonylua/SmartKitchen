@@ -1,9 +1,11 @@
 #include <Arduino.h>
+#include <PubSubClient.h>
 #include "wifiManager.h"
 #include "dht11.h"
+#include "mqttConfig.h"
 
-#define WIFI_SSID "45645645"
-#define WIFI_PASSWORD "mimashishenme"
+#define WIFI_SSID "God-wifi"
+#define WIFI_PASSWORD "111111111"
 
 void orderController();
 void showHelp();
@@ -14,39 +16,24 @@ void setup()
   Serial.begin(115200);
   delay(2000);
   
-  // 初始化WiFi
   if (wifi.begin())
   {
     Serial.println("[System] WiFi initialized");
   }
   wifi.setConfig(WIFI_SSID, WIFI_PASSWORD);
-  Serial.println("[System] Connecting to WiFi...");
   wifi.connect();
-
-  // 初始化DHT11
-  begin();
+  delay(5000);
+  if(wifi.isConnected()){
+    mqttInit();
+  }
+  dht_begin();
 }
 
 void loop()
 {
   wifi.update();
-  dht11Date();
-
+  mqttLoop();
   orderController();
-}
-
-void dht11Date()
-{
-  float temperature = readTemperature();
-  float humidity = readHumidity();
-
-  if (isnan(temperature) || isnan(humidity))
-  {
-    Serial.println("[DHT11] Failed to read from DHT sensor!");
-    return;
-  }
-
-  Serial.printf("[DHT11] Temperature: %.1f °C, Humidity: %.1f %%\n", temperature, humidity);
 }
 
 // 处理串口命令
@@ -73,6 +60,10 @@ void orderController()
         else if (command == "help" || command == "h")
         {
           showHelp();
+        }
+        else if (command == "send")
+        {
+          publishMessage();
         }
         return;
       }
@@ -105,5 +96,6 @@ void showHelp()
   Serial.println("Available commands:");
   Serial.println("  info (i)      - Display WiFi connection info");
   Serial.println("  config [ssid] [password]    - Show WiFi status");
+  Serial.println("  send          - Publish MQTT message");
   Serial.println("  help (h)      - Show this help message");
 }

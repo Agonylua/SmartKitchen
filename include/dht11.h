@@ -6,6 +6,7 @@
 
 extern DHT dht;
 
-void begin();
+void dht_begin();
 float readHumidity();
 float readTemperature();
+void dht11Date();

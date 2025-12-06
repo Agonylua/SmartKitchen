@@ -7,7 +7,7 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-void begin(){
+void dht_begin(){
     dht.begin();
 }
 float readTemperature(){
@@ -15,4 +15,18 @@ float readTemperature(){
 }
 float readHumidity(){
     return dht.readHumidity();
+}
+
+void dht11Date()
+{
+    float temperature = readTemperature();
+    float humidity = readHumidity();
+
+    if (isnan(temperature) || isnan(humidity))
+    {
+        Serial.println("[DHT11] Failed to read from DHT sensor!");
+        return;
+    }
+
+    Serial.printf("[DHT11] Temperature: %.1f °C, Humidity: %.1f %%\n", temperature, humidity);
 }

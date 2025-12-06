@@ -10,7 +10,6 @@ bool WiFiConnector::begin()
     WiFi.mode(WIFI_STA);
     WiFi.setAutoReconnect(true);
     WiFi.setHostname("Refrigerator");
-    WiFi.config(IPAddress(192, 168, 137, 101), IPAddress(255, 255, 255, 0), IPAddress(192, 168, 137, 1));
 
     Serial.printf("[WiFi] MAC: %s\n", WiFi.macAddress().c_str());
     return true;
