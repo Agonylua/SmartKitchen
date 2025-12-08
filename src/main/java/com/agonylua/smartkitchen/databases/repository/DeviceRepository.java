@@ -2,17 +2,16 @@ package com.agonylua.smartkitchen.databases.repository;
 
 import com.agonylua.smartkitchen.databases.entity.Device;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface DeviceRepository extends JpaRepository<Device, Long> {
+    Optional<Device> findByDeviceSn(String deviceSn);
 
-    Optional<Device> findBySn(String sn);
-    Optional<Device> findByName(String name);
-    List<Device> findByStatus(String status);
+    List<Device> findByHomeId(Long homeId);
 
-    boolean existsBySn(String sn);
-    boolean existsByName(String name);
-
+    List<Device> findByRoomId(Long roomId);
 }

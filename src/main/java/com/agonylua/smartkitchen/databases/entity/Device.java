@@ -1,52 +1,30 @@
 package com.agonylua.smartkitchen.databases.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.UUID;
+import jakarta.persistence.*;
+import lombok.Data;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
-@Table(name = "devices")
-public class Device {
+@Table(name = "device")
+public class Device extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "ID", updatable = false, nullable = false, length = 36)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long deviceId;
 
-    @Column(name = "SN", nullable = false, length = 100, unique = true)
-    private String sn;
+    @Column(unique = true, nullable = false)
+    private String deviceSn;
 
-    @Column(name = "Name", nullable = false, length = 100)
-    private String name;
+    private Long homeId;
+    private Long roomId; // 可以为空
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false, length = 10)
-    private DeviceStatus status;
+    private String deviceName;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "Data", columnDefinition = "json", nullable = false)
-    private Map<String, Object> data;
+    // 类型: INDUCTION_COOKER, FRIDGE, etc.
+    private String deviceType;
 
-    @Column(name = "TIME", nullable = false)
-    private LocalDateTime time;
-
-    @PrePersist
-    @PreUpdate
-    protected void prePersistAndUpdate() {
-        if (this.time == null) {
-            this.time = LocalDateTime.now();
-        }
-    }
-
+    // 存储 JSON 字符串。
+    // 在 Service 层可以使用 Jackson ObjectMapper 将其转为 Map 或 Object
+    @Column(columnDefinition = "json")
+    private String deviceData;
 }

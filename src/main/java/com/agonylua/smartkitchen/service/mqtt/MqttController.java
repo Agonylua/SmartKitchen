@@ -1,7 +1,6 @@
 package com.agonylua.smartkitchen.service.mqtt;
 
-import com.agonylua.smartkitchen.utils.JsonUtil;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.agonylua.smartkitchen.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +19,11 @@ public class MqttController {
     private MessageChannel mqttOutputChannel;
 
     public void handleReceivedMessage(Message<?> message) {
-        String json = JsonUtil.toJson(message.getPayload());
-        JsonNode jsonNode = JsonUtil.parse(json);
-        handleMessageProcessing(JsonUtil.getR(jsonNode));
     }
 
     // 发送消息
     public void sendMessage(String topic, Object payload) {
-        String json = JsonUtil.toJson(payload);
+        String json = JsonUtils.toJson(payload);
         Message<String> message = null;
         if (json != null) {
             message = MessageBuilder
