@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -49,6 +52,19 @@ public class JsonUtils {
             return node.has(key) ? node.get(key).asText() : null;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public static <T> List<T> parseList(String jsonStr, Class<T> clazz) {
+        if (jsonStr == null || jsonStr.isEmpty()) return new ArrayList<>();
+        try {
+            // 构建 List<T> 的类型
+            CollectionType listType = mapper.getTypeFactory()
+                    .constructCollectionType(List.class, clazz);
+            return mapper.readValue(jsonStr, listType);
+        } catch (Exception e) {
+            log.error("List反序列化失败", e);
+            return new ArrayList<>();
         }
     }
 }

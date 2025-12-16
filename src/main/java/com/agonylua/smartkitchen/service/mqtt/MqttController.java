@@ -4,6 +4,7 @@ import com.agonylua.smartkitchen.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
@@ -18,12 +19,18 @@ public class MqttController {
     @Autowired
     private MessageChannel mqttOutputChannel;
 
+    @Value("${mqtt.publish-topics}")
+    private String publishTopic;
+
     public void handleReceivedMessage(Message<?> message) {
+        String payload = message.getPayload().toString();
+        System.out.println(payload);
     }
 
     // 发送消息
-    public void sendMessage(String topic, Object payload) {
+    public void sendMessage(Object payload) {
         String json = JsonUtils.toJson(payload);
+        String topic = publishTopic + JsonUtils.getValue(json, "device_id");
         Message<String> message = null;
         if (json != null) {
             message = MessageBuilder
@@ -34,27 +41,6 @@ public class MqttController {
         }
         if (message != null) {
             mqttOutputChannel.send(message);
-        }
-    }
-
-    private void handleMessageProcessing(String r) {
-        if (r == null) {
-            log.warn("R is null");
-            return;
-        }
-        switch (r) {
-            case "#000":
-                log.info("处理心跳消息");
-                break;
-            case "#001":
-                log.info("处理设备状态更新消息");
-                break;
-            case "#002":
-                log.info("处理控制命令响应消息");
-                break;
-            default:
-                log.warn("未知事件: {}", r);
-                break;
         }
     }
 }

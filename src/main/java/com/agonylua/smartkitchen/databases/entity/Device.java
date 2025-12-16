@@ -3,28 +3,30 @@ package com.agonylua.smartkitchen.databases.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "device")
-public class Device extends BaseEntity {
+public class Device {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long deviceId;
+    private String deviceSn; // 12位纯数字
 
-    @Column(unique = true, nullable = false)
-    private String deviceSn;
+    @Column(nullable = false)
+    private String homeId;
 
-    private Long homeId;
-    private Long roomId; // 可以为空
-
+    @Column(nullable = false)
     private String deviceName;
 
-    // 类型: INDUCTION_COOKER, FRIDGE, etc.
-    private String deviceType;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DeviceType deviceType; // 使用枚举限制值
 
-    // 存储 JSON 字符串。
-    // 在 Service 层可以使用 Jackson ObjectMapper 将其转为 Map 或 Object
     @Column(columnDefinition = "json")
-    private String deviceData;
+    private String deviceData; // 允许为 NULL
+
+    @UpdateTimestamp
+    private LocalDateTime updateTime;
 }

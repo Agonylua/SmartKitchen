@@ -26,8 +26,8 @@ public class MqttConfig {
     @Value("${mqtt.client-id}")
     private String clientId;
 
-    @Value("${mqtt.subscribe-topics:default-topic}")
-    private String Topic;
+    @Value("${mqtt.subscribe-topics}")
+    private String subscribeTopic;
 
     @Value("${mqtt.username:}")
     private String username;
@@ -55,7 +55,7 @@ public class MqttConfig {
 
     @Bean
     public MqttPahoMessageDrivenChannelAdapter inbound() {
-        List<String> topics = Arrays.asList(Topic.split(","));
+        List<String> topics = Arrays.asList(subscribeTopic.split(","));
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(clientId, mqttClientFactory(),
                         topics.toArray(new String[0]));
@@ -66,6 +66,7 @@ public class MqttConfig {
         return adapter;
     }
 
+    //接收消息
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler(MqttController mqttController) {
@@ -77,13 +78,13 @@ public class MqttConfig {
         return new DirectChannel();
     }
 
+    //发送消息
     @Bean
     @ServiceActivator(inputChannel = "mqttOutputChannel")
     public MessageHandler mqttOutbound() {
         MqttPahoMessageHandler messageHandler =
                 new MqttPahoMessageHandler(clientId, mqttClientFactory());
         messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic("defaultTopic");
         return messageHandler;
     }
 }

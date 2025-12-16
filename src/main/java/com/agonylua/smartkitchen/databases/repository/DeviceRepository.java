@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DeviceRepository extends JpaRepository<Device, Long> {
+public interface DeviceRepository extends JpaRepository<Device, String> {
     Optional<Device> findByDeviceSn(String deviceSn);
 
-    List<Device> findByHomeId(Long homeId);
+    List<Device> findByHomeId(String homeId);
 
-    List<Device> findByRoomId(Long roomId);
+    boolean existsByDeviceSn(String deviceSn);
 }

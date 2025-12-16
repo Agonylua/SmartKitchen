@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<string-config>
+    <config key="user.welcome" value="欢迎使用Spring Boot（XML版）"/>
+    <config key="order.success" value="订单创建成功，订单号：%s"/>
+    <config key="system.name" value="用户管理系统（XML版）"/>
+    <config key="member.max.count" value="50"/>
+</string-config>

@@ -1,4 +1,4 @@
-package com.agonylua.smartkitchen.controller.common;
+package com.agonylua.smartkitchen.common;
 
 import lombok.Data;
 
