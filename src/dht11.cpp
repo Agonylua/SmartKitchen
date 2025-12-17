@@ -2,8 +2,6 @@
 #include<DHT.h>
 #include "dht11.h"
 
-#define DHTPIN 1
-#define DHTTYPE DHT11
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -17,7 +15,7 @@ float readHumidity(){
     return dht.readHumidity();
 }
 
-void dht11Date()
+void dht11Data()
 {
     float temperature = readTemperature();
     float humidity = readHumidity();

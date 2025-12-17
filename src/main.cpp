@@ -1,32 +1,25 @@
-#include <Arduino.h>
-#include <PubSubClient.h>
-#include "wifiManager.h"
-#include "dht11.h"
-#include "mqttConfig.h"
+#include "main.h"
+#include <Ticker.h>
 
-#define WIFI_SSID "God-wifi"
-#define WIFI_PASSWORD "111111111"
 
-void orderController();
-void showHelp();
-void dht11Date();
+Ticker ticker;
+
 
 void setup()
 {
   Serial.begin(115200);
   delay(2000);
-  
-  if (wifi.begin())
-  {
-    Serial.println("[System] WiFi initialized");
-  }
+  // 初始化WiFi
   wifi.setConfig(WIFI_SSID, WIFI_PASSWORD);
   wifi.connect();
-  delay(5000);
-  if(wifi.isConnected()){
-    mqttInit();
-  }
+  // 初始化MQTT
+  mqttInit();
+  // 初始化DHT11
   dht_begin();
+  // 初始化RGB
+  RGBinit();
+  // 温度监测
+  ticker.attach(10.0, temperatureControl);
 }
 
 void loop()
@@ -60,8 +53,11 @@ void orderController()
         else if (command == "help" || command == "h")
         {
           showHelp();
+        }else if (command == "dht" || command == "d")
+        {
+          Serial.printf("Temperature: %.2f, Humidity: %.2f\n", readTemperature(), readHumidity());
         }
-        else if (command == "send")
+        else if (command == "send" || command == "s")
         {
           publishMessage();
         }
@@ -98,4 +94,11 @@ void showHelp()
   Serial.println("  config [ssid] [password]    - Show WiFi status");
   Serial.println("  send          - Publish MQTT message");
   Serial.println("  help (h)      - Show this help message");
+}
+
+void RGBinit()
+{
+    pixels.begin();
+    pixels.setBrightness(50);
+    pixels.show();
 }
