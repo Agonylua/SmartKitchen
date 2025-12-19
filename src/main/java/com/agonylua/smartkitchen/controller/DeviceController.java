@@ -2,16 +2,16 @@ package com.agonylua.smartkitchen.controller;
 
 import com.agonylua.smartkitchen.common.ApiResponse;
 import com.agonylua.smartkitchen.common.DeviceAddReq;
+import com.agonylua.smartkitchen.common.DeviceControlReq;
 import com.agonylua.smartkitchen.databases.entity.Device;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
 import com.agonylua.smartkitchen.dto.DeviceDTO;
 import com.agonylua.smartkitchen.service.DeviceService;
-import com.agonylua.smartkitchen.utils.JsonUtils;
+import com.agonylua.smartkitchen.service.mqtt.MqttController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -21,6 +21,7 @@ public class DeviceController {
 
     private final DeviceService deviceService;
     private final DeviceRepository deviceRepository;
+    private final MqttController mqttController;
 
     /**
      * 添加设备
@@ -49,27 +50,20 @@ public class DeviceController {
     }
 
     /**
-     * 控制设备 (模拟 MQTT 发送)
-     * 前端传: {"deviceId": "SN123456", "payload": {"switch": "on"}}
+     * 控制设备
+     * 前端传: {"deviceSn": "SN123456", "payload": {"switch": "on"}}
      */
     @PostMapping("/control")
-    public ApiResponse<String> controlDevice(@RequestBody Map<String, Object> req) {
-        String sn = (String) req.get("deviceId");
-        Map<String, Object> payload = (Map<String, Object>) req.get("payload");
+    public ApiResponse<String> controlDevice(@RequestBody DeviceControlReq req) {
+        String sn = req.getDeviceSn();
+        String payload = req.getDeviceData();
 
-        // 1. 校验设备是否存在
         if (!deviceRepository.existsByDeviceSn(sn)) {
             return ApiResponse.error("设备不存在");
         }
 
-        // 2. 构造 MQTT Topic
-        // 假设 Topic 格式: home/device/{sn}/set
-        String topic = "home/device/" + sn + "/set";
-        String msg = JsonUtils.toJson(payload);
-
-        // 3. TODO: 调用 MQTT Client 发送消息
-        // mqttClient.publish(topic, msg);
-        System.out.println(">>> [MQTT发送] Topic: " + topic + " Payload: " + msg);
+        //String topic = "smartKitchen/devices/" + sn + "/control";
+        mqttController.sendMessage(payload);
 
         return ApiResponse.success("指令已下发");
     }

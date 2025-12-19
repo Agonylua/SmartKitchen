@@ -8,6 +8,8 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -22,10 +24,8 @@ public class Home {
     @Column(nullable = false)
     private String ownerId;
 
-    // 将 JSON 数组映射为 Java List<String>
-    // 需要配合 JPA Converter 或 Hibernate Types (这里用 String 简化演示，实际建议用 List)
     @Column(columnDefinition = "json")
-    private String memberIds;
+    private List<String> memberIds = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createTime;

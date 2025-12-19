@@ -49,7 +49,7 @@ public class UserService {
         home.setHomeName(user.getNickname() + "的家");
 
         // 初始成员列表为空或包含户主自己
-        home.setMemberIds("[]");
+        home.getMemberIds().add(user.getUserId());
 
         homeRepository.save(home);
 

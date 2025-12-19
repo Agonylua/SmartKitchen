@@ -17,8 +17,7 @@ public class HomeController {
     private final HomeRepository homeRepository;
 
     /**
-     * 获取我的家庭信息
-     * 目前仅支持查询“我是户主”的家庭
+     * 获取我的家庭信息(根据户主ID)
      */
     @GetMapping("/owner/{userId}")
     public ApiResponse<HomeDTO> getMyHome(@PathVariable String userId) {

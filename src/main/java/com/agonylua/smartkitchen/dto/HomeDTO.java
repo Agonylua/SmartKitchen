@@ -23,7 +23,7 @@ public class HomeDTO {
 
         // 解析数据库里的 JSON 字符串为 List
         if (home.getMemberIds() != null) {
-            dto.setMemberIds(JsonUtils.parseList(home.getMemberIds(), String.class));
+            dto.setMemberIds(JsonUtils.parseList(home.getMemberIds().toString(), String.class));
         }
         return dto;
     }

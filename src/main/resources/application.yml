@@ -26,7 +26,7 @@ mqtt:
   password: wei.liu-liu
   client-id: smartKitchen-service
   subscribe-topics: smartKitchen/service/#
-  publish-topics: smartKitchen/devices/#
+  publish-topics: smartKitchen/devices/
 
 logging:
   level:
