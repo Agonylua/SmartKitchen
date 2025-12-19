@@ -2,6 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 
 Adafruit_NeoPixel pixels(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+String mode = "";
 float tempThreshold_1 = 25.0;
 float humThreshold_1 = 60.0;
 float tempThreshold_2 = 5.0;

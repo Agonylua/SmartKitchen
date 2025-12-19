@@ -6,8 +6,8 @@
 #define MQTT_USERNAME "smartKitchen"
 #define MQTT_PASSWORD "wei.liu-liu"
 
-#define TOPIC_SUB "smartKitchen/devices/DEV000"                                                // MQTT 发布主题
-#define TOPIC_PUB (const char *[]){"smartKitchen/service/data", "smartKitchen/application/data"} // MQTT 订阅主题
+#define TOPIC_SUB "smartKitchen/devices/156400423935"                                                // MQTT 发布主题
+#define TOPIC_PUB (const char *[]){"smartKitchen/service/156400423935", "smartKitchen/application/156400423935"} // MQTT 订阅主题
 
 void mqttInit();
 void mqttCallback(char *topic, byte *payload, unsigned int length);

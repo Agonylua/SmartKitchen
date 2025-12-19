@@ -4,7 +4,9 @@
 #include <ArduinoJson.h>
 #include <mqttConfig.h>
 #include <dht11.h>
+#include <control.h>
 #include <main.h>
+#include "timeUtils.h"
 
 WiFiClient espClient;
 PubSubClient mqtt(espClient);
@@ -13,9 +15,9 @@ void mqttInit()
 {
     mqtt.setServer(MQTT_BROKER, MQTT_PORT);
     mqtt.setCallback(mqttCallback);
-    mqtt.setKeepAlive(30); // 30秒足够
+    mqtt.setSocketTimeout(10); 
+    mqtt.setKeepAlive(20); 
 }
-
 void mqttLoop()
 {
     if (WiFi.status() != WL_CONNECTED)
@@ -48,49 +50,40 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
     }
 
     // MQTT消息解析
-    if (doc["mode"].is<String>())
+    if (doc["cmd"].is<String>())
     {
         return;
     }
-    String mode = doc["mode"];
+    String cmd = doc["cmd"];
     int region = doc["region"];
     int val = doc["value"];
     // 根据控制指令执行相应操作
-    if (mode == "setTempThreshold")
+    if (cmd == "setTempThreshold")
     {
-        switch (region)
-        {
-        case 1:
-            tempThreshold_1 = val;
-            break;
-        case 2:
-            tempThreshold_2 = val;
-            break;
-        default:
-            //异常处理
-            break;
-        }
+        tempThreshold_1 = val;
+        tempThreshold_2 = val;
     }
-    else if (mode == "superCool")
+    else if (cmd == "superCool")
     {
         mode = "SuperCool";
         /* code */
     }
-    else if (mode == "holiday")
+    else if (cmd == "holiday")
     {
         mode = "Holiday";
         /* code */
     }
-    else if (mode == "eco")
+    else if (cmd == "eco")
     {
         mode = "Eco";
         /* code */
     }
     else
     {
-        Serial.println("未知的控制指令: " + String(mode));
+        Serial.println("未知的控制指令: " + String(cmd));
     }
-    
+    Serial.println("当前模式: " + mode);
+    Serial.printf("温度阈值1: %.2f, 温度阈值2: %.2f\n", tempThreshold_1, tempThreshold_2);
 }
 
 void mqttReconnect()
@@ -126,9 +119,7 @@ void mqttReconnect()
 
 void publishMessage()
 {
-    if (!mqtt.connected())
-        return;
-
+    if (!mqtt.connected()){return;}
     float t = readTemperature();
     float h = readHumidity();
     if (isnan(t) || isnan(h))
@@ -138,7 +129,7 @@ void publishMessage()
     JsonDocument doc;
     doc["temp"] = t;
     doc["hum"] = h;
-    doc["up"] = millis() / 1000;
+    doc["up"] = timeStr;
 
     char payload[256];
     serializeJson(doc, payload);

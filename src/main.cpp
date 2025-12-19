@@ -20,6 +20,7 @@ void setup()
   RGBinit();
   // 温度监测
   ticker.attach(10.0, temperatureControl);
+  ticker.attach(10.0, publishMessage);
 }
 
 void loop()
@@ -58,6 +59,14 @@ void orderController()
           Serial.printf("Temperature: %.2f, Humidity: %.2f\n", readTemperature(), readHumidity());
         }
         else if (command == "send" || command == "s")
+        {
+          publishMessage();
+        }
+        else if (command == "tempThr" || command == "t")
+        {
+          Serial.printf("Temp Threshold 1: %.2f, Temp Threshold 2: %.2f\n", tempThreshold_1, tempThreshold_2);
+        }
+        else
         {
           publishMessage();
         }
