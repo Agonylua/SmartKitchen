@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">SmartHome</string>
+    <string name="title_activity_home">homeActivity</string>
+    <string name="bottom_bar_home">首页</string>
+    <string name="bottom_bar_smart">智能</string>
+    <string name="bottom_bar_monitor">监控</string>
+    <string name="bottom_bar_user">我的</string>
+    <string name="login_title">智能厨房</string>
+    <string name="login">登录</string>
+    <string name="register">注册</string>
+    <string name="user_name_hint">请输入用户名/ID</string>
+    <string name="user_password_hint">请输入密码</string>
+    <string name="forget_password">忘记密码</string>
+</resources>
