@@ -12,21 +12,33 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class JsonUtils {
+public class JsonUtil {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * 对象转 JSON 字符串 (存数据库用)
+     * 核心方法：对象转 JSON 字符串 (存数据库用)
      */
     public static String toJson(Object obj) {
         if (obj == null) return null;
+
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+
         try {
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             log.error("JSON序列化失败", e);
             return null;
         }
+    }
+
+    /**
+     * Map 转 JSON 字符串
+     */
+    public static String mapToJson(Map<?, ?> map) {
+        return toJson(map);
     }
 
     /**
@@ -38,23 +50,28 @@ public class JsonUtils {
             return mapper.readValue(jsonStr, new TypeReference<Map<String, Object>>() {
             });
         } catch (JsonProcessingException e) {
-            log.error("JSON反序列化失败", e);
+            log.error("JSON反序列化失败: {}", jsonStr, e);
             return null;
         }
     }
 
     /**
-     * 获取 JSON 中的某个特定字段值 (比如只拿 switch 状态)
+     * 获取 JSON 中的某个特定字段值
      */
     public static String getValue(String jsonStr, String key) {
+        if (jsonStr == null || jsonStr.isEmpty()) return null;
         try {
             JsonNode node = mapper.readTree(jsonStr);
             return node.has(key) ? node.get(key).asText() : null;
         } catch (Exception e) {
+            log.warn("解析JSON字段失败 Key: {}, JSON: {}", key, jsonStr);
             return null;
         }
     }
 
+    /**
+     * 解析 List
+     */
     public static <T> List<T> parseList(String jsonStr, Class<T> clazz) {
         if (jsonStr == null || jsonStr.isEmpty()) return new ArrayList<>();
         try {

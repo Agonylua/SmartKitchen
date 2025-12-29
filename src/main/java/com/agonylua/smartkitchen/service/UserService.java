@@ -4,7 +4,7 @@ import com.agonylua.smartkitchen.databases.entity.Home;
 import com.agonylua.smartkitchen.databases.entity.User;
 import com.agonylua.smartkitchen.databases.repository.HomeRepository;
 import com.agonylua.smartkitchen.databases.repository.UserRepository;
-import com.agonylua.smartkitchen.utils.IdUtils;
+import com.agonylua.smartkitchen.utils.IdUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class UserService {
         // 2. 准备用户对象
         User user = new User();
         // 生成唯一ID (实际生产中需检查ID是否碰撞，这里简化)
-        user.setUserId(IdUtils.generateShortId());
+        user.setUserId(IdUtil.generateUserId());
         user.setUsername(username);
         user.setPassword(password); // 记得加密！
 
@@ -43,7 +43,7 @@ public class UserService {
 
         // 5. 自动创建家庭
         Home home = new Home();
-        home.setHomeId(IdUtils.generateShortId()); // 生成6位家庭ID
+        home.setHomeId(IdUtil.generateHomeId()); // 生成6位家庭ID
         home.setOwnerId(user.getUserId());
         // 默认家庭名称: 昵称 + 的家
         home.setHomeName(user.getNickname() + "的家");

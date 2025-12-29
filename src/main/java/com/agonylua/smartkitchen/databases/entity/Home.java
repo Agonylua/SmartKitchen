@@ -1,9 +1,7 @@
 package com.agonylua.smartkitchen.databases.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.agonylua.smartkitchen.databases.converter.StringListConverter;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -25,6 +23,7 @@ public class Home {
     private String ownerId;
 
     @Column(columnDefinition = "json")
+    @Convert(converter = StringListConverter.class)
     private List<String> memberIds = new ArrayList<>();
 
     @CreationTimestamp

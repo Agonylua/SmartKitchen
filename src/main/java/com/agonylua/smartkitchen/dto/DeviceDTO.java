@@ -1,7 +1,7 @@
 package com.agonylua.smartkitchen.dto;
 
 import com.agonylua.smartkitchen.databases.entity.Device;
-import com.agonylua.smartkitchen.utils.JsonUtils;
+import com.agonylua.smartkitchen.utils.JsonUtil;
 import lombok.Data;
 
 import java.util.Map;
@@ -27,7 +27,7 @@ public class DeviceDTO {
 
         // 解析 JSON 字符串为 Map
         if (device.getDeviceData() != null) {
-            dto.setDeviceData(JsonUtils.parseMap(device.getDeviceData()));
+            dto.setDeviceData(JsonUtil.parseMap(device.getDeviceData()));
         }
         return dto;
     }

@@ -3,7 +3,7 @@ package com.agonylua.smartkitchen.service;
 import com.agonylua.smartkitchen.databases.entity.Device;
 import com.agonylua.smartkitchen.databases.entity.DeviceType;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
-import com.agonylua.smartkitchen.utils.IdUtils;
+import com.agonylua.smartkitchen.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ public class DeviceService {
         Device device = new Device();
 
         // 1. 生成 12位 SN
-        device.setDeviceSn(IdUtils.generateDeviceSn());
+        device.setDeviceSn(IdUtil.generateDeviceSn());
 
         device.setHomeId(homeId);
         device.setDeviceName(customName);

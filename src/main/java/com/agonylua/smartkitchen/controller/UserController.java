@@ -5,7 +5,9 @@ import com.agonylua.smartkitchen.common.RegisterReq;
 import com.agonylua.smartkitchen.databases.entity.User;
 import com.agonylua.smartkitchen.dto.UserDTO;
 import com.agonylua.smartkitchen.service.UserService;
+import com.agonylua.smartkitchen.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /**
      * 用户注册
@@ -37,10 +41,9 @@ public class UserController {
     @PostMapping("/login")
     public ApiResponse<UserDTO> login(@RequestBody RegisterReq req) {
         User user = userService.login(req.getUsername(), req.getPassword());
-
-        // JWT Token
+        String token = jwtUtil.generateToken(req.getUsername());
         UserDTO dto = UserDTO.fromEntity(user);
-        dto.setToken("mock-jwt-token-" + user.getUserId());
+        dto.setToken(token);
 
         return ApiResponse.success(dto);
     }

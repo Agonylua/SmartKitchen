@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mariadb://10.1.1.1:3306/SmartKitchen
+    url: jdbc:mariadb://10.1.1.10:3306/SmartKitchen
     username: agonylua
     password: wei.liu-liu
     driver-class-name: org.mariadb.jdbc.Driver
@@ -24,7 +24,8 @@ mqtt:
   broker: tcp://10.1.1.1:1883
   username: smartKitchen
   password: wei.liu-liu
-  client-id: smartKitchen-service
+  clientId_in: smartKitchen-service_in
+  clientId_out: smartKitchen-service_out
   subscribe-topics: smartKitchen/service/#
   publish-topics: smartKitchen/devices/
 

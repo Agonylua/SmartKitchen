@@ -1,8 +1,7 @@
 package com.agonylua.smartkitchen.service.mqtt;
 
-import com.agonylua.smartkitchen.databases.entity.Device;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
-import com.agonylua.smartkitchen.utils.JsonUtils;
+import com.agonylua.smartkitchen.utils.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,21 +28,28 @@ public class MqttController {
     private final DeviceRepository deviceRepository;
 
     public void handleReceivedMessage(Message<?> message) {
-        String payload = message.getPayload().toString();
-        String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
-        topic = topic.startsWith(MQTT_TOPIC_PREFIX)
-                ? topic.substring(MQTT_TOPIC_PREFIX.length())
-                : "";
-        Device device = deviceRepository.findByDeviceSn(topic)
-                .orElseThrow(() -> new RuntimeException("设备不存在"));
-        device.setDeviceData(payload);
-        deviceRepository.save(device);
+        try {
+            String payload = message.getPayload().toString();
+            String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
+
+            if (topic.startsWith(MQTT_TOPIC_PREFIX)) {
+                String sn = topic.substring(MQTT_TOPIC_PREFIX.length());
+                if (!sn.isEmpty()) {
+                    deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
+                        device.setDeviceData(payload);
+                        deviceRepository.save(device);
+                    }, () -> log.warn("收到消息但设备不存在: {}", sn));
+                }
+            }
+        } catch (Exception e) {
+            log.error("处理MQTT接收消息时发生异常", e);
+        }
     }
 
     // 发送消息
     public void sendMessage(Object payload) {
-        String json = JsonUtils.toJson(payload);
-        String topic = publishTopic + JsonUtils.getValue(json, "device_sn");
+        String json = JsonUtil.toJson(payload);
+        String topic = publishTopic + JsonUtil.getValue(json, "deviceSn");
         Message<String> message = null;
         if (json != null) {
             message = MessageBuilder

@@ -1,7 +1,7 @@
 package com.agonylua.smartkitchen.dto;
 
 import com.agonylua.smartkitchen.databases.entity.Home;
-import com.agonylua.smartkitchen.utils.JsonUtils;
+import com.agonylua.smartkitchen.utils.JsonUtil;
 import lombok.Data;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class HomeDTO {
 
         // 解析数据库里的 JSON 字符串为 List
         if (home.getMemberIds() != null) {
-            dto.setMemberIds(JsonUtils.parseList(home.getMemberIds().toString(), String.class));
+            dto.setMemberIds(JsonUtil.parseList(home.getMemberIds().toString(), String.class));
         }
         return dto;
     }

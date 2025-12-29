@@ -23,8 +23,11 @@ public class MqttConfig {
     @Value("${mqtt.broker}")
     private String brokerUrl;
 
-    @Value("${mqtt.client-id}")
-    private String clientId;
+    @Value("${mqtt.clientId_in}")
+    private String clientId_in;
+
+    @Value("${mqtt.clientId_out}")
+    private String clientId_out;
 
     @Value("${mqtt.subscribe-topics}")
     private String subscribeTopic;
@@ -60,7 +63,7 @@ public class MqttConfig {
     public MqttPahoMessageDrivenChannelAdapter inbound() {
         List<String> topics = Arrays.asList(subscribeTopic.split(","));
         MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter(clientId, mqttClientFactory(),
+                new MqttPahoMessageDrivenChannelAdapter(clientId_in, mqttClientFactory(),
                         topics.toArray(new String[0]));
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
@@ -86,7 +89,7 @@ public class MqttConfig {
     @ServiceActivator(inputChannel = "mqttOutputChannel")
     public MessageHandler mqttOutbound() {
         MqttPahoMessageHandler messageHandler =
-                new MqttPahoMessageHandler(clientId, mqttClientFactory());
+                new MqttPahoMessageHandler(clientId_out, mqttClientFactory());
         messageHandler.setAsync(true);
         return messageHandler;
     }

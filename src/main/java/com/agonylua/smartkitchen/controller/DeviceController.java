@@ -55,16 +55,8 @@ public class DeviceController {
      */
     @PostMapping("/control")
     public ApiResponse<String> controlDevice(@RequestBody DeviceControlReq req) {
-        String sn = req.getDeviceSn();
-        String payload = req.getDeviceData();
-
-        if (!deviceRepository.existsByDeviceSn(sn)) {
-            return ApiResponse.error("设备不存在");
-        }
-
-        //String topic = "smartKitchen/devices/" + sn + "/control";
+        Object payload = req.getDeviceCmd();
         mqttController.sendMessage(payload);
-
         return ApiResponse.success("指令已下发");
     }
 }
