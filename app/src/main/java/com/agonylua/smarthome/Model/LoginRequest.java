@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.network;
+package com.agonylua.smarthome.Model;
 
 public class LoginRequest {
     private String username;
@@ -8,5 +8,4 @@ public class LoginRequest {
         this.username = username;
         this.password = password;
     }
-    // Android 发送数据通常只需要构造函数，Gson 会自动读取字段
 }

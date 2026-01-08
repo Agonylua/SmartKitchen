@@ -18,7 +18,6 @@ import com.google.android.material.textfield.TextInputEditText;
 public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
-    //private TextInputEditText etUsername, etPassword;
     private TextInputEditText etPassword;
     private TextInputEditText etUsername;
     private Button btnLogin;
@@ -66,7 +65,6 @@ public class LoginActivity extends AppCompatActivity {
         loginViewModel.getLoginSuccessToken().observe(this, token -> {
             // 隐藏 loading (如果不希望在 ViewModel 里手动关，可以在这里关)
             //progressBar.setVisibility(View.GONE);
-
             // 保存 Token
             saveToken(token);
 

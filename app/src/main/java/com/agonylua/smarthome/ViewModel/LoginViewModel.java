@@ -1,12 +1,16 @@
 package com.agonylua.smarthome.ViewModel;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.agonylua.smarthome.Repository.LoginRepository;
 
-public class LoginViewModel extends ViewModel {
+import org.jspecify.annotations.NonNull;
+
+public class LoginViewModel extends AndroidViewModel {
 
     private LoginRepository repository;
 
@@ -15,7 +19,8 @@ public class LoginViewModel extends ViewModel {
     private MutableLiveData<String> loginErrorMsg = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
-    public LoginViewModel() {
+    public LoginViewModel(@NonNull Application application) {
+        super(application);
         repository = new LoginRepository();
     }
 
@@ -26,10 +31,10 @@ public class LoginViewModel extends ViewModel {
             return;
         }
 
-        isLoading.setValue(true); // 显示加载圈
+        //isLoading.setValue(true); // 显示加载圈
 
         // 调用仓库，传入 LiveData 以便回调
-        repository.login(username, password, new LoginRepository.LoginCallback() {
+        repository.login(getApplication(), username, password, new LoginRepository.LoginCallback() {
             @Override
             public void onSuccess(String token) {
                 loginSuccessToken.setValue(token);

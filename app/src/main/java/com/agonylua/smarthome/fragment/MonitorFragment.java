@@ -12,6 +12,6 @@ import com.agonylua.smarthome.R;
 public class MonitorFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        return inflater.inflate(R.layout.fragment_monitor, container, false);
     }
 }
