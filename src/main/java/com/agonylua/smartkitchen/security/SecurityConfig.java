@@ -1,5 +1,6 @@
 package com.agonylua.smartkitchen;
 
+import com.agonylua.smartkitchen.security.JwtTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,10 +10,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private JwtTokenFilter jwtTokenFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -28,15 +32,15 @@ public class SecurityConfig {
                 // 3. 配置路径拦截规则
                 .authorizeHttpRequests(auth -> auth
                         // 放行登录接口，允许匿名访问
-                        .requestMatchers("/api/auth/login", "/api/v1/user/login").permitAll()
-                        // 放行注册接口 (如果有)
-                        .requestMatchers("/api/auth/register", "/api/v1/user/register").permitAll()
+                        .requestMatchers("/user/**").permitAll()
+                        // 放行注册接口
+                        .requestMatchers("/device/**").permitAll()
                         // 其他所有接口都需要认证
                         .anyRequest().authenticated()
                 );
 
         // 4. (后续步骤) 这里将来要添加 addFilterBefore 加入你的 JWT 过滤器
-        // http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

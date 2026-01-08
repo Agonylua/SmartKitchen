@@ -1,9 +1,9 @@
 server:
-  port: 8080
+  port: 1234
 
 spring:
   datasource:
-    url: jdbc:mariadb://10.1.1.10:3306/SmartKitchen
+    url: jdbc:mariadb://10.2.2.10:3306/SmartKitchen
     username: agonylua
     password: wei.liu-liu
     driver-class-name: org.mariadb.jdbc.Driver
@@ -21,13 +21,17 @@ spring:
           batch_size: 20
 
 mqtt:
-  broker: tcp://10.1.1.1:1883
+  broker: tcp://10.2.2.10:1883
   username: smartKitchen
   password: wei.liu-liu
   clientId_in: smartKitchen-service_in
   clientId_out: smartKitchen-service_out
   subscribe-topics: smartKitchen/service/#
   publish-topics: smartKitchen/devices/
+
+jwt:
+  secret: 7Z8X9Y0W1V2U3T4S5R6Q7P8O9N0M1L2K3J4I5H6G7F8E9D0C1B2A3Z4Y5X6W7V8U9T0S
+  expiration: 1296000000
 
 logging:
   level:

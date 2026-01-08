@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/device")
+@RequestMapping("/device")
 @RequiredArgsConstructor
 public class DeviceController {
 
@@ -48,6 +48,9 @@ public class DeviceController {
 
         return ApiResponse.success(dtoList);
     }
+    /**
+     * 获取用户名下的设备列表
+     */
 
     /**
      * 控制设备

@@ -1,20 +1,23 @@
 package com.agonylua.smartkitchen.controller;
 
 import com.agonylua.smartkitchen.common.ApiResponse;
+import com.agonylua.smartkitchen.common.LoginReq;
 import com.agonylua.smartkitchen.common.RegisterReq;
 import com.agonylua.smartkitchen.databases.entity.User;
 import com.agonylua.smartkitchen.dto.UserDTO;
 import com.agonylua.smartkitchen.service.UserService;
 import com.agonylua.smartkitchen.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -39,12 +42,12 @@ public class UserController {
      * 实际项目中应该校验密码加密，并生成 JWT Token
      */
     @PostMapping("/login")
-    public ApiResponse<UserDTO> login(@RequestBody RegisterReq req) {
+    public ApiResponse<UserDTO> login(@RequestBody LoginReq req) {
         User user = userService.login(req.getUsername(), req.getPassword());
         String token = jwtUtil.generateToken(req.getUsername());
         UserDTO dto = UserDTO.fromEntity(user);
         dto.setToken(token);
-
+        log.info("获取的登录信息{}, token{}", req, token);
         return ApiResponse.success(dto);
     }
 }

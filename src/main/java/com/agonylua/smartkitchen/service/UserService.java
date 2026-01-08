@@ -66,4 +66,11 @@ public class UserService {
 
         return user;
     }
+
+    public User verify(String token) {
+        // 这里简化为根据 token 查找用户，实际应解析 JWT
+        String username = token; // 假设 token 就是用户名
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("无效的 token"));
+    }
 }
