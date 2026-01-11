@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class TokenManager {
-    private static final String PREF_NAME = "SmartKitchenPrefs";
+    private static final String PREF_NAME = "SmartKitchenApp";
     private static final String KEY_TOKEN = "jwt_token";
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;

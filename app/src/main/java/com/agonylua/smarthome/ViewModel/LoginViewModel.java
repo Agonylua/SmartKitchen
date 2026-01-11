@@ -7,12 +7,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.agonylua.smarthome.Repository.LoginRepository;
+import com.agonylua.smarthome.Utils.TokenManager;
 
 import org.jspecify.annotations.NonNull;
 
 public class LoginViewModel extends AndroidViewModel {
 
     private LoginRepository repository;
+    private TokenManager tokenManager;
 
     // LiveData 用于通知 Activity 更新 UI
     private MutableLiveData<String> loginSuccessToken = new MutableLiveData<>();
@@ -46,6 +48,11 @@ public class LoginViewModel extends AndroidViewModel {
             }
 
         });
+    }
+
+    public Boolean loginVerify() {
+        String token = tokenManager.getToken();
+        return token != null && !token.isEmpty();
     }
 
     // Getters for LiveData (供 Activity 观察)

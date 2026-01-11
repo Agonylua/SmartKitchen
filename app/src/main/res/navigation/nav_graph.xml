@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.agonylua.smarthome.fragment.HomeFragment"
+        android:label="HomeFragment" />
+    <fragment
+        android:id="@+id/monitorFragment"
+        android:name="com.agonylua.smarthome.fragment.MonitorFragment"
+        android:label="MonitorFragment" />
+    <fragment
+        android:id="@+id/setFragment"
+        android:name="com.agonylua.smarthome.fragment.SetFragment"
+        android:label="SetFragment" />
+    <fragment
+        android:id="@+id/smartFragment"
+        android:name="com.agonylua.smarthome.fragment.SmartFragment"
+        android:label="SmartFragment" />
+    <fragment
+        android:id="@+id/userFragment"
+        android:name="com.agonylua.smarthome.fragment.UserFragment"
+        android:label="UserFragment" />
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.agonylua.smarthome.fragment.MainFragment"
+        android:label="MainFragment">
+        <action
+            android:id="@+id/action_mainFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.agonylua.smarthome.fragment.LoginFragment"
+        android:label="LoginFragment">
+        <action
+            android:id="@+id/action_loginFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+</navigation>

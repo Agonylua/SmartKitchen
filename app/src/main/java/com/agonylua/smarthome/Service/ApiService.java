@@ -42,4 +42,12 @@ public interface ApiService {
             @Header("Authorization") String token,
             @Body ControlRequest request
     );
+
+    /**
+     * 验证 Token 接口
+     *
+     * @param token 用户 Token
+     */
+    @POST("/user/validateToken")
+    Call<Void> validateToken(@Header("Authorization") String token);
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/background_main"
+        app:layout_constraintBottom_toTopOf="@id/radioGroup"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#C0C0C0"
+        app:layout_constraintBottom_toTopOf="@id/radioGroup"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@color/bottom_bar_white"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <RadioButton
+            android:id="@+id/rb_home"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:button="@null"
+            android:checked="true"
+            android:drawableTop="@drawable/ic_home_bar"
+            android:drawablePadding="2dp"
+            android:gravity="center"
+            android:text="@string/bottom_bar_home"
+            android:textColor="@color/bar_color" />
+
+        <RadioButton
+            android:id="@+id/rb_smart"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:button="@null"
+            android:drawableTop="@drawable/smart_bar"
+            android:drawablePadding="2dp"
+            android:gravity="center"
+            android:text="@string/bottom_bar_smart"
+            android:textColor="@color/bar_color" />
+
+        <RadioButton
+            android:id="@+id/rb_monitor"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:button="@null"
+            android:drawableTop="@drawable/monitor_bar"
+            android:drawablePadding="2dp"
+            android:gravity="center"
+            android:text="@string/bottom_bar_monitor"
+            android:textColor="@color/bar_color" />
+
+        <RadioButton
+            android:id="@+id/rb_user"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:button="@null"
+            android:drawableTop="@drawable/user_bar"
+            android:drawablePadding="2dp"
+            android:gravity="center"
+            android:text="@string/bottom_bar_user"
+            android:textColor="@color/bar_color" />
+    </RadioGroup>
+</androidx.constraintlayout.widget.ConstraintLayout>

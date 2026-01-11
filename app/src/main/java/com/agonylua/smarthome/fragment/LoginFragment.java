@@ -1,22 +1,27 @@
-package com.agonylua.smarthome.view;
+package com.agonylua.smarthome.fragment;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
+import com.agonylua.smarthome.Utils.TokenManager;
 import com.agonylua.smarthome.ViewModel.LoginViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 
-public class LoginActivity extends AppCompatActivity {
-
+public class LoginFragment extends Fragment {
     private LoginViewModel loginViewModel;
     private TextInputEditText etPassword;
     private TextInputEditText etUsername;
@@ -24,16 +29,17 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnRegister;
     private ProgressBar progressBar;
     private String TAG = "Login";
+    private Context context;
+    private TokenManager tokenManager;
 
-
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.login);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_login, container, false);
 
-        etUsername = findViewById(R.id.user_name);
-        etPassword = findViewById(R.id.user_password);
-        btnLogin = findViewById(R.id.login);
+        etUsername = root.findViewById(R.id.user_name);
+        etPassword = root.findViewById(R.id.user_password);
+        btnLogin = root.findViewById(R.id.login);
 
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
@@ -42,11 +48,13 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> {
             if (etUsername.getText() == null || etPassword.getText() == null) {
                 Log.e(TAG, "用户名或密码为空");
+                return;
             }
             String u = etUsername.getText().toString();
             String p = etPassword.getText().toString();
             loginViewModel.login(u, p);
         });
+        return root;
     }
 
     private void observeViewModel() {
@@ -63,28 +71,22 @@ public class LoginActivity extends AppCompatActivity {
 
         // 观察登录成功
         loginViewModel.getLoginSuccessToken().observe(this, token -> {
-            // 隐藏 loading (如果不希望在 ViewModel 里手动关，可以在这里关)
             //progressBar.setVisibility(View.GONE);
-            // 保存 Token
-            saveToken(token);
+            tokenManager.saveToken(token);
 
-            Toast.makeText(this, "登录成功！", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
+            Toast.makeText(getContext(), "登录成功！", Toast.LENGTH_SHORT).show();
+            if (getView() != null) {
+                Navigation.findNavController(getView()).navigate(R.id.mainFragment);
+            }
         });
 
         // 观察登录失败
         loginViewModel.getLoginErrorMsg().observe(this, errorMsg -> {
             //progressBar.setVisibility(View.GONE);
             btnLogin.setEnabled(true);
-            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), errorMsg, Toast.LENGTH_SHORT).show();
         });
-    }
 
-    private void saveToken(String token) {
-        SharedPreferences sp = getSharedPreferences("SmartKitchenApp", MODE_PRIVATE);
-        sp.edit().putString("jwt_token", token).apply();
-    }
 
+    }
 }

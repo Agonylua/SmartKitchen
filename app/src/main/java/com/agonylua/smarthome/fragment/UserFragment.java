@@ -7,20 +7,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
 
 public class UserFragment extends Fragment {
-    private TextView btn_logout;
+    private TextView btn_settings;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View user = inflater.inflate(R.layout.fragment_user, container, false);
-        btn_logout = user.findViewById(R.id.btn_logout);
-        btn_logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 处理登出逻辑，例如清除用户数据，跳转到登录界面等
-            }
+        btn_settings = user.findViewById(R.id.bt_settings);
+        btn_settings.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.setFragment);
         });
         return user;
     }

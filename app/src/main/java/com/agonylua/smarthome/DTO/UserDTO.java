@@ -4,11 +4,26 @@ public class UserDTO {
     private String userId;
     private String username;
     private String nickname;
+    private String AvatarUrl;
     private String token;
 
-    // Getters
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public String getAvatarUrl() {
+        return AvatarUrl;
+    }
     public String getToken() {
         return token;
     }
-    // ... 其他 getter
 }

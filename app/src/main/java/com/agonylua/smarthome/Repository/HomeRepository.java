@@ -16,7 +16,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class HomeRepository {
-    private String TAG = "HomeRepository";
+    private final String TAG = "HomeRepository";
 
     public void getDevices(Context context, String homeId, DeviceCallback callback) {
         RetrofitClient.getInstance(context).getApi().getDeviceList(homeId).enqueue(new Callback<DeviceResponse<Device>>() {
@@ -43,6 +43,30 @@ public class HomeRepository {
             public void onFailure(@NonNull Call<DeviceResponse<Device>> call, @NonNull Throwable t) {
                 callback.onError("网络连接错误: " + t.getMessage());
                 Log.d(TAG, "onFailure: 网络连接错误: " + t.getMessage());
+            }
+        });
+    }
+
+    public void validateToken(Context context, String token, DeviceCallback callback) {
+
+        Call<Void> call = RetrofitClient.getInstance(context).getApi().validateToken(token);
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                // 3. 处理服务器响应
+                if (response.isSuccessful() && response.body() != null) {
+                    // HTTP 200 OK -> Token 有效
+                } else {
+                    // HTTP 401/403 -> Token 过期或非法
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                String msg = t.getMessage() != null ? t.getMessage() : "未知错误";
+                callback.onError("网络错误: " + msg);
+                Log.e(TAG, "onFailure: " + msg);
             }
         });
     }

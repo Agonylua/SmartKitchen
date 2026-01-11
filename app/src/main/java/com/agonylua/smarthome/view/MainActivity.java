@@ -2,13 +2,17 @@ package com.agonylua.smarthome.view;
 
 import android.os.Bundle;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.adapter.PagerAdapter;
+import com.agonylua.smarthome.ViewModel.HomeViewModel;
 import com.agonylua.smarthome.fragment.HomeFragment;
 import com.agonylua.smarthome.fragment.MonitorFragment;
 import com.agonylua.smarthome.fragment.SmartFragment;
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private HomeViewModel homeViewModel;
     private ViewPager2 mViewPager2;
     private RadioGroup mRadioGroup;
 
@@ -26,58 +31,43 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // 初始化控件
-        mViewPager2 = findViewById(R.id.viewPager);
-        mRadioGroup = findViewById(R.id.radioGroup);
-
-        // 初始化Fragment列表
+        homeViewModel = new HomeViewModel(getApplication());
+        // Init Fragment
         List<Fragment> fragments = new ArrayList<>();
         fragments.add(new HomeFragment());
         fragments.add(new SmartFragment());
         fragments.add(new MonitorFragment());
         fragments.add(new UserFragment());
 
-        // 设置ViewPager2适配器
-        PagerAdapter adapter = new PagerAdapter(this, fragments);
-        mViewPager2.setAdapter(adapter);
 
-        // 监听RadioGroup选中事件，切换ViewPager2页面
-        mRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.rb_home)
-                mViewPager2.setCurrentItem(0);
-            else if (checkedId == R.id.rb_smart)
-                mViewPager2.setCurrentItem(1);
-            else if (checkedId == R.id.rb_monitor)
-                mViewPager2.setCurrentItem(2);
-            else if (checkedId == R.id.rb_user) {
-                mViewPager2.setCurrentItem(3);
-            }
-        });
+        if (homeViewModel.validateToken()) {
+            Toast.makeText(this, "登录成功！", Toast.LENGTH_SHORT).show();
+            findViewById(R.layout.activity_main).post(() -> {
+                NavController navController = Navigation.findNavController(findViewById(R.id.nav_host_fragment));
+                navController.navigate(R.id.loginFragment);
+            });
+        }
+    }
 
-        // 监听ViewPager2页面变化，同步更新RadioButton选中状态
-        mViewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                switch (position) {
-                    case 0:
-                        mRadioGroup.check(R.id.rb_home);
-                        break;
-                    case 1:
-                        mRadioGroup.check(R.id.rb_smart);
-                        break;
-                    case 2:
-                        mRadioGroup.check(R.id.rb_monitor);
-                        break;
-                    case 3:
-                        mRadioGroup.check(R.id.rb_user);
-                        break;
-                }
-            }
-        });
+    /**
+     * 显示全屏 Fragment 的方法
+     *
+     * @param fragment 要展示的全屏 Fragment
+     */
+    public void showSettingsFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        // 默认选中首页
-        mRadioGroup.check(R.id.rb_home);
+        transaction.setCustomAnimations(
+                android.R.anim.slide_in_left,
+                android.R.anim.slide_out_right,
+                android.R.anim.slide_in_left,
+                android.R.anim.slide_out_right
+        );
+
+        transaction.add(android.R.id.content, fragment);
+
+        transaction.addToBackStack("fullscreen_tag");
+
+        transaction.commit();
     }
 }
