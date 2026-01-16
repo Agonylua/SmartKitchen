@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -15,11 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
-    // 从 application.yml 读取配置，如果没有则使用默认值
-    // 注意：密钥长度至少需要 256 位 (32个字符以上)，否则报错
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -80,6 +80,7 @@ public class JwtUtil {
      * 解析 Token 获取所有 Claims (内部方法)
      */
     private Claims extractAllClaims(String token) {
+        log.info("secretKey {},jwtExpiration {}", secretKey, jwtExpiration);
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey()) // 设置签名密钥
                 .build()

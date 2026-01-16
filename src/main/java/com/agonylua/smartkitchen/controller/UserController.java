@@ -4,6 +4,7 @@ import com.agonylua.smartkitchen.common.ApiResponse;
 import com.agonylua.smartkitchen.common.LoginReq;
 import com.agonylua.smartkitchen.common.RegisterReq;
 import com.agonylua.smartkitchen.databases.entity.User;
+import com.agonylua.smartkitchen.databases.repository.UserRepository;
 import com.agonylua.smartkitchen.dto.UserDTO;
 import com.agonylua.smartkitchen.service.UserService;
 import com.agonylua.smartkitchen.utils.JwtUtil;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
+
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -46,8 +49,20 @@ public class UserController {
         User user = userService.login(req.getUsername(), req.getPassword());
         String token = jwtUtil.generateToken(req.getUsername());
         UserDTO dto = UserDTO.fromEntity(user);
+        dto.setUserId(user.getUserId());
+        dto.setNickname(user.getNickname());
+        dto.setAvatarUrl(user.getAvatarUrl());
         dto.setToken(token);
-        log.info("获取的登录信息{}, token{}", req, token);
+        log.info("获取的登录信息{}, token{}", req, dto);
         return ApiResponse.success(dto);
+    }
+
+    /**
+     * token 验证接口
+     * 用于前端验证 token 是否有效
+     */
+    @PostMapping("/validateToken")
+    public ApiResponse<Void> verifyToken() {
+        return ApiResponse.success(null);
     }
 }

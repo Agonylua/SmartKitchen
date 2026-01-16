@@ -5,7 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,11 +21,14 @@ import java.io.IOException;
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private UserDetailsService userDetailsService; // Spring Security用于加载用户数据的接口
+    private final UserDetailsService userDetailsService; // Spring Security用于加载用户数据的接口
+
+    public JwtTokenFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -41,9 +43,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         // 2. 判断 Header 是否以 "Bearer " 开头
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7); // 去掉 "Bearer " 前缀拿到纯 Token
+            logger.info("JWT token " + jwt);
             try {
-                // 从 Token 中解析出用户名 (需要在 JwtUtil 中实现 extractUsername)
-                username = jwtUtil.extractUsername(jwt);
+                // 从 Token 中解析出用户名
+                if (jwtUtil != null) {
+                    username = jwtUtil.extractUsername(jwt);
+                }
             } catch (Exception e) {
                 logger.error("JWT 解析失败或过期: " + e.getMessage());
             }
