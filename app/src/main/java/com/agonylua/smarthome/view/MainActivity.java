@@ -2,51 +2,60 @@ package com.agonylua.smarthome.view;
 
 import android.os.Bundle;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.ViewModel.HomeViewModel;
+import com.agonylua.smarthome.Utils.TokenManager;
+import com.agonylua.smarthome.ViewModel.SplashViewModel;
 import com.agonylua.smarthome.fragment.HomeFragment;
 import com.agonylua.smarthome.fragment.MonitorFragment;
 import com.agonylua.smarthome.fragment.SmartFragment;
+import com.agonylua.smarthome.fragment.SplashFragment;
 import com.agonylua.smarthome.fragment.UserFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private HomeViewModel homeViewModel;
+    private SplashViewModel splashViewModel;
     private ViewPager2 mViewPager2;
     private RadioGroup mRadioGroup;
+    private TokenManager tokenManager;
+    private String TAG = "MainActivity";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        homeViewModel = new HomeViewModel(getApplication());
+
+        tokenManager = new TokenManager(getApplication());
+        // 获取 NavHostFragment
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+
+        // 获取 controller 进行跳转
+        if (navHostFragment != null) {
+            NavController navController = navHostFragment.getNavController();
+            if (tokenManager.getToken() == null) {
+                navController.navigate(R.id.loginFragment);
+            }
+        }
         // Init Fragment
         List<Fragment> fragments = new ArrayList<>();
+        fragments.add(new SplashFragment());
         fragments.add(new HomeFragment());
         fragments.add(new SmartFragment());
         fragments.add(new MonitorFragment());
         fragments.add(new UserFragment());
 
 
-        if (homeViewModel.validateToken()) {
-            Toast.makeText(this, "登录成功！", Toast.LENGTH_SHORT).show();
-            findViewById(R.layout.activity_main).post(() -> {
-                NavController navController = Navigation.findNavController(findViewById(R.id.nav_host_fragment));
-                navController.navigate(R.id.loginFragment);
-            });
-        }
     }
 
     /**

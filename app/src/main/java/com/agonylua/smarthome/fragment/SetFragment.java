@@ -9,6 +9,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
@@ -21,20 +22,27 @@ public class SetFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_settings, container, false);
-        btnLogout = root.findViewById(R.id.btn_logout);
+        return inflater.inflate(R.layout.fragment_settings, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setViewModel = new ViewModelProvider(this).get(SetViewModel.class);
+        btnLogout = view.findViewById(R.id.btn_logout);
 
 
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 setViewModel.Cancellation();
+
                 if (getView() != null) {
-                    Navigation.findNavController(getView()).navigate(R.id.mainFragment);
+                    Navigation.findNavController(getView()).navigate(R.id.loginFragment);
                 }
             }
         });
-        return root;
     }
 
 

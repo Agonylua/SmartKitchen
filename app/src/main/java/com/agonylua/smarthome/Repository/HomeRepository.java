@@ -47,25 +47,26 @@ public class HomeRepository {
         });
     }
 
-    public void validateToken(Context context, String token, DeviceCallback callback) {
+    public void validateToken(Context context, String token, VerifyCallback callback) {
 
         Call<Void> call = RetrofitClient.getInstance(context).getApi().validateToken(token);
 
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                // 3. 处理服务器响应
-                if (response.isSuccessful() && response.body() != null) {
+                // 处理服务器响应
+                if (response.isSuccessful()) {
                     // HTTP 200 OK -> Token 有效
+                    callback.onVerify(true);
                 } else {
                     // HTTP 401/403 -> Token 过期或非法
+                    callback.onVerify(false);
                 }
             }
 
             @Override
-            public void onFailure(Call call, Throwable t) {
+            public void onFailure(@NonNull Call call, @NonNull Throwable t) {
                 String msg = t.getMessage() != null ? t.getMessage() : "未知错误";
-                callback.onError("网络错误: " + msg);
                 Log.e(TAG, "onFailure: " + msg);
             }
         });
@@ -73,7 +74,10 @@ public class HomeRepository {
 
     public interface DeviceCallback {
         void onSuccess(List<Device> devices);
-
         void onError(String message);
+    }
+
+    public interface VerifyCallback {
+        void onVerify(Boolean isValid);
     }
 }

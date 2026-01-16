@@ -5,7 +5,8 @@
     android:layout_height="460dp"
     android:layout_margin="10dp"
     android:backgroundTint="@android:color/transparent"
-    android:elevation="4dp">
+    android:elevation="4dp"
+    app:cardCornerRadius="12dp">
 
     <LinearLayout
         android:id="@+id/card_login"
@@ -57,6 +58,7 @@
                 android:gravity="center_vertical"
                 android:imeOptions="actionNext"
                 android:inputType="text"
+                android:minLines="8"
                 android:maxLength="12"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
@@ -84,6 +86,7 @@
                 android:gravity="center_vertical"
                 android:imeOptions="actionNext"
                 android:inputType="textPassword"
+                android:minLines="6"
                 android:maxLength="12"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
@@ -91,17 +94,36 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/login"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginStart="30dp"
             android:layout_marginTop="20dp"
-            android:layout_marginEnd="30dp"
-            android:text="@string/login"
-            android:textSize="20sp"
-            app:cornerRadius="30dp" />
+            android:layout_marginEnd="30dp">
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/login"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="@string/login"
+                android:textSize="20sp"
+                app:cornerRadius="30dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:indeterminateTint="@color/brand_blue_dark"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,7 +136,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="1dp"
                 android:layout_weight="1"
-                android:text="@string/forget_password" />
+                android:text="@string/forget_password"
+                android:textColor="@color/state_info" />
 
             <TextView
                 android:layout_width="0dp"
@@ -122,7 +145,8 @@
                 android:layout_marginEnd="1dp"
                 android:layout_weight="1"
                 android:text="@string/register"
-                android:textAlignment="textEnd" />
+                android:textAlignment="textEnd"
+                android:textColor="@color/state_info" />
 
         </LinearLayout>
 

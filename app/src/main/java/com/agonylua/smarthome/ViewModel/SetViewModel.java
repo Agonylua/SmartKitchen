@@ -1,16 +1,22 @@
 package com.agonylua.smarthome.ViewModel;
 
-import androidx.lifecycle.ViewModel;
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 
 import com.agonylua.smarthome.Utils.TokenManager;
 
-public class SetViewModel extends ViewModel {
+import org.jspecify.annotations.NonNull;
+
+public class SetViewModel extends AndroidViewModel {
     private TokenManager tokenManager;
 
-    public SetViewModel() {
+    public SetViewModel(@NonNull Application application) {
+        super(application);
     }
 
     public void Cancellation() {
+        tokenManager = new TokenManager(getApplication());
         tokenManager.clearToken();
     }
 }

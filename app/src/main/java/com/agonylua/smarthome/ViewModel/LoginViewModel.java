@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.agonylua.smarthome.Repository.LoginRepository;
+import com.agonylua.smarthome.Utils.ThreadPoolUtils;
 import com.agonylua.smarthome.Utils.TokenManager;
 
 import org.jspecify.annotations.NonNull;
@@ -33,27 +34,26 @@ public class LoginViewModel extends AndroidViewModel {
             return;
         }
 
-        //isLoading.setValue(true); // 显示加载圈
+        isLoading.postValue(true); // 显示加载圈
+        ThreadPoolUtils.getInstance().executeDelay(() -> {
 
-        // 调用仓库，传入 LiveData 以便回调
-        repository.login(getApplication(), username, password, new LoginRepository.LoginCallback() {
-            @Override
-            public void onSuccess(String token) {
-                loginSuccessToken.setValue(token);
-            }
+            // 调用仓库，传入 LiveData 以便回调
+            repository.login(getApplication(), username, password, new LoginRepository.LoginCallback() {
+                @Override
+                public void onSuccess(String token) {
+                    loginSuccessToken.setValue(token);
+                }
 
-            @Override
-            public void onError(String message) {
-                loginErrorMsg.setValue(message);
-            }
+                @Override
+                public void onError(String message) {
+                    loginErrorMsg.setValue(message);
+                }
 
-        });
+            });
+
+        }, 2000);
     }
 
-    public Boolean loginVerify() {
-        String token = tokenManager.getToken();
-        return token != null && !token.isEmpty();
-    }
 
     // Getters for LiveData (供 Activity 观察)
     public LiveData<String> getLoginSuccessToken() {

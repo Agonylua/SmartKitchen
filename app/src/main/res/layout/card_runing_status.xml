@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/monitor_device_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="电饭煲 (IH加热)"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/monitor_device_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="运行中"
+                android:textColor="#4CAF50" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="#EEEEEE" />
+
+        <TextView
+            android:id="@+id/monitor_current_task"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="当前任务: 精煮饭" />
+
+        <TextView
+            android:id="@+id/monitor_remaining_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="剩余时间: 15 分钟" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
