@@ -9,6 +9,7 @@ public class UserDTO {
     private String username;
     private String nickname;
     private String avatarUrl;
+    private String homeId;
     private String token; // 登录成功后返回的 JWT
 
     // 静态工厂方法：将 Entity 转为 DTO

@@ -24,6 +24,9 @@ public class Device {
     @Column(nullable = false)
     private DeviceType deviceType; // 使用枚举限制值
 
+    @Column(nullable = false)
+    private Boolean deviceStatus; // true: 在线, false: 离线
+
     @Column(columnDefinition = "json")
     private String deviceData; // 允许为 NULL
 

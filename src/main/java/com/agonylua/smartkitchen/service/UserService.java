@@ -1,12 +1,16 @@
 package com.agonylua.smartkitchen.service;
 
+import com.agonylua.smartkitchen.common.UserReq;
 import com.agonylua.smartkitchen.databases.entity.Home;
 import com.agonylua.smartkitchen.databases.entity.User;
 import com.agonylua.smartkitchen.databases.repository.HomeRepository;
 import com.agonylua.smartkitchen.databases.repository.UserRepository;
+import com.agonylua.smartkitchen.dto.UserDTO;
 import com.agonylua.smartkitchen.utils.IdUtil;
+import com.agonylua.smartkitchen.utils.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +19,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final HomeRepository homeRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Transactional // 事务管理：用户和家庭必须同时创建成功
     public User register(String username, String password, String inputNickname) {
@@ -33,7 +39,7 @@ public class UserService {
 
         // 3. 处理默认昵称逻辑
         if (inputNickname == null || inputNickname.trim().isEmpty()) {
-            user.setNickname(username); // 默认昵称为用户名
+            user.setNickname("用户" + username); // 默认昵称为用户名
         } else {
             user.setNickname(inputNickname);
         }
@@ -56,21 +62,30 @@ public class UserService {
         return user;
     }
 
-    public User login(String username, String password) {
-        User user = userRepository.findByUsername(username)
+    public UserDTO login(UserReq req) {
+        User user = userRepository.findByUsername(req.getUsername())
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
-
-        if (!user.getPassword().equals(password)) {
+        Home home = homeRepository.findByOwnerId(user.getUserId())
+                .orElseThrow(() -> new RuntimeException("家庭不存在"));
+        if (!user.getPassword().equals(req.getPassword())) {
             throw new RuntimeException("密码错误");
         }
 
-        return user;
+        String token = jwtUtil.generateToken(req.getUsername());
+        UserDTO dto = UserDTO.fromEntity(user);
+        dto.setUserId(user.getUserId());
+        dto.setNickname(user.getNickname());
+        dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setHomeId(home.getHomeId());
+        dto.setToken(token);
+        return dto;
     }
 
-    public User verify(String token) {
-        // 这里简化为根据 token 查找用户，实际应解析 JWT
-        String username = token; // 假设 token 就是用户名
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("无效的 token"));
+    public void update(String id, String nickname, String avatarUrl) {
+        User user = userRepository.findByUserId(id)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        user.setNickname(nickname);
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
     }
 }

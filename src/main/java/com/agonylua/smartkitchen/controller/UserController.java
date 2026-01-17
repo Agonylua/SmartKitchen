@@ -1,16 +1,14 @@
 package com.agonylua.smartkitchen.controller;
 
 import com.agonylua.smartkitchen.common.ApiResponse;
-import com.agonylua.smartkitchen.common.LoginReq;
 import com.agonylua.smartkitchen.common.RegisterReq;
+import com.agonylua.smartkitchen.common.UserReq;
 import com.agonylua.smartkitchen.databases.entity.User;
 import com.agonylua.smartkitchen.databases.repository.UserRepository;
 import com.agonylua.smartkitchen.dto.UserDTO;
 import com.agonylua.smartkitchen.service.UserService;
-import com.agonylua.smartkitchen.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,8 +23,6 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
-    @Autowired
-    private JwtUtil jwtUtil;
 
     /**
      * 用户注册
@@ -45,18 +41,20 @@ public class UserController {
      * 实际项目中应该校验密码加密，并生成 JWT Token
      */
     @PostMapping("/login")
-    public ApiResponse<UserDTO> login(@RequestBody LoginReq req) {
-        User user = userService.login(req.getUsername(), req.getPassword());
-        String token = jwtUtil.generateToken(req.getUsername());
-        UserDTO dto = UserDTO.fromEntity(user);
-        dto.setUserId(user.getUserId());
-        dto.setNickname(user.getNickname());
-        dto.setAvatarUrl(user.getAvatarUrl());
-        dto.setToken(token);
-        log.info("获取的登录信息{}, token{}", req, dto);
-        return ApiResponse.success(dto);
+    public ApiResponse<UserDTO> login(@RequestBody UserReq req) {
+        UserDTO user = userService.login(req);
+        log.info("获取的登录信息{}, token{}", req, user);
+        return ApiResponse.success(user);
     }
 
+    /**
+     * 更新用户信息
+     */
+    @PostMapping("/updateUserInfo")
+    public ApiResponse<Void> updateProfile(@RequestBody UserDTO req) {
+        userService.update(req.getUserId(), req.getNickname(), req.getAvatarUrl());
+        return ApiResponse.success(null);
+    }
     /**
      * token 验证接口
      * 用于前端验证 token 是否有效

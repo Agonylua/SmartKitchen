@@ -11,6 +11,7 @@ public class DeviceDTO {
     private String deviceSn;
     private String deviceName;
     private String deviceType; // 返回中文或英文给前端
+    private Boolean deviceStatus;
     private String homeId;
 
     // 重点：前端拿到的直接是对象 {"temp": -18, "mode": "eco"}
@@ -21,7 +22,7 @@ public class DeviceDTO {
         dto.setDeviceSn(device.getDeviceSn());
         dto.setDeviceName(device.getDeviceName());
         dto.setHomeId(device.getHomeId());
-
+        dto.setDeviceStatus(device.getDeviceStatus());
         // 枚举转字符串
         dto.setDeviceType(device.getDeviceType().name());
 

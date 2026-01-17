@@ -48,9 +48,6 @@ public class DeviceController {
 
         return ApiResponse.success(dtoList);
     }
-    /**
-     * 获取用户名下的设备列表
-     */
 
     /**
      * 控制设备
