@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.DTO;
+package com.agonylua.smarthome.dto;
 
 import java.util.Map;
 

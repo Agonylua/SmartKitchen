@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.ViewModel;
+package com.agonylua.smarthome.viewModel;
 
 import android.app.Application;
 import android.util.Log;
@@ -8,10 +8,10 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.agonylua.smarthome.Repository.HomeRepository;
-import com.agonylua.smarthome.Utils.NetworkUtils;
-import com.agonylua.smarthome.Utils.ThreadPoolUtils;
-import com.agonylua.smarthome.Utils.TokenManager;
+import com.agonylua.smarthome.repository.HomeRepository;
+import com.agonylua.smarthome.utils.NetworkUtils;
+import com.agonylua.smarthome.utils.ThreadPoolUtils;
+import com.agonylua.smarthome.utils.TokenManager;
 
 public class SplashViewModel extends AndroidViewModel {
     private final String TAG = "SplashViewModel";
@@ -24,7 +24,7 @@ public class SplashViewModel extends AndroidViewModel {
 
     public SplashViewModel(@NonNull Application application) {
         super(application);
-        repository = new HomeRepository();
+        repository = new HomeRepository(getApplication());
     }
 
     public void LoginCheck() {
@@ -39,9 +39,8 @@ public class SplashViewModel extends AndroidViewModel {
      */
     public void validateToken() {
         tokenManager = new TokenManager(getApplication());
-        Log.d(TAG, "validateToken: 开始验证 Token" + tokenManager.getToken());
+        Log.d(TAG, "Verify Token" + tokenManager.getToken());
         if (tokenManager.getToken() == null) {
-            Log.d(TAG, "validateToken: Token is null");
             tokenValid.postValue(false);
             return;
         }
@@ -51,7 +50,7 @@ public class SplashViewModel extends AndroidViewModel {
             public void onVerify(Boolean valid) {
 
                 tokenValid.postValue(valid);
-                Log.d(TAG, "onVerify: Token 有效性验证结果: " + valid);
+                Log.d(TAG, "Verify Token result: " + valid);
             }
         });
     }

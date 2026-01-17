@@ -1,6 +1,6 @@
-package com.agonylua.smarthome.Model;
+package com.agonylua.smarthome.model;
 
-public class LoginResponse<T> {
+public class ApiResponse<T> {
     private int code;
     private String message;
     private T data;

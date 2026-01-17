@@ -1,12 +1,15 @@
-package com.agonylua.smarthome.Repository;
+package com.agonylua.smarthome.repository;
 
 import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 
-import com.agonylua.smarthome.Model.Device;
-import com.agonylua.smarthome.Model.DeviceResponse;
+import com.agonylua.smarthome.database.AppDatabase;
+import com.agonylua.smarthome.database.dao.DeviceDao;
+import com.agonylua.smarthome.database.entity.Device;
+import com.agonylua.smarthome.model.DeviceResponse;
 import com.agonylua.smarthome.network.RetrofitClient;
 
 import java.util.List;
@@ -17,8 +20,17 @@ import retrofit2.Response;
 
 public class HomeRepository {
     private final String TAG = "HomeRepository";
+    private DeviceDao deviceDao;
 
-    public void getDevices(Context context, String homeId, DeviceCallback callback) {
+    public HomeRepository(Context context) {
+        deviceDao = AppDatabase.getInstance(context).deviceDao();
+    }
+
+    public LiveData<List<Device>> getDeviceList(String homeId) {
+        return deviceDao.getDevicesByHome(homeId);
+    }
+
+    public void getDevices(Context context, String homeId) {
         RetrofitClient.getInstance(context).getApi().getDeviceList(homeId).enqueue(new Callback<DeviceResponse<Device>>() {
             @Override
             public void onResponse(@NonNull Call<DeviceResponse<Device>> call, @NonNull Response<DeviceResponse<Device>> response) {
@@ -28,20 +40,15 @@ public class HomeRepository {
 
                     if (DeviceResponse.getCode() == 200) {
                         Log.d(TAG, "onResponse: 设备列表获取成功，设备数量: " + DeviceResponse.getData().size());
-                        callback.onSuccess(DeviceResponse.getData());
-                    } else {
-                        Log.e(TAG, "onResponse: 设备列表获取失败，错误信息: " + DeviceResponse.getMessage());
-                        callback.onError(DeviceResponse.getMessage());
+                        new Thread(() -> {
+                            deviceDao.insertAll(response.body().getData());
+                        }).start();
                     }
-                } else {
-                    Log.d(TAG, "onResponse: 请求失败，服务器状态码: " + response.code());
-                    callback.onError("请求失败，服务器状态码: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<DeviceResponse<Device>> call, @NonNull Throwable t) {
-                callback.onError("网络连接错误: " + t.getMessage());
                 Log.d(TAG, "onFailure: 网络连接错误: " + t.getMessage());
             }
         });
@@ -71,12 +78,6 @@ public class HomeRepository {
             }
         });
     }
-
-    public interface DeviceCallback {
-        void onSuccess(List<Device> devices);
-        void onError(String message);
-    }
-
     public interface VerifyCallback {
         void onVerify(Boolean isValid);
     }

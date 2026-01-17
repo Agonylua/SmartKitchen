@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.Model;
+package com.agonylua.smarthome.model;
 
 public class LoginRequest {
     private String username;

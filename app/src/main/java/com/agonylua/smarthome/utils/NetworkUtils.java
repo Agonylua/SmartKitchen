@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.Utils;
+package com.agonylua.smarthome.utils;
 
 import android.content.Context;
 import android.content.Intent;

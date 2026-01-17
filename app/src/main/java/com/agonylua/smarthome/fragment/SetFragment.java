@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.ViewModel.SetViewModel;
+import com.agonylua.smarthome.viewModel.SetViewModel;
 
 public class SetFragment extends Fragment {
     private Button btnLogout;
@@ -36,7 +36,7 @@ public class SetFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                setViewModel.Cancellation();
+                setViewModel.logout();
 
                 if (getView() != null) {
                     Navigation.findNavController(getView()).navigate(R.id.loginFragment);

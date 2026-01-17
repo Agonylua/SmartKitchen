@@ -10,12 +10,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.agonylua.smarthome.Model.Device;
-import com.agonylua.smarthome.Model.DeviceData;
 import com.agonylua.smarthome.R;
+import com.agonylua.smarthome.database.entity.Device;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceViewHolder> {
@@ -48,25 +48,24 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
 
     @Override
     public void onBindViewHolder(@NonNull DeviceViewHolder holder, int position) {
-        Device device = deviceList.get(position);
-        DeviceData data = device.getDeviceData();
+        Device device = deviceList.get(position); // 获取当前设备
+        Map<String, Object> data = device.getDeviceData(); // 获取设备详细数据
 
         // 设置通用信息
         holder.tvDeviceName.setText(device.getDeviceName());
 
         // 根据 deviceType 设置图标和特定状态文本
-//        if ("FRIDGE".equalsIgnoreCase(device.getDeviceType())) {
-//            holder.ivDeviceIcon.setImageResource(R.drawable.refrigerator);
-//            if (data != null) {
-//                holder.tvStatus.setText("冷藏: " + data.getTemp() + "°C | 湿度: " + data.getHum() + "%");
-//            }
-//        } else if ("RICE_COOKER".equalsIgnoreCase(device.getDeviceType())) {
-//            holder.ivDeviceIcon.setImageResource(R.drawable.rice_cooker);
-//            holder.tvStatus.setText("状态: 空闲中");
-//        } else {
-//            // 未知设备类型
-//            holder.tvStatus.setText("状态未知");
-//        }
+        if ("FRIDGE".equalsIgnoreCase(device.getDeviceType())) {
+            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_refrigerator);
+        } else if ("RICE_COOKER".equalsIgnoreCase(device.getDeviceType())) {
+            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_rice_cooker);
+        } else if ("MICROWAVE".equalsIgnoreCase(device.getDeviceType())) {
+            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_microwave_oven);
+        } else if ("DISHWASHER".equalsIgnoreCase(device.getDeviceType())) {
+            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_dishwasher);
+        } else if ("STERILIZER".equalsIgnoreCase(device.getDeviceType())) {
+            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_disinfection_cabinet);
+        }
         // TODO: 添加更多设备类型
         // 3. 点击事件处理
         holder.itemView.setOnClickListener(v -> {

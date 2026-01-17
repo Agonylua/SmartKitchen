@@ -2,7 +2,7 @@ package com.agonylua.smarthome.network;
 
 import android.content.Context;
 
-import com.agonylua.smarthome.Service.ApiService;
+import com.agonylua.smarthome.service.ApiService;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;

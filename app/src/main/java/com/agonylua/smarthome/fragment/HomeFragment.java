@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -13,8 +14,9 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.ViewModel.HomeViewModel;
 import com.agonylua.smarthome.adapter.DeviceAdapter;
+import com.agonylua.smarthome.utils.UserManager;
+import com.agonylua.smarthome.viewModel.HomeViewModel;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
@@ -27,6 +29,9 @@ public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
     private RecyclerView rvDevices;
+    private TextView tvDeviceCount, tvTitle;
+    private String homeId;
+    private UserManager userManager;
     private DeviceAdapter adapter;
     private SmartRefreshLayout refreshLayout;
     private String TAG = "HomeFragment";
@@ -36,9 +41,15 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@androidx.annotation.NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         // 初始化
-        rvDevices = root.findViewById(R.id.rv_devices);
-        refreshLayout = root.findViewById(R.id.refreshLayout);
+        init(view);
 
         adapter = new DeviceAdapter(getContext());
         rvDevices.setLayoutManager(new GridLayoutManager(getContext(), 2)); // 网格布局，一行2个
@@ -55,14 +66,23 @@ public class HomeFragment extends Fragment {
         observeViewModel();
 
         //TODO: 这里的 homeId 需要动态获取
-        homeViewModel.loadDevices("d6J5Gp");
-        Log.d(TAG, "onCreateView: 请求设备列表");
-        return root;
+        homeViewModel.loadDevices(homeId);
+        String nickname = userManager.getNickName() + "的智能家居";
+        tvTitle.setText(nickname);
+    }
+
+    private void init(View view) {
+        tvTitle = view.findViewById(R.id.tv_welcome);
+        tvDeviceCount = view.findViewById(R.id.tv_subtitle);
+        rvDevices = view.findViewById(R.id.rv_devices);
+        refreshLayout = view.findViewById(R.id.refreshLayout);
+        userManager = UserManager.getInstance(getContext());
+        homeId = userManager.getHomeId();
     }
 
     private void observeViewModel() {
         // 观察列表数据变化
-        homeViewModel.getDeviceList().observe(getViewLifecycleOwner(), devices -> {
+        homeViewModel.getDeviceList(homeId).observe(getViewLifecycleOwner(), devices -> {
             if (devices != null) {
                 adapter.setDeviceList(devices);
             }
@@ -72,7 +92,14 @@ public class HomeFragment extends Fragment {
         // 观察错误信息
         homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
             Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "错误信息: " + msg);
             refreshLayout.finishRefresh(false);
+        });
+
+        homeViewModel.getDeviceCount().observe(getViewLifecycleOwner(), count -> {
+            count = " " + count + " 台设备";
+            tvDeviceCount.setText(count);
+            Log.d(TAG, "设备数量更新: " + count);
         });
     }
 }

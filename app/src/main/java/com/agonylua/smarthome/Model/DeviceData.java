@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.Model;
+package com.agonylua.smarthome.model;
 
 public class DeviceData {
     // 冰箱的数据

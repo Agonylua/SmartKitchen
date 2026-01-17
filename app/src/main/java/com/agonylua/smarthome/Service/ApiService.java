@@ -1,10 +1,11 @@
-package com.agonylua.smarthome.Service;
+package com.agonylua.smarthome.service;
 
-import com.agonylua.smarthome.DTO.UserDTO;
-import com.agonylua.smarthome.Model.Device;
-import com.agonylua.smarthome.Model.DeviceResponse;
-import com.agonylua.smarthome.Model.LoginRequest;
-import com.agonylua.smarthome.Model.LoginResponse;
+import com.agonylua.smarthome.database.entity.Device;
+import com.agonylua.smarthome.dto.UserDTO;
+import com.agonylua.smarthome.model.ApiResponse;
+import com.agonylua.smarthome.model.DeviceResponse;
+import com.agonylua.smarthome.model.LoginRequest;
+import com.agonylua.smarthome.model.UserRequest;
 import com.agonylua.smarthome.network.ControlRequest;
 
 import retrofit2.Call;
@@ -22,8 +23,21 @@ public interface ApiService {
      * 不需要 Token
      */
     @POST("/user/login")
-    Call<LoginResponse<UserDTO>> login(@Body LoginRequest request);
+    Call<ApiResponse<UserDTO>> login(@Body LoginRequest request);
 
+    /**
+     * 注册接口
+     */
+    @POST("/user/register")
+    Call<ApiResponse<UserDTO>> register(@Body LoginRequest request);
+
+    /**
+     * 更新用户信息
+     *
+     * @param request 更新数据
+     */
+    @POST("user/update")
+    Call<ApiResponse<Void>> updateUserInfo(@Body UserRequest request);
     /**
      * 获取厨房设备信息
      *
@@ -34,8 +48,9 @@ public interface ApiService {
 
     /**
      * 控制设备
-     * @param token    用户 Token
-     * @param request  控制请求体
+     *
+     * @param token   用户 Token
+     * @param request 控制请求体
      */
     @POST("/user/control")
     Call<Void> controlDevice(

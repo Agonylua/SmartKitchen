@@ -11,13 +11,13 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.Utils.TokenManager;
-import com.agonylua.smarthome.ViewModel.SplashViewModel;
 import com.agonylua.smarthome.fragment.HomeFragment;
 import com.agonylua.smarthome.fragment.MonitorFragment;
 import com.agonylua.smarthome.fragment.SmartFragment;
 import com.agonylua.smarthome.fragment.SplashFragment;
 import com.agonylua.smarthome.fragment.UserFragment;
+import com.agonylua.smarthome.utils.TokenManager;
+import com.agonylua.smarthome.viewModel.SplashViewModel;
 
 import java.util.ArrayList;
 import java.util.List;

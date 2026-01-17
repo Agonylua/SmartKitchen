@@ -17,8 +17,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.Utils.TokenManager;
-import com.agonylua.smarthome.ViewModel.LoginViewModel;
+import com.agonylua.smarthome.utils.TokenManager;
+import com.agonylua.smarthome.viewModel.LoginViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class LoginFragment extends Fragment {

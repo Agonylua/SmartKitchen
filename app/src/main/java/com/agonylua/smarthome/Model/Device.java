@@ -1,26 +1,20 @@
-package com.agonylua.smarthome.Model;
+package com.agonylua.smarthome.model;
+
+import android.content.Context;
+
+import com.agonylua.smarthome.database.AppDatabase;
+import com.agonylua.smarthome.database.dao.DeviceDao;
 
 public class Device {
-    private String deviceSn;
-    private String deviceName;
-    private String deviceType;
-    private String homeId;
-    private DeviceData deviceData;
+    private DeviceDao deviceDao;
+    private String TAG = "DeviceModel";
+    private String DeviceSn;
+    private String DeviceName;
+    private String DeviceType;
+    private Boolean DeviceStatus;
+    private Integer DeviceCount;
 
-    // Getters
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    public String getDeviceType() {
-        return deviceType;
-    }
-
-    public DeviceData getDeviceData() {
-        return deviceData;
-    }
-
-    public String getDeviceSn() {
-        return deviceSn;
+    public Device(Context context, String homeId) {
+        deviceDao = AppDatabase.getInstance(context).deviceDao();
     }
 }

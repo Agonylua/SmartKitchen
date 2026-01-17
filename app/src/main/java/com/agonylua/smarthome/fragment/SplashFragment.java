@@ -14,8 +14,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.Utils.NetworkUtils;
-import com.agonylua.smarthome.ViewModel.SplashViewModel;
+import com.agonylua.smarthome.utils.NetworkUtils;
+import com.agonylua.smarthome.viewModel.SplashViewModel;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;

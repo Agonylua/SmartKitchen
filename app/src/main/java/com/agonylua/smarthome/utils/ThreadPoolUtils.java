@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.Utils;
+package com.agonylua.smarthome.utils;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -9,7 +9,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 智能家居 App 专用线程池工具类
@@ -38,28 +37,29 @@ public class ThreadPoolUtils {
     // 单例模式
     private static volatile ThreadPoolUtils instance;
     private final ThreadPoolExecutor threadPoolExecutor;
-    private final Handler mainHandler; // 用于切换回主线程
+    private final Handler mainHandler;
 
-    // 私有构造函数
+    /**
+     * 私有构造函数，初始化线程池和主线程 Handler
+     *
+     * @see ThreadPoolExecutor
+     */
     private ThreadPoolUtils() {
         // 自定义线程工厂 (为了给线程起名字，方便调试)
         ThreadFactory threadFactory = new ThreadFactory() {
-            private final AtomicInteger count = new AtomicInteger(1);
-
             @Override
             public Thread newThread(Runnable r) {
-                return new Thread(r, "SmartHome-Thread-" + count.getAndIncrement());
+                return new Thread(r, "SmartKitchen-Thread");
             }
         };
-
-        // 初始化 ThreadPoolExecutor
+        // 初始化线程池
         threadPoolExecutor = new ThreadPoolExecutor(
-                CORE_POOL_SIZE,
-                MAXIMUM_POOL_SIZE,
-                KEEP_ALIVE_SECONDS,
-                TimeUnit.SECONDS,
+                CORE_POOL_SIZE, // 核心线程数
+                MAXIMUM_POOL_SIZE, // 最大线程数
+                KEEP_ALIVE_SECONDS, // 空闲线程存活时间
+                TimeUnit.SECONDS, // 时间单位
                 new LinkedBlockingQueue<>(QUEUE_CAPACITY), // 有界队列
-                threadFactory,
+                threadFactory, // 线程工厂
                 new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略：如果队列满了，由调用线程自己去执行，不抛异常
         );
 

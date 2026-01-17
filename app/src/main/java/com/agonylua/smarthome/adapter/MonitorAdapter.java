@@ -9,12 +9,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.agonylua.smarthome.Model.Device;
-import com.agonylua.smarthome.Model.DeviceData;
 import com.agonylua.smarthome.R;
+import com.agonylua.smarthome.database.entity.Device;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.MonitorViewHolder> {
 
@@ -47,7 +47,7 @@ public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.MonitorV
     @Override
     public void onBindViewHolder(@NonNull MonitorViewHolder holder, int position) {
         Device device = deviceList.get(position);
-        DeviceData data = device.getDeviceData();
+        Map<String, Object> data = device.getDeviceData();
 
         // 设置通用信息
         holder.tvDeviceName.setText(device.getDeviceName());

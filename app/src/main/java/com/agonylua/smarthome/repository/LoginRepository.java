@@ -1,14 +1,15 @@
-package com.agonylua.smarthome.Repository;
+package com.agonylua.smarthome.repository;
 
 import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.agonylua.smarthome.DTO.UserDTO;
-import com.agonylua.smarthome.Model.LoginRequest;
-import com.agonylua.smarthome.Model.LoginResponse;
+import com.agonylua.smarthome.dto.UserDTO;
+import com.agonylua.smarthome.model.ApiResponse;
+import com.agonylua.smarthome.model.LoginRequest;
 import com.agonylua.smarthome.network.RetrofitClient;
+import com.agonylua.smarthome.utils.UserManager;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -17,23 +18,31 @@ import retrofit2.Response;
 // LoginRepository.java
 public class LoginRepository {
     private final String TAG = "callback";
+    private UserManager userManager;
 
     public void login(Context context, String username, String password, final LoginCallback callback) {
 
         LoginRequest request = new LoginRequest(username, password);
+        userManager = UserManager.getInstance(context);
 
-        Call<LoginResponse<UserDTO>> call = RetrofitClient.getInstance(context).getApi().login(request);
+        Call<ApiResponse<UserDTO>> call = RetrofitClient.getInstance(context).getApi().login(request);
 
-        call.enqueue(new Callback<LoginResponse<UserDTO>>() {
+        call.enqueue(new Callback<ApiResponse<UserDTO>>() {
             @Override
-            public void onResponse(@NonNull Call<LoginResponse<UserDTO>> call, @NonNull Response<LoginResponse<UserDTO>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<UserDTO>> call, @NonNull Response<ApiResponse<UserDTO>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse<UserDTO> body = response.body();
+                    ApiResponse<UserDTO> body = response.body();
 
                     if (body.getData() != null && body.getData().getToken() != null) {
                         // 回调成功
+                        userManager.saveLoginInfo(
+                                body.getData().getUserId(),
+                                body.getData().getHomeId(),
+                                body.getData().getUsername(),
+                                body.getData().getNickname()
+                        );
                         callback.onSuccess(body.getData().getToken());
-                        Log.i(TAG, "登陆成功信息: " + body.getData().getToken());
+                        Log.i(TAG, "登陆成功信息: " + body.getData());
                     } else {
                         // 数据为空或Token为空，视为失败
                         callback.onError("登录失败，服务器响应异常");
@@ -47,7 +56,7 @@ public class LoginRepository {
             }
 
             @Override
-            public void onFailure(@NonNull Call<LoginResponse<UserDTO>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<UserDTO>> call, @NonNull Throwable t) {
                 String msg = t.getMessage() != null ? t.getMessage() : "未知错误";
                 callback.onError("网络错误: " + msg);
                 Log.e(TAG, "onFailure: " + msg);

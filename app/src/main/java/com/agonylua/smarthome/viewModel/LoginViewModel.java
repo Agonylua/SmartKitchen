@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.ViewModel;
+package com.agonylua.smarthome.viewModel;
 
 import android.app.Application;
 
@@ -6,16 +6,14 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.agonylua.smarthome.Repository.LoginRepository;
-import com.agonylua.smarthome.Utils.ThreadPoolUtils;
-import com.agonylua.smarthome.Utils.TokenManager;
+import com.agonylua.smarthome.repository.LoginRepository;
+import com.agonylua.smarthome.utils.ThreadPoolUtils;
 
 import org.jspecify.annotations.NonNull;
 
 public class LoginViewModel extends AndroidViewModel {
 
     private LoginRepository repository;
-    private TokenManager tokenManager;
 
     // LiveData 用于通知 Activity 更新 UI
     private MutableLiveData<String> loginSuccessToken = new MutableLiveData<>();
