@@ -7,7 +7,7 @@
         android:fillColor="#FF000000"
         android:pathData="M972.3,810.6H55V218.1h917.4v592.5zM73,792.6h881.3V236.1H73v556.5z" />
     <path
-        android:fillColor="#00A0E9"
+        android:fillColor="@color/device_offline"
         android:pathData="M127.9,292.9h631.5v442.8H127.9z" />
     <path
         android:fillColor="#FFFFFF"

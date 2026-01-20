@@ -47,7 +47,7 @@ public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.MonitorV
     @Override
     public void onBindViewHolder(@NonNull MonitorViewHolder holder, int position) {
         Device device = deviceList.get(position);
-        Map<String, Object> data = device.getDeviceData();
+        Map<String, String> data = device.getDeviceData();
 
         // 设置通用信息
         holder.tvDeviceName.setText(device.getDeviceName());

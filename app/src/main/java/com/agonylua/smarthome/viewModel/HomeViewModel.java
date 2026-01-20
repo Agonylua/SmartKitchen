@@ -1,6 +1,7 @@
 package com.agonylua.smarthome.viewModel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -55,6 +56,7 @@ public class HomeViewModel extends AndroidViewModel {
     // Getters for LiveData
     public LiveData<List<Device>> getDeviceList(String homeId) {
         deviceList = repository.getDeviceList(homeId);
+        Log.d(TAG, "getDeviceList: " + deviceList);
         return deviceList;
     }
 

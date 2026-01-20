@@ -16,9 +16,8 @@ import com.agonylua.smarthome.utils.TokenManager;
 public class SplashViewModel extends AndroidViewModel {
     private final String TAG = "SplashViewModel";
     private TokenManager tokenManager;
-    private NetworkUtils networkUtils;
     private HomeRepository repository;
-    private MutableLiveData<Boolean> tokenValid = new MutableLiveData<>();
+    private MutableLiveData<Integer> tokenValid = new MutableLiveData<>();
     private MutableLiveData<Boolean> hasNetwork = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
@@ -28,10 +27,8 @@ public class SplashViewModel extends AndroidViewModel {
     }
 
     public void LoginCheck() {
-        ThreadPoolUtils.getInstance().executeDelay(() -> {
-            HasNetwork();
-            validateToken();
-        }, 1000);
+        ThreadPoolUtils.getInstance().executeDelay(this::HasNetwork, 2000);
+        ThreadPoolUtils.getInstance().executeDelay(this::validateToken, 2000);
     }
 
     /**
@@ -41,16 +38,24 @@ public class SplashViewModel extends AndroidViewModel {
         tokenManager = new TokenManager(getApplication());
         Log.d(TAG, "Verify Token" + tokenManager.getToken());
         if (tokenManager.getToken() == null) {
-            tokenValid.postValue(false);
+            tokenValid.postValue(0);
             return;
         }
         String token = tokenManager.getToken();
         repository.validateToken(getApplication(), token, new HomeRepository.VerifyCallback() {
             @Override
             public void onVerify(Boolean valid) {
-
-                tokenValid.postValue(valid);
+                if (valid) {
+                    tokenValid.postValue(1);
+                } else {
+                    tokenValid.postValue(0);
+                }
                 Log.d(TAG, "Verify Token result: " + valid);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                tokenValid.postValue(-1);
             }
         });
     }
@@ -64,7 +69,7 @@ public class SplashViewModel extends AndroidViewModel {
         isLoading.postValue(loading);
     }
 
-    public LiveData<Boolean> getTokenValid() {
+    public LiveData<Integer> getTokenValid() {
         return tokenValid;
     }
 
@@ -72,7 +77,4 @@ public class SplashViewModel extends AndroidViewModel {
         return hasNetwork;
     }
 
-    public LiveData<Boolean> getIsLoading() {
-        return isLoading;
-    }
 }

@@ -4,29 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@drawable/bg_app_gradient">
 
     <ImageView
         android:id="@+id/iv_logo"
         android:layout_width="240dp"
         android:layout_height="240dp"
+        android:src="@drawable/ic_splash_logo"
         android:layout_marginBottom="24dp"
-        android:src="@drawable/ic_launcher_foreground"
         app:layout_constraintBottom_toTopOf="@+id/tv_app_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_chainStyle="packed"
+        app:tint="@color/black" />
 
     <TextView
         android:id="@+id/tv_app_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="48dp"
         android:text="Smart Kitchen"
-        android:textColor="@android:color/black"
+        android:layout_marginBottom="36dp"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:textColor="@color/text_primary"
         app:layout_constraintBottom_toTopOf="@+id/layout_loading"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -38,6 +39,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
+        android:layout_marginBottom="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,7 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="正在检查网络..."
-            android:textColor="#757575"
+            android:textColor="@color/text_secondary"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -66,7 +68,7 @@
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="36dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_app_name"
@@ -76,16 +78,16 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="@android:drawable/stat_notify_error"
-            app:tint="#F44336" />
+            app:tint="@color/red" />
 
         <TextView
             android:id="@+id/tv_error_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="网络连接失败"
-            android:textColor="#F44336"
-            android:textSize="16sp" />
+            android:textColor="@color/red"
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/btn_retry"
@@ -94,8 +96,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="点击重试"
-            android:textColor="#2196F3"
-            app:strokeColor="#2196F3" />
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/state_info" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

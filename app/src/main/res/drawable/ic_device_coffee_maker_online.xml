@@ -13,7 +13,7 @@
         android:fillColor="#FF000000"
         android:pathData="M489,192.8m-29.2,0a29.2,29.2 0,1 0,58.4 0,29.2 29.2,0 1,0 -58.4,0Z" />
     <path
-        android:fillColor="#00A0E9"
+        android:fillColor="@color/device_online"
         android:pathData="M637.5,847.1h-99.3c-74.7,0 -135.8,-61.1 -135.8,-135.8V575.4h370.9v135.8c0,74.7 -61.1,135.9 -135.8,135.9z" />
     <path
         android:fillColor="#FFFFFF"

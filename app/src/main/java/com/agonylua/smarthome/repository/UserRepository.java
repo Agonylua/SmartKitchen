@@ -53,10 +53,8 @@ public class UserRepository {
         });
     }
 
-    // 私有方法：同步更新本地缓存
+    // 同步更新本地缓存
     private void updateLocalCache(UserRequest request) {
-
-        // 这是一个示例，假设只更新 HomeID
         userManager.saveUser(request.getNickname(), request.getAvatarUrl(), request.getHomeId());
     }
 

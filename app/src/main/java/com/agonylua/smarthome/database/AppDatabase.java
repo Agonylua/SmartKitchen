@@ -5,11 +5,13 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
 import com.agonylua.smarthome.database.dao.DeviceDao;
 import com.agonylua.smarthome.database.entity.Device;
 
 @Database(entities = {Device.class}, version = 1, exportSchema = false)
+@TypeConverters(DataConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase mAppDatabase;
 

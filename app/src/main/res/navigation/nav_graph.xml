@@ -31,6 +31,9 @@
         <action
             android:id="@+id/action_mainFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_deviceFragment2"
+            app:destination="@id/deviceFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -50,5 +53,19 @@
         <action
             android:id="@+id/action_splashFragment_to_mainFragment"
             app:destination="@id/mainFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/deviceFragment"
+        android:name="com.agonylua.smarthome.fragment.DeviceFragment"
+        android:label="DeviceFragment">
+        <!--        <argument-->
+        <!--            android:name="deviceType" />-->
+        <!--        <argument-->
+        <!--            android:name="deviceName"-->
+        <!--            app:argType="string"-->
+        <!--            app:nullable="true" />-->
+        <argument
+            android:name="currentDevice"
+            app:argType="com.agonylua.smarthome.database.entity.Device" />
     </fragment>
 </navigation>

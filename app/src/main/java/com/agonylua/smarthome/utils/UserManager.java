@@ -122,7 +122,7 @@ public class UserManager {
         return !getToken().isEmpty();
     }
 
-    // 退出登录 (清空数据)
+    // 注销
     public void clear() {
         editor.clear();
         editor.apply();

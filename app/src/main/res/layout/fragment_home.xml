@@ -16,11 +16,19 @@
         android:layout_height="match_parent"
         android:padding="16dp">
 
-        <include
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/topbar"
-            layout="@layout/topbar_home"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/menu_home"
+            app:popupTheme="@drawable/background_round_corner"
+            app:subtitle="1 台设备已连接"
+            app:subtitleTextColor="@color/text_secondary"
+            app:title="我的智能厨房"
+            app:titleTextColor="@color/text_primary" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_devices"

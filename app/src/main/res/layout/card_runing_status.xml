@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/background_card"
     app:cardCornerRadius="12dp"
     app:cardElevation="2dp">
 
@@ -24,6 +25,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="电饭煲 (IH加热)"
+                android:textColor="@color/text_primary"
                 android:textStyle="bold" />
 
             <TextView
@@ -31,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="运行中"
-                android:textColor="#4CAF50" />
+                android:textColor="@color/state_success" />
         </LinearLayout>
 
         <View
@@ -45,13 +47,15 @@
             android:id="@+id/monitor_current_task"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="当前任务: 精煮饭" />
+            android:text="当前任务: 精煮饭"
+            android:textColor="@color/text_secondary" />
 
         <TextView
             android:id="@+id/monitor_remaining_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="剩余时间: 15 分钟" />
+            android:text="剩余时间: 15 分钟"
+            android:textColor="@color/text_secondary" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

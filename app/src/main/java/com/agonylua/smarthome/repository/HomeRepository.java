@@ -75,10 +75,13 @@ public class HomeRepository {
             public void onFailure(@NonNull Call call, @NonNull Throwable t) {
                 String msg = t.getMessage() != null ? t.getMessage() : "未知错误";
                 Log.e(TAG, "onFailure: " + msg);
+                callback.onFailure(msg);
             }
         });
     }
     public interface VerifyCallback {
         void onVerify(Boolean isValid);
+
+        void onFailure(String errorMessage);
     }
 }

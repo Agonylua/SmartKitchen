@@ -49,7 +49,10 @@ public class SplashFragment extends Fragment {
         // 开始检查
         splashViewModel.LoginCheck();
         // 设置重试按钮点击事件
-        btnRetry.setOnClickListener(v -> splashViewModel.LoginCheck());
+        btnRetry.setOnClickListener(v -> {
+            splashViewModel.LoginCheck();
+            showLoading("正在检查网络环境...");
+        });
         observeViewModel();
     }
 
@@ -58,17 +61,21 @@ public class SplashFragment extends Fragment {
         splashViewModel.getHasNetwork().observe(getViewLifecycleOwner(), hasNetwork -> {
             if (!hasNetwork) {
                 showError("网络不可用，请检查您的连接。");
+            } else {
+                showLoading("网络连接正常，正在验证身份...");
             }
         });
-        showLoading("正在进行身份验证...");
         splashViewModel.getTokenValid().observe(getViewLifecycleOwner(), tokenValid -> {
-            if (tokenValid) {
+            if (tokenValid == 1) {
                 if (getView() != null) {
+                    showLoading("身份验证成功!");
                     Navigation.findNavController(getView()).navigate(R.id.mainFragment);
                 }
-            } else {
+            } else if (tokenValid == 0) {
                 Toast.makeText(getContext(), "身份验证失败，请重新登录。", Toast.LENGTH_SHORT).show();
                 Navigation.findNavController(this.requireView()).navigate(R.id.loginFragment);
+            } else if (tokenValid == -1) {
+                showError("身份验证过程中出现错误，请重试。");
             }
         });
 
@@ -79,6 +86,7 @@ public class SplashFragment extends Fragment {
         layoutError.setVisibility(View.GONE);
         layoutLoading.setVisibility(View.VISIBLE);
         tvStatus.setText(message);
+        btnRetry.setVisibility(View.GONE);
     }
 
     // 显示错误状态
@@ -86,5 +94,6 @@ public class SplashFragment extends Fragment {
         layoutLoading.setVisibility(View.GONE);
         layoutError.setVisibility(View.VISIBLE);
         tvErrorMsg.setText(errorMsg);
+        btnRetry.setVisibility(View.VISIBLE);
     }
 }

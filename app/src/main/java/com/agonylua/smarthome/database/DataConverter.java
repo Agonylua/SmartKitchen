@@ -11,7 +11,7 @@ import java.util.Map;
 public class DataConverter {
 
     @TypeConverter
-    public String fromMap(Map<String, Object> map) {
+    public String fromMap(Map<String, String> map) {
         if (map == null) {
             return null;
         }
@@ -20,13 +20,13 @@ public class DataConverter {
     }
 
     @TypeConverter
-    public Map<String, Object> toMap(String data) {
+    public Map<String, String> toMap(String data) {
         if (data == null) {
             return null;
         }
         Gson gson = new Gson();
         // 这里需要使用 TypeToken 来保留泛型信息
-        Type type = new TypeToken<Map<String, Object>>() {
+        Type type = new TypeToken<Map<String, String>>() {
         }.getType();
         return gson.fromJson(data, type);
     }

@@ -1,5 +1,8 @@
 package com.agonylua.smarthome.database.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -12,7 +15,7 @@ import com.agonylua.smarthome.database.DataConverter;
 import java.util.Map;
 
 @Entity(tableName = "devices")
-public class Device {
+public class Device implements Parcelable {
     @PrimaryKey(autoGenerate = false)
     @NonNull
     @ColumnInfo(name = "deviceSn")
@@ -23,22 +26,22 @@ public class Device {
     private String deviceType;
     @ColumnInfo(name = "homeId")
     private String homeId;
+    public static final Creator<Device> CREATOR = new Creator<Device>() {
+        @Override
+        public Device createFromParcel(Parcel in) {
+            return new Device(in);
+        }
+
+        @Override
+        public Device[] newArray(int size) {
+            return new Device[size];
+        }
+    };
     @ColumnInfo(name = "deviceStatus")
-    private Boolean deviceStatus;
+    private String deviceStatus;
     @TypeConverters(DataConverter.class)
     @ColumnInfo(name = "deviceData")
-    private Map<String, Object> deviceData;
-
-    @Ignore
-    public Device(@NonNull String sn, String name, String type, boolean deviceStatus, int homeId, Map<String, Object> data) {
-        this.deviceSn = sn;
-        this.deviceName = name;
-        this.deviceType = type;
-        this.deviceStatus = deviceStatus;
-        this.homeId = String.valueOf(homeId);
-        this.deviceData = data;
-
-    }
+    private Map<String, String> deviceData;
 
     public Device() {
     }
@@ -70,12 +73,24 @@ public class Device {
         this.deviceType = deviceType;
     }
 
-    public Map<String, Object> getDeviceData() {
-        return deviceData;
+    @Ignore
+    public Device(@NonNull String sn, String name, String type, String deviceStatus, String homeId, Map<String, String> data) {
+        this.deviceSn = sn;
+        this.deviceName = name;
+        this.deviceType = type;
+        this.deviceStatus = deviceStatus;
+        this.homeId = String.valueOf(homeId);
+        this.deviceData = data;
+
     }
 
-    public void setDeviceData(Map<String, Object> deviceData) {
-        this.deviceData = deviceData;
+    // Parcelable implementation
+    protected Device(Parcel in) {
+        deviceSn = in.readString();
+        deviceName = in.readString();
+        deviceType = in.readString();
+        homeId = in.readString();
+        deviceStatus = in.readString();
     }
 
     public String getHomeId() {
@@ -86,11 +101,33 @@ public class Device {
         this.homeId = homeId;
     }
 
-    public Boolean getDeviceStatus() {
+    public Map<String, String> getDeviceData() {
+        return deviceData;
+    }
+
+    public void setDeviceData(Map<String, String> deviceData) {
+        this.deviceData = deviceData;
+    }
+
+    public String getDeviceStatus() {
         return deviceStatus;
     }
 
-    public void setDeviceStatus(Boolean deviceStatus) {
+    public void setDeviceStatus(String deviceStatus) {
         this.deviceStatus = deviceStatus;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
+        parcel.writeString(deviceSn);
+        parcel.writeString(deviceName);
+        parcel.writeString(deviceType);
+        parcel.writeString(homeId);
+        parcel.writeString(deviceStatus);
     }
 }
