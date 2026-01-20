@@ -9,11 +9,13 @@ import com.agonylua.smartkitchen.dto.DeviceDTO;
 import com.agonylua.smartkitchen.service.DeviceService;
 import com.agonylua.smartkitchen.service.mqtt.MqttController;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/device")
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class DeviceController {
         List<DeviceDTO> dtoList = devices.stream()
                 .map(DeviceDTO::fromEntity)
                 .collect(Collectors.toList());
-
+        log.info("Device list for homeId {}: {}", homeId, dtoList);
         return ApiResponse.success(dtoList);
     }
 

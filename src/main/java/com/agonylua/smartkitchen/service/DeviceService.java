@@ -1,6 +1,7 @@
 package com.agonylua.smartkitchen.service;
 
 import com.agonylua.smartkitchen.databases.entity.Device;
+import com.agonylua.smartkitchen.databases.entity.DeviceStatus;
 import com.agonylua.smartkitchen.databases.entity.DeviceType;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
 import com.agonylua.smartkitchen.utils.IdUtil;
@@ -16,19 +17,22 @@ public class DeviceService {
     public void addDevice(String homeId, String customName, String typeStr) {
         Device device = new Device();
 
-        // 1. 生成 12位 SN
+        // 生成 12位 SN
         device.setDeviceSn(IdUtil.generateDeviceSn());
 
         device.setHomeId(homeId);
         device.setDeviceName(customName);
 
-        // 2. 校验设备类型 (如果输入值不在枚举中，会抛出异常)
+        // 校验设备类型 (如果输入值不在枚举中，会抛出异常)
         try {
             DeviceType type = DeviceType.valueOf(typeStr); // 自动校验
             device.setDeviceType(type);
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("设备类型不支持，仅支持：电磁炉、冰箱、微波炉...");
+            throw new RuntimeException("设备类型不支持");
         }
+        // 默认状态为离线
+        DeviceStatus status = DeviceStatus.OFFLINE;
+        device.setDeviceStatus(status);
 
         deviceRepository.save(device);
     }

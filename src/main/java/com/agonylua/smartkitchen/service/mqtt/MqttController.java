@@ -50,10 +50,11 @@ public class MqttController {
     public void sendMessage(Object payload) {
         String json = JsonUtil.toJson(payload);
         String topic = publishTopic + JsonUtil.getValue(json, "deviceSn");
+        String cmd = JsonUtil.getValue(json, "deviceData");
         Message<String> message = null;
         if (json != null) {
             message = MessageBuilder
-                    .withPayload(json)
+                    .withPayload(cmd)
                     .setHeader(MqttHeaders.TOPIC, topic)
                     .setHeader(MqttHeaders.QOS, 1)
                     .build();
