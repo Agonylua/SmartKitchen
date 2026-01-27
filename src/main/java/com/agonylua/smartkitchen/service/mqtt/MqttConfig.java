@@ -14,9 +14,6 @@ import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Configuration
 public class MqttConfig {
 
@@ -61,10 +58,9 @@ public class MqttConfig {
 
     @Bean
     public MqttPahoMessageDrivenChannelAdapter inbound() {
-        List<String> topics = Arrays.asList(subscribeTopic.split(","));
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(clientId_in, mqttClientFactory(),
-                        topics.toArray(new String[0]));
+                        subscribeTopic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);

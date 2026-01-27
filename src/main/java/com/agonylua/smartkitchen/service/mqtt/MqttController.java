@@ -4,7 +4,6 @@ import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
 import com.agonylua.smartkitchen.utils.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.integration.support.MessageBuilder;
@@ -15,17 +14,23 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor // 自动为 final 字段生成构造函数
 @Slf4j
 public class MqttController {
 
-    @Autowired
-    private MessageChannel mqttOutputChannel;
+    private final MessageChannel mqttOutputChannel;
+    private final DeviceRepository deviceRepository;
 
+    @Value("${mqtt.return-topics}")
+    private String returnTopic;
+    @Value("${mqtt.return-qos}")
+    private String returnQos;
     @Value("${mqtt.publish-topics}")
     private String publishTopic;
+    @Value("${mqtt.publish-qos}")
+    private String publishQos;
+
     private static final String MQTT_TOPIC_PREFIX = "smartKitchen/service/";
-    private final DeviceRepository deviceRepository;
 
     public void handleReceivedMessage(Message<?> message) {
         try {
@@ -33,12 +38,28 @@ public class MqttController {
             String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
 
             if (topic.startsWith(MQTT_TOPIC_PREFIX)) {
-                String sn = topic.substring(MQTT_TOPIC_PREFIX.length());
-                if (!sn.isEmpty()) {
+                String[] topicParts = topic.substring(MQTT_TOPIC_PREFIX.length()).split("/");
+                if (topicParts[0].isEmpty() || topicParts[1].isEmpty()) return;
+
+                String sn = topicParts[0];
+                if (topicParts[1].equals("update")) {
+                    // 更新数据
                     deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
+                        if (payload.equals(device.getDeviceData())) {
+                            log.debug("设备 {} 数据未变化，跳过更新", sn);
+                            return;
+                        }
+
                         device.setDeviceData(payload);
                         deviceRepository.save(device);
+                        log.info("设备 {} 数据已更新", sn);
+
                     }, () -> log.warn("收到消息但设备不存在: {}", sn));
+                } else if (topicParts[1].equals("return")) {
+                    // 设备返回消息处理
+                    sendReturnMessage(payload);
+                    log.info("收到设备 {} 的返回消息: {}", sn, payload);
+
                 }
             }
         } catch (Exception e) {
@@ -47,16 +68,24 @@ public class MqttController {
     }
 
     // 发送消息
-    public void sendMessage(Object payload) {
-        String json = JsonUtil.toJson(payload);
-        String topic = publishTopic + JsonUtil.getValue(json, "deviceSn");
-        String cmd = JsonUtil.getValue(json, "deviceData");
+    public void sendReturnMessage(Object payload) {
+        String topic = returnTopic + JsonUtil.getValue(JsonUtil.toJson(payload), "deviceSn") + "/return";
+        toPayload(payload, topic, returnQos);
+    }
+
+    public void sendCmdMessage(String payload) {
+        String topic = publishTopic + JsonUtil.getValue(payload, "deviceSn") + "/control";
+        toPayload(payload, topic, publishQos);
+    }
+
+    private void toPayload(Object payload, String topic, String publishQos) {
+        String cmd = JsonUtil.getValue(JsonUtil.toJson(payload), "deviceData");
         Message<String> message = null;
-        if (json != null) {
+        if (JsonUtil.toJson(payload) != null) {
             message = MessageBuilder
                     .withPayload(cmd)
                     .setHeader(MqttHeaders.TOPIC, topic)
-                    .setHeader(MqttHeaders.QOS, 1)
+                    .setHeader(MqttHeaders.QOS, publishQos)
                     .build();
         }
         if (message != null) {

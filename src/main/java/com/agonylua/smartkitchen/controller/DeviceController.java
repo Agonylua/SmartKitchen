@@ -2,7 +2,6 @@ package com.agonylua.smartkitchen.controller;
 
 import com.agonylua.smartkitchen.common.ApiResponse;
 import com.agonylua.smartkitchen.common.DeviceAddReq;
-import com.agonylua.smartkitchen.common.DeviceControlReq;
 import com.agonylua.smartkitchen.databases.entity.Device;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
 import com.agonylua.smartkitchen.dto.DeviceDTO;
@@ -56,9 +55,8 @@ public class DeviceController {
      * 前端传: {"deviceSn": "SN123456", "payload": {"switch": "on"}}
      */
     @PostMapping("/control")
-    public ApiResponse<String> controlDevice(@RequestBody DeviceControlReq req) {
-        Object payload = req.getDeviceCmd();
-        mqttController.sendMessage(payload);
+    public ApiResponse<String> controlDevice(@RequestBody String req) {
+        mqttController.sendCmdMessage(req);
         return ApiResponse.success("指令已下发");
     }
 }

@@ -28,6 +28,9 @@ public class Device {
     @Column(nullable = false)
     private DeviceStatus deviceStatus; // true: 在线, false: 离线
 
+    @Column(nullable = false)
+    private String deviceMode; // 设备当前模式，如 "normal", "eco"
+
     @Column(columnDefinition = "json")
     private String deviceData; // 允许为 NULL
 

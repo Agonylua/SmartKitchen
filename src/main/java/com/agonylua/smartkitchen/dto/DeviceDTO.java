@@ -12,10 +12,12 @@ public class DeviceDTO {
     private String deviceName;
     private String deviceType; // 返回中文或英文给前端
     private String deviceStatus;
+    private String deviceMode;
     private String homeId;
 
     // 重点：前端拿到的直接是对象 {"temp": -18, "mode": "eco"}
     private Map<String, Object> deviceData;
+    private Map<String, Object> deviceSet;
 
     public static DeviceDTO fromEntity(Device device) {
         DeviceDTO dto = new DeviceDTO();
@@ -25,6 +27,7 @@ public class DeviceDTO {
         dto.setDeviceStatus(device.getDeviceStatus().name());
         // 枚举转字符串
         dto.setDeviceType(device.getDeviceType().name());
+        dto.setDeviceMode(device.getDeviceMode());
 
         // 解析 JSON 字符串为 Map
         if (device.getDeviceData() != null) {

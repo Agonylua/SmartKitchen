@@ -80,7 +80,6 @@ public class JwtUtil {
      * 解析 Token 获取所有 Claims (内部方法)
      */
     private Claims extractAllClaims(String token) {
-        log.info("secretKey {},jwtExpiration {}", secretKey, jwtExpiration);
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey()) // 设置签名密钥
                 .build()
