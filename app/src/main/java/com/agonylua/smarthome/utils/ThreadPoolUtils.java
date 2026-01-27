@@ -22,8 +22,7 @@ public class ThreadPoolUtils {
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
 
     // 核心线程数：核心数 + 1 (适合计算密集型)
-    // 如果是 IO 密集型 (网络请求多)，建议设置为 2 * CPU_COUNT + 1
-    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));
+    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT + 1, 4));
 
     // 最大线程数
     private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
@@ -127,7 +126,7 @@ public class ThreadPoolUtils {
         mainHandler.removeCallbacks(runnable);
     }
 
-    // 获取当前线程池状态信息 (调试用)
+    // TODO 获取当前线程池状态信息 (调试用)
     public String getPoolStatus() {
         return String.format("Core: %d, Active: %d, Queue: %d, Completed: %d",
                 threadPoolExecutor.getCorePoolSize(),

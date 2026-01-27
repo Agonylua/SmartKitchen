@@ -1,14 +1,12 @@
 package com.agonylua.smarthome.view;
 
 import android.os.Bundle;
-import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.fragment.HomeFragment;
@@ -16,16 +14,15 @@ import com.agonylua.smarthome.fragment.MonitorFragment;
 import com.agonylua.smarthome.fragment.SmartFragment;
 import com.agonylua.smarthome.fragment.SplashFragment;
 import com.agonylua.smarthome.fragment.UserFragment;
+import com.agonylua.smarthome.network.MqttManager;
+import com.agonylua.smarthome.utils.NetworkMonitor;
 import com.agonylua.smarthome.utils.TokenManager;
-import com.agonylua.smarthome.viewModel.SplashViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private SplashViewModel splashViewModel;
-    private ViewPager2 mViewPager2;
-    private RadioGroup mRadioGroup;
+    private NetworkMonitor networkMonitor;
     private TokenManager tokenManager;
     private String TAG = "MainActivity";
 
@@ -35,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        MqttManager.getInstance().connect();
         tokenManager = new TokenManager(getApplication());
         // 获取 NavHostFragment
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
@@ -55,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         fragments.add(new MonitorFragment());
         fragments.add(new UserFragment());
 
+        networkMonitor = new NetworkMonitor(getApplicationContext());
+        networkMonitor.startMonitoring();
 
     }
 
@@ -78,5 +78,11 @@ public class MainActivity extends AppCompatActivity {
         transaction.addToBackStack("fullscreen_tag");
 
         transaction.commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        networkMonitor.stopMonitoring();
     }
 }

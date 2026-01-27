@@ -1,30 +1,62 @@
 package com.agonylua.smarthome.model;
 
-public class DeviceMode {
+public enum DeviceMode {
     //--- Refrigerator Modes ---
-    public static final String REFRIGERATOR_MODE_STANDARD = "standard";
-    public static final String REFRIGERATOR_MODE_RAPID_COOL = "rapid_cool";
-    public static final String REFRIGERATOR_MODE_ENERGY_SAVE = "energy_saving";
-    public static final String REFRIGERATOR_MODE_HOLIDAY = "holiday";
+    STANDARD("标准"),
+    FAST_COOL("速冷"),
+    ENERGY_SAVING("节能"),
+    HOLIDAY("假日"),
+
     //--- Microwave Modes ---
-    public static final String MICROWAVE_MODE_HEAT = "heat";
-    public static final String MICROWAVE_MODE_BARBECUE = "barbecue";
-    public static final String MICROWAVE_MODE_THAW = "thaw";
-    public static final String MICROWAVE_MODE_STEAM = "steam";
+    HEAT("加热"),
+    GRILL("烧烤"),
+    DEFROST("解冻"),
+    STEAM("蒸汽"),
+
     //--- Rice Cooker Modes ---
-    public static final String RICE_COOKER_MODE_COOK_RICE = "cook_rice";
-    public static final String RICE_COOKER_MODE_STEAM_COOK = "steam_cook";
-    public static final String RICE_COOKER_MODE_COOK_PORRIDGE = "cook_porridge";
-    public static final String RICE_COOKER_MODE_CAKE = "cake";
+    COOK_RICE("煮饭"),
+    STEAM_COOK("蒸煮"),
+    PORRIDGE("煮粥"),
+    CAKE("蛋糕"),
+
     //--- Dishwasher Modes ---
-    public static final String DISHWASHER_MODE_STANDARD_WASH = "standard_wash";
-    public static final String DISHWASHER_MODE_QUICK_WASH = "quick_wash";
-    public static final String DISHWASHER_MODE_INTENSIVE_WASH = "intensive_wash";
-    public static final String DISHWASHER_MODE_ENERGY_SAVE_WASH = "energy_saving_wash";
-    public static final String DISHWASHER_MODE_STERILIZATION_WASH = "sterilization_wash";
-    public static final String DISHWASHER_MODE_DRY = "dry";
+    STANDARD_WASH("标准洗"),
+    QUICK_WASH("快速洗"),
+    INTENSIVE_WASH("强力洗"),
+    ECO_WASH("节能洗"),
+    SANITIZE_WASH("消毒洗"),
+    DRY("烘干"),
+
     //--- Sterilizer Modes ---
-    public static final String STERILIZER_MODE_HIGH_TEMP = "high_temp";
-    public static final String STERILIZER_MODE_UVB = "uvb";
-    public static final String STERILIZER_MODE_DRY = "dry";
+    HIGH_TEMP("高温"),
+    UVB("UVB"),
+    STERILIZER_DRY("烘干");
+
+    private final String label;
+
+    DeviceMode(String label) {
+        this.label = label;
+    }
+
+    public static String toMode(String label) {
+        for (DeviceMode mode : DeviceMode.values()) {
+            if (mode.label.equals(label)) {
+                return mode.name();
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with label " + label);
+    }
+
+    public static String toLabel(String mode) {
+        for (DeviceMode deviceMode : DeviceMode.values()) {
+            if (deviceMode.name().equals(mode)) {
+                return deviceMode.label;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with mode " + mode);
+    }
+
+    public String getLabel() {
+        return label;
+    }
 }

@@ -20,7 +20,7 @@ import retrofit2.Response;
 
 public class HomeRepository {
     private final String TAG = "HomeRepository";
-    private DeviceDao deviceDao;
+    private final DeviceDao deviceDao;
 
     public HomeRepository(Context context) {
         deviceDao = AppDatabase.getInstance(context).deviceDao();
@@ -30,7 +30,7 @@ public class HomeRepository {
         return deviceDao.getDevicesByHome(homeId);
     }
 
-    public void getDevices(Context context, String homeId) {
+    public void getDevices(Context context, String homeId, DeviceListCallback callback) {
         RetrofitClient.getInstance(context).getApi().getDeviceList(homeId).enqueue(new Callback<DeviceResponse<Device>>() {
             @Override
             public void onResponse(@NonNull Call<DeviceResponse<Device>> call, @NonNull Response<DeviceResponse<Device>> response) {
@@ -43,6 +43,9 @@ public class HomeRepository {
                         new Thread(() -> {
                             deviceDao.insertAll(response.body().getData());
                         }).start();
+                        callback.onSuccess(DeviceResponse.getData());
+                    } else {
+                        callback.onFailure("设备列表获取失败，错误代码: " + DeviceResponse.getCode());
                     }
                 }
             }
@@ -50,6 +53,7 @@ public class HomeRepository {
             @Override
             public void onFailure(@NonNull Call<DeviceResponse<Device>> call, @NonNull Throwable t) {
                 Log.d(TAG, "onFailure: 网络连接错误: " + t.getMessage());
+                callback.onFailure(t.getMessage());
             }
         });
     }
@@ -81,6 +85,12 @@ public class HomeRepository {
     }
     public interface VerifyCallback {
         void onVerify(Boolean isValid);
+
+        void onFailure(String errorMessage);
+    }
+
+    public interface DeviceListCallback {
+        void onSuccess(List<Device> devices);
 
         void onFailure(String errorMessage);
     }

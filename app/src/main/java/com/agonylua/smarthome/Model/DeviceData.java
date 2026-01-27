@@ -2,21 +2,117 @@ package com.agonylua.smarthome.model;
 
 public class DeviceData {
     // 冰箱的数据
-    private double temp;
-    private double hum;
-
-    // 预留给电饭煲、燃气灶的字段 (虽然目前 JSON 没返回，但建议预留)
-    private String mode; // 模式
-    private int remainingTime; // 剩余时间
-    private boolean isFireOn; // 火焰状态
+    private float fridgeTemp;
+    private float freezerTemp;
+    // 微波炉的数据
+    private float microwaveTemp; // 加热温度
+    private int microwaveTime; // 加热时长
+    // 洗碗机的数据
+    private int dishwasherSWS; // 软水盐储量
+    private int dishwasherRA; // 漂洗剂储量
+    private boolean dishwasherFK; // 鲜存保管
+    // 电饭煲的数据
+    private String riceCookerFlavor; // 口感调节
+    private boolean riceCookerInsulation; // 自动保温
+    private int riceCookerTime; // 加热时长
+    // 消毒柜的数据
+    private float sterilizerTemp; // 加热温度
+    private int sterilizerTime; // 加热时长
 
     // Getters and Setters
-    public double getTemp() {
-        return temp;
+    public float getFridgeTemp() {
+        return fridgeTemp;
     }
 
-    public double getHum() {
-        return hum;
+    public void setFridgeTemp(int fridgeTemp) {
+        this.fridgeTemp = fridgeTemp;
     }
-    // ... 其他 getter/setter
+
+    public float getFreezeTemp() {
+        return freezerTemp;
+    }
+
+    public float getMicrowaveTemp() {
+        return microwaveTemp;
+    }
+
+    public void setMicrowaveTemp(int microwaveTemp) {
+        this.microwaveTemp = microwaveTemp;
+    }
+
+    public int getMicrowaveTime() {
+        return microwaveTime;
+    }
+
+    public void setMicrowaveTime(int microwaveTime) {
+        this.microwaveTime = microwaveTime;
+    }
+
+    public int getDishwasherSWS() {
+        return dishwasherSWS;
+    }
+
+    public void setDishwasherSWS(int dishwasherSWS) {
+        this.dishwasherSWS = dishwasherSWS;
+    }
+
+    public int getDishwasherRA() {
+        return dishwasherRA;
+    }
+
+    public void setDishwasherRA(int dishwasherRA) {
+        this.dishwasherRA = dishwasherRA;
+    }
+
+    public boolean isDishwasherFK() {
+        return dishwasherFK;
+    }
+
+    public void setDishwasherFK(boolean dishwasherFK) {
+        this.dishwasherFK = dishwasherFK;
+    }
+
+    public String getRiceCookerFlavor() {
+        return riceCookerFlavor;
+    }
+
+    public void setRiceCookerFlavor(String riceCookerFlavor) {
+        this.riceCookerFlavor = riceCookerFlavor;
+    }
+
+    public boolean isRiceCookerInsulation() {
+        return riceCookerInsulation;
+    }
+
+    public void setRiceCookerInsulation(boolean riceCookerInsulation) {
+        this.riceCookerInsulation = riceCookerInsulation;
+    }
+
+    public int getRiceCookerTime() {
+        return riceCookerTime;
+    }
+
+    public void setRiceCookerTime(int riceCookerTime) {
+        this.riceCookerTime = riceCookerTime;
+    }
+
+    public float getSterilizerTemp() {
+        return sterilizerTemp;
+    }
+
+    public void setSterilizerTemp(int sterilizerTemp) {
+        this.sterilizerTemp = sterilizerTemp;
+    }
+
+    public int getSterilizerTime() {
+        return sterilizerTime;
+    }
+
+    public void setSterilizerTime(int sterilizerTime) {
+        this.sterilizerTime = sterilizerTime;
+    }
+
+    public void setFreezerTemp(int freezerTemp) {
+        this.freezerTemp = freezerTemp;
+    }
 }

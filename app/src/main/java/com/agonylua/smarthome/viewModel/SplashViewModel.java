@@ -9,7 +9,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.agonylua.smarthome.repository.HomeRepository;
-import com.agonylua.smarthome.utils.NetworkUtils;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
 import com.agonylua.smarthome.utils.TokenManager;
 
@@ -18,8 +17,6 @@ public class SplashViewModel extends AndroidViewModel {
     private TokenManager tokenManager;
     private HomeRepository repository;
     private MutableLiveData<Integer> tokenValid = new MutableLiveData<>();
-    private MutableLiveData<Boolean> hasNetwork = new MutableLiveData<>();
-    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
     public SplashViewModel(@NonNull Application application) {
         super(application);
@@ -27,7 +24,6 @@ public class SplashViewModel extends AndroidViewModel {
     }
 
     public void LoginCheck() {
-        ThreadPoolUtils.getInstance().executeDelay(this::HasNetwork, 2000);
         ThreadPoolUtils.getInstance().executeDelay(this::validateToken, 2000);
     }
 
@@ -60,21 +56,9 @@ public class SplashViewModel extends AndroidViewModel {
         });
     }
 
-    public void HasNetwork() {
-        boolean networkStatus = NetworkUtils.isNetworkAvailable(getApplication());
-        hasNetwork.postValue(networkStatus);
-    }
-
-    public void LoginStatus(Boolean loading) {
-        isLoading.postValue(loading);
-    }
 
     public LiveData<Integer> getTokenValid() {
         return tokenValid;
-    }
-
-    public LiveData<Boolean> getHasNetwork() {
-        return hasNetwork;
     }
 
 }

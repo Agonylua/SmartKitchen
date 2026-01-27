@@ -12,7 +12,6 @@ import com.agonylua.smarthome.database.dao.DeviceDao;
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.repository.HomeRepository;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
-import com.agonylua.smarthome.utils.TokenManager;
 
 import org.jspecify.annotations.NonNull;
 
@@ -21,14 +20,12 @@ import java.util.List;
 public class HomeViewModel extends AndroidViewModel {
 
     private HomeRepository repository;
-    private TokenManager tokenManager;
     private DeviceDao deviceDao;
-    private String TAG = "HomeViewModel";
+    private final String TAG = "HomeViewModel";
 
     private LiveData<List<Device>> deviceList = new MutableLiveData<>();
     private MutableLiveData<String> deviceCount = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
-    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
@@ -39,18 +36,26 @@ public class HomeViewModel extends AndroidViewModel {
     /**
      * 加载设备列表
      *
-     * @param homeId 家庭ID
      */
-    public void loadDevices(String homeId) {
-        try {
-            repository.getDevices(getApplication(), homeId);
-            ThreadPoolUtils.getInstance().execute(() -> {
-                String count = String.valueOf(deviceDao.getCount());
-                deviceCount.postValue(count);
-            });
-        } catch (Exception e) {
-            errorMessage.setValue("加载设备失败: " + e.getMessage());
-        }
+    public void loadDevices() {
+        ThreadPoolUtils.getInstance().execute(() -> {
+            String count = String.valueOf(deviceDao.getCount());
+            deviceCount.postValue(count);
+        });
+    }
+
+    public void syncServiceData(String homeId) {
+        repository.getDevices(getApplication(), homeId, new HomeRepository.DeviceListCallback() {
+            @Override
+            public void onSuccess(List<Device> devices) {
+                loadDevices();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                errorMessage.setValue("网络异常" + error);
+            }
+        });
     }
 
     // Getters for LiveData

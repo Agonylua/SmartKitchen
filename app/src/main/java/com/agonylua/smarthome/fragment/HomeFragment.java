@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
@@ -34,7 +33,6 @@ public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private RecyclerView rvDevices;
     private Toolbar toolbar;
-    private TextView tvDeviceCount, tvTitle;
     private String homeId;
     private UserManager userManager;
     private DeviceAdapter adapter;
@@ -44,9 +42,7 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-
-        return root;
+        return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
     @Override
@@ -56,6 +52,7 @@ public class HomeFragment extends Fragment {
         // 初始化
         init(view);
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        homeViewModel.syncServiceData(homeId);
         // 设置RecyclerView
         adapter = new DeviceAdapter(getContext());
         rvDevices.setLayoutManager(new GridLayoutManager(getContext(), 2)); // 网格布局，一行2个
@@ -66,23 +63,20 @@ public class HomeFragment extends Fragment {
                 NavController navController = NavHostFragment.findNavController(HomeFragment.this);
                 MainFragmentDirections.ActionMainFragmentToDeviceFragment2 action =
                         MainFragmentDirections.actionMainFragmentToDeviceFragment2(device);
-                if (action != null) {
-                    navController.navigate(action);
-                }
+                navController.navigate(action);
             }
         });
         // 下拉刷新监听
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                homeViewModel.loadDevices("d6J5Gp");
+                homeViewModel.syncServiceData(homeId);
             }
         });
 
         observeViewModel();
 
-        //TODO: 这里的 homeId 需要动态获取
-        homeViewModel.loadDevices(homeId);
+        homeViewModel.loadDevices();
         String nickname = userManager.getNickName() + "的智能家居";
         toolbar.setTitle(nickname);
     }
@@ -107,7 +101,7 @@ public class HomeFragment extends Fragment {
         // 观察错误信息
         homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
             Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "错误信息: " + msg);
+            Log.d(TAG, "Error: " + msg);
             refreshLayout.finishRefresh(false);
         });
 

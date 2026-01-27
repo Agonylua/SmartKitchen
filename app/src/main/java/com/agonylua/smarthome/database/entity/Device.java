@@ -11,6 +11,7 @@ import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
 import com.agonylua.smarthome.database.DataConverter;
+import com.google.gson.Gson;
 
 import java.util.Map;
 
@@ -39,6 +40,8 @@ public class Device implements Parcelable {
     };
     @ColumnInfo(name = "deviceStatus")
     private String deviceStatus;
+    @ColumnInfo(name = "deviceMode")
+    private String deviceMode;
     @TypeConverters(DataConverter.class)
     @ColumnInfo(name = "deviceData")
     private Map<String, String> deviceData;
@@ -91,6 +94,7 @@ public class Device implements Parcelable {
         deviceType = in.readString();
         homeId = in.readString();
         deviceStatus = in.readString();
+        deviceMode = in.readString();
     }
 
     public String getHomeId() {
@@ -129,5 +133,16 @@ public class Device implements Parcelable {
         parcel.writeString(deviceType);
         parcel.writeString(homeId);
         parcel.writeString(deviceStatus);
+        parcel.writeString(deviceMode);
+        parcel.writeString(deviceData != null ? new Gson().toJson(deviceData) : null);
     }
+
+    public String getDeviceMode() {
+        return deviceMode;
+    }
+
+    public void setDeviceMode(String deviceMode) {
+        this.deviceMode = deviceMode;
+    }
+
 }

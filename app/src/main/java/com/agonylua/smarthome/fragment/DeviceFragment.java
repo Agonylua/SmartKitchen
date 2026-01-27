@@ -19,24 +19,23 @@ import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.databinding.FragmentDeviceBinding;
 import com.agonylua.smarthome.databinding.LayoutMicrowaveBinding;
 import com.agonylua.smarthome.databinding.LayoutRefrigeratorBinding;
-import com.agonylua.smarthome.model.DeviceType;
+import com.agonylua.smarthome.repository.DeviceRepository;
 import com.agonylua.smarthome.viewModel.DeviceViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.slider.Slider;
 
-import java.util.Objects;
-
 public class DeviceFragment extends Fragment {
 
     // 常量定义
     public static final String TYPE_FRIDGE = "fridge";
     public static final String TYPE_MICROWAVE = "microwave";
-    private static final String ARG_DEVICE_TYPE = "device_type";
+    private static final String SUB_TOPIC = "smartKitchen/App/";
     private static final String TAG = "DeviceFragment";
     private FragmentDeviceBinding binding;
     private DeviceViewModel mViewModel;
+    private DeviceRepository deviceRepository;
     private Device device;
     private String mDeviceType, mDeviceName, mDeviceState;
 
@@ -56,10 +55,10 @@ public class DeviceFragment extends Fragment {
 
         mViewModel = new ViewModelProvider(this).get(DeviceViewModel.class);
         binding.setViewModel(mViewModel);
-
         if (getArguments() != null) {
             DeviceFragmentArgs args = DeviceFragmentArgs.fromBundle(getArguments());
             device = args.getCurrentDevice();
+            mViewModel.initDevice(device);
             this.mDeviceType = device.getDeviceType();
             this.mDeviceName = device.getDeviceName();
             this.mDeviceState = device.getDeviceStatus();
@@ -68,12 +67,18 @@ public class DeviceFragment extends Fragment {
             binding.toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
         }
         try {
-            mViewModel.DeviceGeneral(mDeviceState);
             setupDynamicContent(mDeviceType);
         } catch (Exception e) {
             Log.e(TAG, "onViewCreated: " + e);
         }
+        observeViewModel();
         binding.setLifecycleOwner(getViewLifecycleOwner());
+    }
+
+    private void observeViewModel() {
+        mViewModel.state.observe(getViewLifecycleOwner(), state -> {
+            mViewModel.setDeviceState(state);
+        });
     }
 
 
@@ -85,18 +90,14 @@ public class DeviceFragment extends Fragment {
 
         switch (deviceType) {
             case "REFRIGERATOR": // 冰箱
-                if (mDeviceState != null && mDeviceState.equals("OFFLINE")) {
-                    binding.deviceImage.setImageResource(Objects.requireNonNull(DeviceType.fromName(deviceType)).getOffline());
-                } else {
-                    binding.deviceImage.setImageResource(Objects.requireNonNull(DeviceType.fromName(deviceType)).getOnline());
-                }
                 LayoutRefrigeratorBinding fridgeBinding = LayoutRefrigeratorBinding.inflate(inflater, container, false);
                 fridgeBinding.setViewModel(mViewModel);
+                mViewModel.getFridgeData();
+                fridgeBinding.btnStart.setOnClickListener(v -> {
+                });
                 fridgeBinding.setLifecycleOwner(getViewLifecycleOwner());
 
                 container.addView(fridgeBinding.getRoot());
-                initFridgeLogic(fridgeBinding.getRoot());
-                mViewModel.getFridgeData(mDeviceName, mDeviceState);
                 break;
 
             case "MICROWAVE": // 微波炉
@@ -131,20 +132,6 @@ public class DeviceFragment extends Fragment {
     //  设备逻辑：冰箱 (Fridge)
     //  假设布局包含: Slider(温度), ChipGroup(模式: 速冻/节能)
     // ============================================================
-    private void initFridgeLogic(View view) {
-        ChipGroup chipGroupMode = view.findViewById(R.id.cooling_mode);
-
-        if (chipGroupMode != null) {
-            chipGroupMode.setOnCheckedStateChangeListener((group, checkedIds) -> {
-                if (!checkedIds.isEmpty()) {
-                    Chip chip = view.findViewById(checkedIds.get(0));
-                    Log.d(TAG, "chipGroupMode: " + chip.getText());
-                    //mViewModel.setFridgeMode(chip.getText().toString());
-                }
-            });
-        }
-
-    }
 
     // ============================================================
     //  设备逻辑：微波炉 (Microwave)
@@ -158,11 +145,6 @@ public class DeviceFragment extends Fragment {
 
         // 保存当前选择的时间 (在 Fragment 暂存 UI 状态，或者放到 ViewModel 也可以)
         final int[] currentSeconds = {0};
-
-        // 1. 观察数据
-//        mViewModel.getDeviceDisplayState().observe(getViewLifecycleOwner(), timeStr -> {
-//            if (tvTimer != null) tvTimer.setText(timeStr);
-//        });
 
         // 2. 事件绑定
         if (chipGroupPower != null) {
@@ -212,6 +194,9 @@ public class DeviceFragment extends Fragment {
         }
 
     }
+
+    // ====================== 通用 ========================
+
 
     @Override
     public void onDestroyView() {

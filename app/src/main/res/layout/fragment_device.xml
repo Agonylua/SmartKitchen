@@ -59,14 +59,14 @@
                         android:layout_height="120dp"
                         android:importantForAccessibility="no"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_device_refrigerator_online"
+                        android:src="@{viewModel.deviceImage}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/device_status"
-                        android:layout_width="wrap_content"
+                        android:layout_width="64dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_status_capsule"
                         android:paddingHorizontal="12dp"
@@ -74,8 +74,20 @@
                         android:text="@{viewModel.state}"
                         android:textColor="@color/state_success"
                         android:textSize="16sp"
+                        android:gravity="center"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ProgressBar
+                        android:id="@+id/state_loading"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:indeterminateTint="#2196F3"
+                        android:visibility="@{viewModel.stateLoading}"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="@+id/device_status"
+                        app:layout_constraintStart_toStartOf="@id/device_status"
                         app:layout_constraintTop_toTopOf="parent" />
 
 

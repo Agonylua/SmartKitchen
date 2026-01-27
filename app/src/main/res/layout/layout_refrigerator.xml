@@ -11,7 +11,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -55,7 +55,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="温度"
+                            android:text="冷藏室"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -81,7 +81,7 @@
                             android:id="@+id/tv_freezer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@{viewModel.fridgeHum+`%`}"
+                            android:text="@{viewModel.freezeTemp+`°C`}"
                             android:textColor="@color/text_primary"
                             android:textSize="32sp"
                             android:textStyle="bold" />
@@ -89,7 +89,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="湿度"
+                            android:text="冷冻室"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -127,65 +127,15 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="40dp"
                         android:layout_marginBottom="10dp"
-                        app:checkedChip="@={viewModel.deviceMode}"
-                        app:chipSpacingHorizontal="16dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:selectionRequired="true"
                         app:singleLine="true"
-                        app:singleSelection="true">
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_standard"
-                            style="@style/Widget.MaterialComponents.Chip.Choice"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:tag="1"
-                            android:text="标准"
-                            android:textColor="@color/text_primary"
-                            app:chipBackgroundColor="@color/white"
-                            app:chipStrokeColor="@color/chip_stroke"
-                            app:chipStrokeWidth="1dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_rapid_cooling"
-                            style="@style/Widget.MaterialComponents.Chip.Choice"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:tag="2"
-                            android:text="速冷"
-                            android:textColor="@color/text_primary"
-                            app:chipBackgroundColor="@color/white"
-                            app:chipStrokeColor="@color/chip_stroke"
-                            app:chipStrokeWidth="1dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_energy_saving"
-                            style="@style/Widget.MaterialComponents.Chip.Choice"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:tag="3"
-                            android:text="节能"
-                            android:textColor="@color/text_primary"
-                            app:chipBackgroundColor="@color/white"
-                            app:chipStrokeColor="@color/chip_stroke"
-                            app:chipStrokeWidth="1dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chip_holiday"
-                            style="@style/Widget.MaterialComponents.Chip.Choice"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:tag="4"
-                            android:text="假日"
-                            android:textColor="@color/text_primary"
-                            app:chipBackgroundColor="@color/white"
-                            app:chipStrokeColor="@color/chip_stroke"
-                            app:chipStrokeWidth="1dp" />
-                    </com.google.android.material.chip.ChipGroup>
+                        app:chipItems="@{viewModel.modeTags}"
+                        app:singleSelection="true"
+                        app:viewModel="@{viewModel}" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
@@ -221,7 +171,7 @@
                         <TextView
                             android:layout_width="40dp"
                             android:layout_height="wrap_content"
-                            android:text="温度"
+                            android:text="冷藏"
                             android:textColor="@color/text_secondary" />
 
                         <com.google.android.material.slider.Slider
@@ -231,7 +181,7 @@
                             android:layout_weight="1"
                             android:stepSize="1"
                             android:value="@={viewModel.setFridgeTemp}"
-                            android:valueFrom="-18"
+                            android:valueFrom="2"
                             android:valueTo="8"
                             app:thumbColor="@color/primary"
                             app:trackColorActive="@color/primary"
@@ -255,7 +205,7 @@
                         <TextView
                             android:layout_width="40dp"
                             android:layout_height="wrap_content"
-                            android:text="湿度"
+                            android:text="冷冻"
                             android:textColor="@color/text_secondary" />
 
                         <com.google.android.material.slider.Slider
@@ -264,9 +214,9 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:stepSize="1"
-                            android:value="@={viewModel.setFridgeHum}"
-                            android:valueFrom="40"
-                            android:valueTo="85"
+                            android:value="@={viewModel.setFreezeTemp}"
+                            android:valueFrom="-24"
+                            android:valueTo="-18"
                             app:thumbColor="@color/secondary"
                             app:trackColorActive="@color/secondary"
                             app:trackColorInactive="#E0E0E0" />
@@ -276,7 +226,7 @@
                             android:layout_width="40dp"
                             android:layout_height="wrap_content"
                             android:gravity="end"
-                            android:text="@{(int)viewModel.setFridgeHum+`%`}"
+                            android:text="@{(int)viewModel.setFreezeTemp+`℃`}"
                             android:textColor="@color/text_primary"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -289,7 +239,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="16dp"
-                android:text="开始运行"
+                android:text="提交任务"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/primary"

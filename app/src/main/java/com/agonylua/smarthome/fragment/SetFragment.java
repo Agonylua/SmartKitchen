@@ -15,6 +15,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.agonylua.smarthome.R;
+import com.agonylua.smarthome.network.MqttManager;
 import com.agonylua.smarthome.viewModel.SetViewModel;
 
 public class SetFragment extends Fragment {
@@ -40,7 +41,7 @@ public class SetFragment extends Fragment {
             public void onClick(View v) {
 
                 setViewModel.logout();
-
+                MqttManager.getInstance().disconnect();
                 if (getView() != null) {
                     Navigation.findNavController(getView()).navigate(R.id.loginFragment);
                 }

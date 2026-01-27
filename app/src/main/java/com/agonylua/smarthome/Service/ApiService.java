@@ -6,7 +6,6 @@ import com.agonylua.smarthome.model.ApiResponse;
 import com.agonylua.smarthome.model.DeviceResponse;
 import com.agonylua.smarthome.model.LoginRequest;
 import com.agonylua.smarthome.model.UserRequest;
-import com.agonylua.smarthome.network.ControlRequest;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -38,8 +37,9 @@ public interface ApiService {
      */
     @POST("user/update")
     Call<ApiResponse<Void>> updateUserInfo(@Body UserRequest request);
+
     /**
-     * 获取厨房设备信息
+     * 获取家庭设备信息
      *
      * @param homeId 家庭 ID
      */
@@ -47,16 +47,12 @@ public interface ApiService {
     Call<DeviceResponse<Device>> getDeviceList(@Path("homeId") String homeId);
 
     /**
-     * 控制设备
+     * 更新设备信息
      *
-     * @param token   用户 Token
-     * @param request 控制请求体
+     * @param deviceSn 设备序列号
      */
-    @POST("/user/control")
-    Call<Void> controlDevice(
-            @Header("Authorization") String token,
-            @Body ControlRequest request
-    );
+    @POST("device/update/{deviceSn}")
+    Call<ApiResponse<Void>> updateDeviceInfo(@Path("deviceSn") String deviceSn, @Body Device device);
 
     /**
      * 验证 Token 接口

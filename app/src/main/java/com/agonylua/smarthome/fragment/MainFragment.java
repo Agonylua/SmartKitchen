@@ -11,6 +11,8 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smarthome.R;
+import com.agonylua.smarthome.model.MqttLiveBus;
+import com.agonylua.smarthome.repository.MainRepository;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -19,6 +21,7 @@ public class MainFragment extends Fragment {
 
     private ViewPager2 mViewPager2;
     private RadioGroup mRadioGroup;
+    private MainRepository mainRepository;
     private int currentPosition = 0;
 
     @Nullable
@@ -33,21 +36,19 @@ public class MainFragment extends Fragment {
 
         mViewPager2 = view.findViewById(R.id.viewPager);
         mRadioGroup = view.findViewById(R.id.radioGroup);
-
         // Adapter
         mViewPager2.setAdapter(new FragmentStateAdapter(this) {
             @NonNull
             @Override
             public Fragment createFragment(int position) {
                 switch (position) {
-                    case 0:
-                        return new HomeFragment();
                     case 1:
                         return new SmartFragment();
                     case 2:
                         return new MonitorFragment();
                     case 3:
                         return new UserFragment();
+                    case 0:
                     default:
                         return new HomeFragment();
                 }
@@ -99,6 +100,15 @@ public class MainFragment extends Fragment {
                         break;
                 }
             }
+        });
+
+
+        MqttLiveBus.getInstance().getEvent().observe(getViewLifecycleOwner(), event -> {
+            String topic = event.topic;
+            String message = event.message;
+            // 在这里处理接收到的 MQTT 消息
+            // 例如，根据 topic 更新 UI 或数据
+            mainRepository.saveDeviceData();
         });
 
     }
