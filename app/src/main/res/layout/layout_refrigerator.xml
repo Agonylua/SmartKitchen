@@ -7,6 +7,10 @@
         <variable
             name="viewModel"
             type="com.agonylua.smarthome.viewModel.DeviceViewModel" />
+
+        <variable
+            name="device"
+            type="com.agonylua.smarthome.database.entity.Device" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -47,7 +51,7 @@
                             android:id="@+id/tv_fridge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@{viewModel.fridgeTemp+`°C`}"
+                            android:text='@{viewModel.fridgeTemp != null ? Math.round(viewModel.fridgeTemp) + "°C" : "--°C"}'
                             android:textColor="@color/text_primary"
                             android:textSize="32sp"
                             android:textStyle="bold" />
@@ -81,7 +85,7 @@
                             android:id="@+id/tv_freezer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@{viewModel.freezeTemp+`°C`}"
+                            android:text='@{viewModel.freezeTemp != null ?  Math.round(viewModel.freezeTemp) + "°C" : "--°C"}'
                             android:textColor="@color/text_primary"
                             android:textSize="32sp"
                             android:textStyle="bold" />
@@ -242,6 +246,7 @@
                 android:text="提交任务"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:enabled="@{viewModel.state == `空闲` || viewModel.state == `运行中`}"
                 app:backgroundTint="@color/primary"
                 app:cornerRadius="30dp"
                 app:iconGravity="textStart"

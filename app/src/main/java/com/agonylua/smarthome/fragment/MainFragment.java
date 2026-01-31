@@ -1,6 +1,9 @@
 package com.agonylua.smarthome.fragment;
 
+import static com.agonylua.smarthome.network.MqttManager.SUB_TOPIC;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +14,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.model.MqttLiveBus;
+import com.agonylua.smarthome.network.MqttManager;
 import com.agonylua.smarthome.repository.MainRepository;
 
 import org.jspecify.annotations.NonNull;
@@ -19,6 +22,7 @@ import org.jspecify.annotations.Nullable;
 
 public class MainFragment extends Fragment {
 
+    private static final String TAG = "MainFragment";
     private ViewPager2 mViewPager2;
     private RadioGroup mRadioGroup;
     private MainRepository mainRepository;
@@ -102,15 +106,17 @@ public class MainFragment extends Fragment {
             }
         });
 
+        mainRepository = new MainRepository(getContext());
+        MqttManager.getInstance().setOnMessageListener(new MqttManager.OnMessageListener() {
+            @Override
+            public void onMessage(String topic, String message) {
+                String sn = topic.substring(SUB_TOPIC.length());
+                Log.d(TAG, "onViewCreated: " + sn + " message: " + message);
+                // 在这里处理接收到的 MQTT 消息
+                mainRepository.updateDeviceData(sn, message);
 
-        MqttLiveBus.getInstance().getEvent().observe(getViewLifecycleOwner(), event -> {
-            String topic = event.topic;
-            String message = event.message;
-            // 在这里处理接收到的 MQTT 消息
-            // 例如，根据 topic 更新 UI 或数据
-            mainRepository.saveDeviceData();
+            }
         });
-
     }
 
     /**

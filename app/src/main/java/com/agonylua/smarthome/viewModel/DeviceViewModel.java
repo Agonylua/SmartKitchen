@@ -8,19 +8,17 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.adapter.ChipDeviceMode;
-import com.agonylua.smarthome.database.AppDatabase;
-import com.agonylua.smarthome.database.dao.DeviceDao;
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.model.DeviceMode;
 import com.agonylua.smarthome.model.DeviceType;
-import com.agonylua.smarthome.network.MqttManager;
 import com.agonylua.smarthome.repository.DeviceRepository;
 import com.agonylua.smarthome.utils.DeviceDataManager;
-import com.agonylua.smarthome.utils.JsonUtils;
 
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -35,19 +33,16 @@ public class DeviceViewModel extends AndroidViewModel {
     public final MutableLiveData<String> state = new MutableLiveData<>();// 设备状态数据
     public final MutableLiveData<Integer> stateColor = new MutableLiveData<>();// 设备状态颜色数据
     public final MutableLiveData<Drawable> deviceImage = new MutableLiveData<>();// 设备图片数据
-    public final MutableLiveData<String> deviceName = new MutableLiveData<>();// 设备电源数据
+    public final MutableLiveData<String> deviceName = new MutableLiveData<>();// 设备名称数据
+    public final MutableLiveData<String> deviceMode = new MutableLiveData<>();// 设备模式数据
     public final MutableLiveData<List<String>> modeTags = new MutableLiveData<>(); // 模式标签数据
     public final MutableLiveData<String> selectedMode = new MutableLiveData<>(); // 选中模式标签数据
     public final MutableLiveData<Integer> stateLoading = new MutableLiveData<>(View.GONE);// 加载状态数据
     // 冰箱
-    public final MutableLiveData<String> fridgeTemp = new MutableLiveData<>();// 冰箱温度数据
-    public final MutableLiveData<String> freezeTemp = new MutableLiveData<>();// 冰箱湿度数据
+    public final MutableLiveData<Float> fridgeTemp = new MutableLiveData<>();// 冰箱温度数据
+    public final MutableLiveData<Float> freezeTemp = new MutableLiveData<>();// 冰箱湿度数据
     public final MutableLiveData<Float> setFridgeTemp = new MutableLiveData<>();// 冰箱温度数据
     public final MutableLiveData<Float> setFreezeTemp = new MutableLiveData<>();// 冰箱湿度数据
-    private DeviceDao deviceDao;
-    private Device device;
-    private DeviceDataManager deviceDataManager;
-    private DeviceRepository deviceRepository;
     // 微波炉
     private final MutableLiveData<LocalTime> microwave_time = new MutableLiveData<>();// 微波炉时间数据
     private final MutableLiveData<String> microwave_temp = new MutableLiveData<>();// 微波炉温度数据
@@ -68,24 +63,34 @@ public class DeviceViewModel extends AndroidViewModel {
     private final MutableLiveData<String> limit_sterilizer_temp = new MutableLiveData<>();// 消毒柜温度数据
     private final MutableLiveData<LocalTime> limit_sterilizer_time = new MutableLiveData<>();// 消毒柜时间数据
     private final MutableLiveData<Boolean> sterilizer_light = new MutableLiveData<>();// 消毒柜照明数据
-
+    // 聚合观察者
+    public MediatorLiveData<Boolean> autoSaverData = new MediatorLiveData<>();
+    public MediatorLiveData<Boolean> autoSaverSetup = new MediatorLiveData<>();
+    private Device device;
+    private DeviceDataManager deviceDataManager;
+    private DeviceRepository deviceRepository;
     public DeviceViewModel(@NonNull Application application) {
         super(application);
-        deviceDao = AppDatabase.getInstance(getApplication()).deviceDao();
+        autoSaverData.addSource(fridgeTemp, value -> autoSaverData.setValue(true));
+        autoSaverData.addSource(freezeTemp, value -> autoSaverData.setValue(true));
+        autoSaverSetup.addSource(selectedMode, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(setFridgeTemp, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(setFreezeTemp, value -> autoSaverSetup.setValue(true));
     }
 
     // ================== 冰箱业务逻辑 ==================
 
     public void getFridgeData() {
-        fridgeTemp.setValue(device.getDeviceData().get("temp"));
-        freezeTemp.setValue(device.getDeviceData().get("hum"));
-        selectedMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
+        fridgeTemp.setValue(Float.valueOf(device.getDeviceData().get("fridgeTemp")));
+        freezeTemp.setValue(Float.valueOf(device.getDeviceData().get("freezeTemp")));
+        deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
+        selectedMode.setValue(deviceDataManager.getDeviceMode());
         setFridgeTemp.setValue(deviceDataManager.getFridgeTemp());
         setFreezeTemp.setValue(deviceDataManager.getFreezeTemp());
     }
 
 
-// ================== 微波炉业务逻辑 ==================
+    // ================== 微波炉业务逻辑 ==================
 
     public void setMicrowaveTime(int seconds) {
         // 格式化时间显示 MM:ss
@@ -107,22 +112,39 @@ public class DeviceViewModel extends AndroidViewModel {
 // ================== 洗碗机业务逻辑 ==================
 
     // ================== 设备通用业务逻辑 ==================
+    public LiveData<Device> getDevice(String deviceSn) {
+        deviceRepository = new DeviceRepository(getApplication(), deviceSn);
+        return deviceRepository.getDevice();
+    }
+
     public void initDevice(Device device) {
         this.device = device;
-        deviceDataManager = DeviceDataManager.Instance(getApplication(), this.device.getDeviceSn());
-
+        deviceDataManager = DeviceDataManager.Instance(getApplication(), device.getDeviceSn());
         setDeviceImage(this.device.getDeviceStatus(), this.device.getDeviceType(), this.device.getDeviceName());
         setDeviceState(this.device.getDeviceStatus());
         setChipDeviceMode(this.device.getDeviceType());
-        setDeviceSet();
+        //setDeviceSet();
+        switch (this.device.getDeviceType()) {
+            case "REFRIGERATOR": // 冰箱
+                getFridgeData();
+                break;
+            case "MICROWAVE": // 微波炉
+                break;
+            case "DISHWASHER": // 洗碗机
+                break;
+            case "RICE_COOKER": // 电饭煲
+                break;
+            case "STERILIZER": // 消毒柜
+                break;
+        }
     }
 
     public void setDeviceImage(String deviceState, String deviceType, String deviceName) {
-        this.deviceName.postValue(deviceName);
+        this.deviceName.setValue(deviceName);
         if (deviceState != null && deviceState.equals("OFFLINE")) {
-            deviceImage.postValue(ContextCompat.getDrawable(getApplication(), Objects.requireNonNull(DeviceType.fromName(deviceType)).getOffline()));
+            deviceImage.setValue(ContextCompat.getDrawable(getApplication(), Objects.requireNonNull(DeviceType.fromName(deviceType)).getOffline()));
         } else {
-            deviceImage.postValue(ContextCompat.getDrawable(getApplication(), Objects.requireNonNull(DeviceType.fromName(deviceType)).getOnline()));
+            deviceImage.setValue(ContextCompat.getDrawable(getApplication(), Objects.requireNonNull(DeviceType.fromName(deviceType)).getOnline()));
         }
     }
 
@@ -130,20 +152,20 @@ public class DeviceViewModel extends AndroidViewModel {
         if (deviceState != null) {
             switch (deviceState) {
                 case "IDLE":
-                    state.postValue("空闲");
-                    stateColor.postValue(R.color.state_info);
+                    state.setValue("空闲");
+                    stateColor.setValue(R.color.state_info);
                     break;
                 case "RUNNING":
-                    state.postValue("运行中");
-                    stateColor.postValue(R.color.state_success);
+                    state.setValue("运行中");
+                    stateColor.setValue(R.color.state_success);
                     break;
                 case "OFFLINE":
-                    state.postValue("离线");
-                    stateColor.postValue(R.color.state_disabled);
+                    state.setValue("离线");
+                    stateColor.setValue(R.color.state_disabled);
                     break;
                 default:
-                    state.postValue("异常");
-                    stateColor.postValue(R.color.state_error);
+                    state.setValue("未知");
+                    stateColor.setValue(R.color.state_error);
                     break;
             }
         }
@@ -172,11 +194,12 @@ public class DeviceViewModel extends AndroidViewModel {
         }
     }
 
-    public void saveDataGeneral(String deviceType, String deviceName) {
-        if (Objects.equals(deviceType, "REFRIGERATOR")) {
+    public void saveDataGeneral() {
+        if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
+            deviceDataManager.setDeviceMode(selectedMode.getValue());
             deviceDataManager.saveFridgeSet(setFridgeTemp.getValue(), setFreezeTemp.getValue());
-        } else if (Objects.equals(deviceType, "MICROWAVE")) {
-        } else if (Objects.equals(deviceType, "DISHWASHER")) {
+        } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
+        } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
         }
     }
 
@@ -185,11 +208,11 @@ public class DeviceViewModel extends AndroidViewModel {
         Map<String, String> payload = new HashMap<>();
         payload.put("mode", selectedMode.getValue());
         if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
-            payload.put("temp", String.valueOf(setFridgeTemp.getValue()));
-            payload.put("hum", String.valueOf(setFreezeTemp.getValue()));
+            payload.put("fridgeTemp", String.valueOf(setFridgeTemp.getValue()));
+            payload.put("freezeTemp", String.valueOf(setFreezeTemp.getValue()));
         } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
         } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
         }
-        MqttManager.getInstance().publish(device.getDeviceSn(), JsonUtils.toJson(payload));
+        deviceRepository.mqttControlMessage(payload, device.getDeviceSn());
     }
 }

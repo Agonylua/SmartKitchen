@@ -25,8 +25,8 @@ public class MqttManager {
     private static final String CLIENT_ID = "Android_App";
     private static final String USERNAME = "smartKitchen";
     private static final String PASSWORD = "wei.liu-liu";
-    private static final String SUB_TOPIC = "smartKitchen/App/";
-    private static final String PUB_TOPIC = "smartKitchen/Service/";
+    public static final String SUB_TOPIC = "smartKitchen/App/";
+    private static final String PUB_TOPIC = "smartKitchen/Devices";
     // 消息质量 (0:最多一次, 1:至少一次, 2:只有一次)
     // 智能家居控制建议用 1，状态上报用 0
     private static final int QoS = 1;
@@ -77,6 +77,11 @@ public class MqttManager {
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     String payload = new String(message.getPayload());
                     MqttLiveBus.getInstance().post(topic, payload);
+                    if (onMessageListener != null) {
+                        // 注意：messageArrived 通常在子线程运行，如果需要更新 UI，
+                        // 实现者需要在 onMessage 中切换到主线程，或者在此处使用 Handler 包装
+                        onMessageListener.onMessage(topic, payload);
+                    }
                 }
 
                 @Override
@@ -136,6 +141,7 @@ public class MqttManager {
                     message.setQos(QoS);
                     String topic = PUB_TOPIC + deviceSn;
                     mqttClient.publish(topic, message);
+
                     Log.d(TAG, "发送指令: " + msg);
                 } else {
                     Log.e(TAG, "未连接，无法发送");

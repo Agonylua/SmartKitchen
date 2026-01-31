@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.model;
+package com.agonylua.smarthome.network;
 
 import java.util.List;
 

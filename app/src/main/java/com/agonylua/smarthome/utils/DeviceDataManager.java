@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class DeviceDataManager {
+    private static final String TAG = "DeviceDataManager";
     private static DeviceDataManager Instance;
     private final SharedPreferences sp;
     private final SharedPreferences.Editor editor;

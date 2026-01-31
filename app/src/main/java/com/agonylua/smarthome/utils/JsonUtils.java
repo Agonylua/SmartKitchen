@@ -28,16 +28,16 @@ public class JsonUtils {
     }
 
     /**
-     * 将 JSON 字符串转换为 Map<String, String>
+     * 将 JSON 字符串转换为 Map<String, Object>
      * 场景：从数据库读取 String 后，转为 Map 方便取值
      */
-    public static Map<String, String> toMap(String json) {
+    public static Map<String, Object> toMap(String json) {
         if (TextUtils.isEmpty(json)) {
             return new HashMap<>();
         }
         try {
             // 使用 TypeToken 处理泛型擦除
-            Type type = new TypeToken<Map<String, String>>() {
+            Type type = new TypeToken<Map<String, Object>>() {
             }.getType();
             return gson.fromJson(json, type);
         } catch (Exception e) {

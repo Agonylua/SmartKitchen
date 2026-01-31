@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData;
 import com.agonylua.smarthome.database.AppDatabase;
 import com.agonylua.smarthome.database.dao.DeviceDao;
 import com.agonylua.smarthome.database.entity.Device;
-import com.agonylua.smarthome.model.DeviceResponse;
+import com.agonylua.smarthome.network.DeviceResponse;
 import com.agonylua.smarthome.network.RetrofitClient;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class HomeRepository {
     }
 
     public LiveData<List<Device>> getDeviceList(String homeId) {
-        return deviceDao.getDevicesByHome(homeId);
+        return deviceDao.getDevicesByHomeId(homeId);
     }
 
     public void getDevices(Context context, String homeId, DeviceListCallback callback) {

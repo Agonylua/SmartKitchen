@@ -4,8 +4,8 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import com.agonylua.smarthome.model.ApiResponse;
 import com.agonylua.smarthome.model.UserRequest;
+import com.agonylua.smarthome.network.ApiResponse;
 import com.agonylua.smarthome.network.RetrofitClient;
 import com.agonylua.smarthome.utils.UserManager;
 

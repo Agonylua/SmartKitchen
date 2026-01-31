@@ -1,7 +1,6 @@
 package com.agonylua.smarthome.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +57,6 @@ public class DeviceFragment extends Fragment {
         if (getArguments() != null) {
             DeviceFragmentArgs args = DeviceFragmentArgs.fromBundle(getArguments());
             device = args.getCurrentDevice();
-            mViewModel.initDevice(device);
             this.mDeviceType = device.getDeviceType();
             this.mDeviceName = device.getDeviceName();
             this.mDeviceState = device.getDeviceStatus();
@@ -66,18 +64,20 @@ public class DeviceFragment extends Fragment {
         if (getActivity() != null) {
             binding.toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
         }
-        try {
-            setupDynamicContent(mDeviceType);
-        } catch (Exception e) {
-            Log.e(TAG, "onViewCreated: " + e);
-        }
+        setupDynamicContent(mDeviceType);
         observeViewModel();
         binding.setLifecycleOwner(getViewLifecycleOwner());
     }
 
     private void observeViewModel() {
-        mViewModel.state.observe(getViewLifecycleOwner(), state -> {
-            mViewModel.setDeviceState(state);
+        mViewModel.autoSaverSetup.observe(getViewLifecycleOwner(), trigger -> {
+            mViewModel.saveDataGeneral();
+        });
+        mViewModel.getDevice(device.getDeviceSn()).observe(getViewLifecycleOwner(), updatedDevice -> {
+            if (updatedDevice != null) {
+                this.device = updatedDevice;
+                mViewModel.initDevice(this.device);
+            }
         });
     }
 
@@ -92,8 +92,10 @@ public class DeviceFragment extends Fragment {
             case "REFRIGERATOR": // 冰箱
                 LayoutRefrigeratorBinding fridgeBinding = LayoutRefrigeratorBinding.inflate(inflater, container, false);
                 fridgeBinding.setViewModel(mViewModel);
-                mViewModel.getFridgeData();
+                fridgeBinding.setDevice(device);
+                mViewModel.initDevice(device);
                 fridgeBinding.btnStart.setOnClickListener(v -> {
+                    mViewModel.submitTask();
                 });
                 fridgeBinding.setLifecycleOwner(getViewLifecycleOwner());
 
@@ -201,7 +203,7 @@ public class DeviceFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mViewModel.saveDataGeneral(mDeviceType, mDeviceName);
+        //mViewModel.saveDataGeneral(mDeviceType, mDeviceName);
         binding = null;
     }
 }

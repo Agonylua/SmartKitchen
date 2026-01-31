@@ -6,8 +6,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.agonylua.smarthome.dto.UserDTO;
-import com.agonylua.smarthome.model.ApiResponse;
-import com.agonylua.smarthome.model.LoginRequest;
+import com.agonylua.smarthome.network.ApiResponse;
+import com.agonylua.smarthome.network.LoginRequest;
 import com.agonylua.smarthome.network.RetrofitClient;
 import com.agonylua.smarthome.utils.UserManager;
 

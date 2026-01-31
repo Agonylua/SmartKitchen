@@ -2,10 +2,10 @@ package com.agonylua.smarthome.service;
 
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.dto.UserDTO;
-import com.agonylua.smarthome.model.ApiResponse;
-import com.agonylua.smarthome.model.DeviceResponse;
-import com.agonylua.smarthome.model.LoginRequest;
 import com.agonylua.smarthome.model.UserRequest;
+import com.agonylua.smarthome.network.ApiResponse;
+import com.agonylua.smarthome.network.DeviceResponse;
+import com.agonylua.smarthome.network.LoginRequest;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

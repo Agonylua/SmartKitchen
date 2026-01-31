@@ -1,5 +1,6 @@
 package com.agonylua.smarthome.adapter;
 
+import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.model.DeviceState;
 import com.agonylua.smarthome.model.DeviceType;
+import com.agonylua.smarthome.viewModel.DeviceViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +28,16 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
 
     private Context context;
     private List<Device> deviceList;
+    private DeviceViewModel deviceViewModel;
     private OnDeviceClickListener listener;
     private static final String TAG = "DeviceAdapter";
 
     public DeviceAdapter(Context context) {
         this.context = context;
         this.deviceList = new ArrayList<>();
+        if (context.getApplicationContext() instanceof Application) {
+            deviceViewModel = new DeviceViewModel((Application) context.getApplicationContext());
+        }
     }
 
     public void setDeviceList(List<Device> list) {
@@ -76,17 +82,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         } else {
             holder.ivDeviceIcon.setImageResource(deviceType.getOffline());
         }
-//        if ("FRIDGE".equalsIgnoreCase(device.getDeviceType())) {
-//            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_refrigerator_online);
-//        } else if ("RICE_COOKER".equalsIgnoreCase(device.getDeviceType())) {
-//            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_rice_cooker_online);
-//        } else if ("MICROWAVE".equalsIgnoreCase(device.getDeviceType())) {
-//            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_microwave_online);
-//        } else if ("DISHWASHER".equalsIgnoreCase(device.getDeviceType())) {
-//            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_dishwasher_online);
-//        } else if ("STERILIZER".equalsIgnoreCase(device.getDeviceType())) {
-//            holder.ivDeviceIcon.setImageResource(R.drawable.ic_device_sterilizer_online);
-//        }
         // TODO: 添加更多设备类型
         // 点击事件处理
         holder.itemView.setOnClickListener(v -> {

@@ -52,7 +52,6 @@ public class HomeFragment extends Fragment {
         // 初始化
         init(view);
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        homeViewModel.syncServiceData(homeId);
         // 设置RecyclerView
         adapter = new DeviceAdapter(getContext());
         rvDevices.setLayoutManager(new GridLayoutManager(getContext(), 2)); // 网格布局，一行2个

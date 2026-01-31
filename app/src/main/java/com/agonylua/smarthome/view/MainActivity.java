@@ -14,9 +14,12 @@ import com.agonylua.smarthome.fragment.MonitorFragment;
 import com.agonylua.smarthome.fragment.SmartFragment;
 import com.agonylua.smarthome.fragment.SplashFragment;
 import com.agonylua.smarthome.fragment.UserFragment;
+import com.agonylua.smarthome.model.MqttLiveBus;
 import com.agonylua.smarthome.network.MqttManager;
 import com.agonylua.smarthome.utils.NetworkMonitor;
 import com.agonylua.smarthome.utils.TokenManager;
+import com.agonylua.smarthome.utils.UserManager;
+import com.agonylua.smarthome.viewModel.HomeViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +27,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private NetworkMonitor networkMonitor;
     private TokenManager tokenManager;
+    private HomeViewModel homeViewModel;
     private String TAG = "MainActivity";
 
 
@@ -32,8 +36,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        MqttLiveBus.getInstance().init(getApplicationContext());
         MqttManager.getInstance().connect();
         tokenManager = new TokenManager(getApplication());
+
+        initFragments();
+
+        homeViewModel = new HomeViewModel(getApplication());
+        homeViewModel.syncServiceData(UserManager.getInstance(getApplication()).getHomeId());
+
+        networkMonitor = new NetworkMonitor(getApplicationContext());
+        networkMonitor.startMonitoring();
+
+    }
+
+    private void initFragments() {
         // 获取 NavHostFragment
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
@@ -52,10 +69,6 @@ public class MainActivity extends AppCompatActivity {
         fragments.add(new SmartFragment());
         fragments.add(new MonitorFragment());
         fragments.add(new UserFragment());
-
-        networkMonitor = new NetworkMonitor(getApplicationContext());
-        networkMonitor.startMonitoring();
-
     }
 
     /**

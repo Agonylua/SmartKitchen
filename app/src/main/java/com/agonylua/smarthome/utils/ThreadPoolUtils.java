@@ -126,6 +126,39 @@ public class ThreadPoolUtils {
         mainHandler.removeCallbacks(runnable);
     }
 
+    /**
+     * 执行带超时监测的任务
+     * <p>
+     * 原理：提交任务后获得 Future 控制句柄，同时利用 Handler 开启一个倒计时。
+     * 如果倒计时结束任务仍未完成，则尝试中断任务线程并执行回调。
+     *
+     * @param task            需要在子线程执行的耗时任务
+     * @param timeoutMillis   超时时间 (毫秒)
+     * @param timeoutCallback 超时发生时的回调 (运行在主线程，适合更新 UI)
+     */
+    public void executeWithTimeout(Runnable task, long timeoutMillis, Runnable timeoutCallback) {
+        if (task == null) return;
+
+        // 提交任务到线程池，并获取 Future 对象以便后续控制
+        // 注意：这里直接调用 threadPoolExecutor.submit 以获取 Future，而不是用 execute()
+        Future<?> future = threadPoolExecutor.submit(task);
+
+        // 在主线程延迟执行超时检查
+        mainHandler.postDelayed(() -> {
+            // 检查任务状态：如果任务尚未完成 (isDone() 为 false)
+            if (!future.isDone()) {
+                // 尝试取消任务
+                // true 表示如果线程正在运行，则允许中断 (抛出 InterruptedException)
+                boolean isCancelled = future.cancel(true);
+
+                // 如果取消成功（或任务确实超时未完），触发超时回调
+                if (timeoutCallback != null) {
+                    timeoutCallback.run();
+                }
+            }
+        }, timeoutMillis);
+    }
+
     // TODO 获取当前线程池状态信息 (调试用)
     public String getPoolStatus() {
         return String.format("Core: %d, Active: %d, Queue: %d, Completed: %d",
