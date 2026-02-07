@@ -2,8 +2,8 @@
 #include <time.h>
 #include "timeUtils.h"
 
-extern char *timeStr;
-char *dateStr;
+char timeStr[20];
+char dateStr[40];
 
 struct tm currentTime;
 
@@ -41,7 +41,7 @@ void printCurrentTime()
         // 格式化时间：时:分:秒
         strftime(timeStr, sizeof(timeStr), "%H:%M:%S", &currentTime);
         // 格式化日期：年-月-日 星期
-        strftime(dateStr, sizeof(dateStr), "%Y-%m-%d %A", &currentTime);
+        strftime(dateStr, sizeof(dateStr), "%Y/%m/%d %A", &currentTime);
 
         Serial.print("当前时间：");
         Serial.print(dateStr);

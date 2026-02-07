@@ -8,12 +8,13 @@
 #define LED_COUNT 1
 
 extern String mode;
-extern float tempThreshold_1;
-extern float humThreshold_1;
-extern float tempThreshold_2;
-extern float humThreshold_2;
+extern float freezingTemp;
+extern float freezingHum;
+extern float refrigerationTemp;
+extern float refrigerationHum;
 extern Adafruit_NeoPixel pixels;
 
-void temperatureControl();
+void temperatureControl(float fridgeTempThreshold, float freezeTempThreshold);
 void scenarioModeControl(String mode);
 void RGBLightControl(String color);
+void RGBinit();

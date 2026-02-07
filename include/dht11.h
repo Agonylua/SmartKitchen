@@ -1,12 +1,14 @@
 #include <Arduino.h>
 #include <DHT.h>
 
-#define DHTPIN 2
+#define DHTPIN0 2
+#define DHTPIN1 4
 #define DHTTYPE DHT11
 
-extern DHT dht;
+extern DHT dhtFridge;
+extern DHT dhtFreeze;
 
 void dht_begin();
-float readHumidity();
-float readTemperature();
+float readFreezeTemp();
+float readFridgeTemp();
 void dht11Data();
