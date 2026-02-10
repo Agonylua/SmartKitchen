@@ -2,6 +2,7 @@ package com.agonylua.smartkitchen.controller;
 
 import com.agonylua.smartkitchen.common.ApiResponse;
 import com.agonylua.smartkitchen.common.DeviceAddReq;
+import com.agonylua.smartkitchen.common.DeviceBindReq;
 import com.agonylua.smartkitchen.databases.entity.Device;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
 import com.agonylua.smartkitchen.dto.DeviceDTO;
@@ -56,7 +57,17 @@ public class DeviceController {
      */
     @PostMapping("/control")
     public ApiResponse<String> controlDevice(@RequestBody String req) {
-        mqttController.sendCmdMessage(req);
+        //mqttController.sendCmdMessage(req);
         return ApiResponse.success("指令已下发");
+    }
+
+    /**
+     * 绑定设备
+     * 前端传: {"deviceSn": "SN123456", "homeId": "xxx"}
+     */
+    @PostMapping("/bind")
+    public ApiResponse<Integer> bindDevice(@RequestBody DeviceBindReq req) {
+        int result = deviceService.bindDevice(req.getDeviceSn(), req.getHomeId());
+        return ApiResponse.success(result);
     }
 }

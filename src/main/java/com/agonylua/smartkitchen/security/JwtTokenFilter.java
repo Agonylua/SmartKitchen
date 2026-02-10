@@ -56,22 +56,19 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         // 3. 如果拿到了用户名，且当前上下文没有认证信息 (说明还没登录)
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            // 从数据库加载用户信息
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            // 4. 验证 Token 是否有效 (需要在 JwtUtil 中实现 validateToken)
-            if (jwtUtil.validateToken(jwt, userDetails)) {
-
-                // 5. 生成认证对象
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // 6. 【关键】将认证信息放入 Spring Security 上下文
-                // 只要这行代码执行成功，后面的 Controller 就认为用户已登录
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            // 将 validateToken 也放入 try-catch 保护，或者确保它不抛出异常
+            try {
+                if (jwtUtil.validateToken(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    logger.info("Token 验证成功，用户 " + username + " 已认证");
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+                logger.error("Token 验证过程出错: " + e.getMessage());
             }
         }
 

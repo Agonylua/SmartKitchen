@@ -70,6 +70,20 @@ public class JsonUtil {
     }
 
     /**
+     * 获取 JSON 中的某个特定字段的 raw JSON 字符串 (保留 JSON 结构，用于存 JSON 字段)
+     */
+    public static String getJsonStr(String jsonStr, String key) {
+        if (jsonStr == null || jsonStr.isEmpty()) return null;
+        try {
+            JsonNode node = mapper.readTree(jsonStr);
+            return node.has(key) ? node.get(key).toString() : null;
+        } catch (Exception e) {
+            log.warn("解析JSON字段失败 Key: {}, JSON: {}", key, jsonStr);
+            return null;
+        }
+    }
+
+    /**
      * 解析 List
      */
     public static <T> List<T> parseList(String jsonStr, Class<T> clazz) {

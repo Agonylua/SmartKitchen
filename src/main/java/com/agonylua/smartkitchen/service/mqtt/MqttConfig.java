@@ -27,7 +27,7 @@ public class MqttConfig {
     private String clientId_out;
 
     @Value("${mqtt.subscribe-topics}")
-    private String subscribeTopic;
+    private String[] subscribeTopics;
 
     @Value("${mqtt.username:}")
     private String username;
@@ -60,7 +60,7 @@ public class MqttConfig {
     public MqttPahoMessageDrivenChannelAdapter inbound() {
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(clientId_in, mqttClientFactory(),
-                        subscribeTopic);
+                        subscribeTopics);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);

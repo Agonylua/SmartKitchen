@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum DeviceStatus {
-    IDLE("空闲"),
-    RUNNING("运行中"),
-    OFFLINE("离线");
+    ONLINE("在线"),
+    OFFLINE("离线"),
+    UNKNOWN("未知");
     private final String type;
 
     DeviceStatus(String type) {
