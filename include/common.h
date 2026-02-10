@@ -6,17 +6,22 @@
 // 设备运行状态枚举
 enum class DeviceStatus
 {
-    UNBOUND, // 未绑定 (显示二维码)
-    IDLE,    // 待机
-    RUNNING, // 运行中
+    UNBOUND, // 未知
+    ONLINE, // 运行中
     OFFLINE, // 离线
-    RESET    // 重置
+};
+enum class DeviceMode
+{
+    STANDARD, // 标准模式 
+    FAST_COOL, // 快速制冷
+    ENERGY_SAVING, // 节能模式
+    HOLIDAY, // 假日模式
 };
 
 // 全局变量声明 (在 main.cpp 中定义)
 extern DeviceStatus currentStatus;
 extern const char *DEV_SN;
-extern String mode;
+extern DeviceMode currentMode;
 extern Preferences preferences;
 
 #endif

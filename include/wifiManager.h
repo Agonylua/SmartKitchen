@@ -2,7 +2,9 @@
 #define WIFI_MANAGER_H_
 
 #include <WiFi.h>
+#include <WiFiProv.h>
 #include <Preferences.h>
+#include "mqttConfig.h"
 
 class WiFiConnector
 {
@@ -10,57 +12,41 @@ private:
     struct WiFiConfig
     {
         String ssid;
-        String password;
     };
 
     enum class ConnectionStatus
     {
         DISCONNECTED,
-        CONNECTED,
-        SMART_CONFIG
+        PROVISIONING,
+        CONNECTING,
+        CONNECTED
     };
 
     WiFiConfig config;
     ConnectionStatus status;
     Preferences preferences;
 
-    // 重连配置
-    static const int MAX_RETRY_COUNT = 3;
-    static const unsigned long RETRY_DELAY = 10000;
-    static const unsigned long CONNECTION_TIMEOUT = 15000;
-
-    int retryCount = 0;
+    // 参数配置
+    static const unsigned long RETRY_DELAY = 5000;
     unsigned long lastRetryTime = 0;
+
+    // 配网参数
+    const char *service_name = "SK_Refrigerator";
+    const char *pop = "smart123";
 
 public:
     WiFiConnector();
 
     bool begin();
-
-    // 修改：connect 逻辑将自动判断是否需要配网
-    void connect();
-
-    void disconnect();
-
-    // 手动强制进入配网模式（可绑定物理按键）
-    void startSmartConfig();
-
+    void resetSettings();
     String getStatus();
     String getWiFiStatus();
     void displayConnectionInfo();
     void update();
     bool isConnected();
 
-    // 新增：清除配置（用于重置设备）
-    void clearConfig();
-
 private:
-    bool reConnect();
-    void saveConfig();
-    void loadConfig();
-
-    // 新增：检查 SmartConfig 状态
-    void checkSmartConfig();
+    static void SysProvEvent(arduino_event_t *sys_event);
 };
 
 extern WiFiConnector wifi;

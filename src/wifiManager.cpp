@@ -1,220 +1,188 @@
 #include "wifiManager.h"
-#include "common.h"
+#include <esp_wifi.h> // 引入底层 ESP-IDF WiFi 库以读取配置
 
-WiFiConnector::WiFiConnector() : status(ConnectionStatus::DISCONNECTED) {}
+// 全局静态指针
+static WiFiConnector *instance = nullptr;
+
+WiFiConnector::WiFiConnector() : status(ConnectionStatus::DISCONNECTED)
+{
+    instance = this;
+}
+
+// 事件回调
+void WiFiConnector::SysProvEvent(arduino_event_t *sys_event)
+{
+    switch (sys_event->event_id)
+    {
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+        Serial.print("\n[WiFi] Connected! IP: ");
+        Serial.println(IPAddress(sys_event->event_info.got_ip.ip_info.ip.addr));
+        if (instance)
+            instance->status = ConnectionStatus::CONNECTED;
+        break;
+
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+        Serial.println("\n[WiFi] Disconnected. Reason: " + String(sys_event->event_info.wifi_sta_disconnected.reason));
+        if (instance)
+        {
+            instance->status = ConnectionStatus::DISCONNECTED;
+            instance->resetSettings();
+        }
+        break;
+
+    case ARDUINO_EVENT_PROV_START:
+        Serial.println("\n[Provisioning] Started. Please scan for BLE device: " + String(instance->service_name));
+        if (instance)
+            instance->status = ConnectionStatus::PROVISIONING;
+        break;
+
+    case ARDUINO_EVENT_PROV_CRED_RECV:
+        Serial.println("\n[Provisioning] Credentials Received...");
+        break;
+
+    case ARDUINO_EVENT_PROV_CRED_FAIL:
+        Serial.println("\n[Provisioning] Failed!");
+        break;
+
+    case ARDUINO_EVENT_PROV_CRED_SUCCESS:
+        Serial.println("\n[Provisioning] Success! Connecting...");
+        break;
+
+    case ARDUINO_EVENT_PROV_END:
+        Serial.println("\n[Provisioning] Session Ended.");
+        break;
+
+    default:
+        break;
+    }
+}
 
 bool WiFiConnector::begin()
 {
+    Serial.println("[WiFi] Initializing...");
+
+    // 注册事件
+    WiFi.onEvent(SysProvEvent);
+
+    // 必须先设置模式才能读取配置
+    WiFi.mode(WIFI_STA);
+
+    // 检查是否已经配网 (通过检查 NVS 中是否有 SSID)
+    bool has_config = false;
+    wifi_config_t conf;
+    if (esp_wifi_get_config(WIFI_IF_STA, &conf) == ESP_OK)
+    {
+        if (strlen((const char *)conf.sta.ssid) > 0)
+        {
+            has_config = true;
+            Serial.printf("[WiFi] Found saved SSID: %s\n", (const char *)conf.sta.ssid);
+        }
+    }
+
+    if (has_config)
+    {
+        Serial.println("[WiFi] Connecting with saved credentials...");
+        status = ConnectionStatus::CONNECTING;
+        WiFi.begin();
+    }
+    else
+    {
+        Serial.println("[WiFi] No saved credentials. Starting Provisioning...");
+        status = ConnectionStatus::PROVISIONING;
+
+        // 修正：直接使用全局常量，去掉 WiFiProv. 前缀
+        WiFiProv.beginProvision(
+            WIFI_PROV_SCHEME_BLE,
+            WIFI_PROV_SCHEME_HANDLER_FREE_BTDM,
+            WIFI_PROV_SECURITY_1,
+            pop,
+            service_name);
+    }
+
     preferences.begin("wifi-config", false);
-    loadConfig();
-
-    WiFi.mode(WIFI_STA);                 // SmartConfig 必须工作在 STA 模式
-    WiFi.setHostname("SK-156400423935"); // 建议统一 Hostname
-
-    Serial.printf("[WiFi] MAC: %s\n", WiFi.macAddress().c_str());
     return true;
 }
 
-void WiFiConnector::connect()
+void WiFiConnector::resetSettings()
 {
-    // 如果没有读取到配置，直接进入配网模式
-    if (config.ssid.length() == 0)
-    {
-        Serial.println("[WiFi] No saved config. Starting SmartConfig...");
-        startSmartConfig();
-        return;
-    }
+    Serial.println("[WiFi] Resetting settings...");
+    WiFi.disconnect(true, true); // 清除 Wi-Fi 凭证 (erase = true)
+    preferences.clear();
 
-    Serial.printf("[WiFi] Connecting to stored SSID: %s\n", config.ssid.c_str());
-    WiFi.begin(config.ssid.c_str(), config.password.c_str());
-
-    // 尝试连接
-    if (!reConnect())
-    {
-        // 如果连接失败（可能是密码改了），这里策略可以是重试，或者也可以选择进入配网
-        // 目前策略：仅保持断开，由 update() 尝试重连
-        Serial.println("[WiFi] Connect failed, waiting for update loop or manual reset.");
-    }
-}
-
-void WiFiConnector::startSmartConfig()
-{
-    // 清除旧连接
-    WiFi.disconnect();
-    status = ConnectionStatus::SMART_CONFIG;
-
-    Serial.println("\r\n[WiFi] Waiting for SmartConfig...");
-    // 开启 SmartConfig
-    WiFi.beginSmartConfig();
-}
-
-void WiFiConnector::checkSmartConfig()
-{
-    // 检查是否收到配网数据
-    bool smartConfigDone = WiFi.smartConfigDone();
-    if (smartConfigDone)
-    {
-        // 检查绑定状态
-        preferences.begin("config", true);
-        bool isBind = preferences.getBool("isBind", false);
-        preferences.end();
-
-        Serial.printf("[WiFi] isBind: %d\n", isBind ? 1 : 0);
-        Serial.println("\r\n[WiFi] SmartConfig Received!");
-        Serial.printf("[WiFi] SSID: %s\n", WiFi.SSID().c_str());
-        Serial.printf("[WiFi] PASS: %s\n", WiFi.psk().c_str());
-
-        // 更新内存中的配置
-        config.ssid = WiFi.SSID();
-        config.password = WiFi.psk();
-
-        // 重新打开 wifi-config 命名空间并保存
-        preferences.begin("wifi-config", false);
-        saveConfig();
-        preferences.end();
-
-        // 停止 SmartConfig
-        WiFi.stopSmartConfig();
-
-        Serial.println("[WiFi] Config saved. Restarting to apply...");
-        delay(1000);
-        ESP.restart(); // 重启
-    }
+    Serial.println("[WiFi] Reset complete. Restarting...");
+    delay(1000);
+    ESP.restart();
 }
 
 void WiFiConnector::update()
 {
-    // 1. 如果处于配网模式，持续检测是否完成
-    if (status == ConnectionStatus::SMART_CONFIG)
-    {
-        checkSmartConfig();
-        // 这里可以加一个非阻塞的 LED 闪烁逻辑提示用户
-        return;
-    }
-
-    // 2. 正常连接保活逻辑
-    if (WiFi.status() != WL_CONNECTED && status == ConnectionStatus::CONNECTED)
-    {
-        Serial.println("[WiFi] Connection lost!");
-        status = ConnectionStatus::DISCONNECTED;
-    }
-
-    // 3. 断线重连逻辑
-    if (WiFi.status() != WL_CONNECTED &&
-        status == ConnectionStatus::DISCONNECTED &&
-        config.ssid.length() > 0)
+    // 应用层简单的看门狗，如果长期断开且已配网，可以尝试重连
+    if (status == ConnectionStatus::DISCONNECTED)
     {
         unsigned long currentTime = millis();
-
-        if (retryCount < MAX_RETRY_COUNT &&
-            (currentTime - lastRetryTime >= RETRY_DELAY || lastRetryTime == 0))
+        // 只有在非配网模式下才尝试重连
+        if (WiFi.status() != WL_CONNECTED && (currentTime - lastRetryTime > RETRY_DELAY))
         {
-            lastRetryTime = currentTime;
-            retryCount++;
-            Serial.printf("[WiFi] Retry connection %d/%d\n", retryCount, MAX_RETRY_COUNT);
-            WiFi.begin(config.ssid.c_str(), config.password.c_str());
+            // 检查是否处于配网模式，如果正在配网则不打断
+            // 这里简单判断：如果是通过 beginProvision 启动的，底层会自动处理
         }
     }
 }
 
-void WiFiConnector::disconnect()
-{
-    Serial.println("[WiFi] Disconnecting...");
-    WiFi.disconnect();
-    status = ConnectionStatus::DISCONNECTED;
-    retryCount = 0;
-}
-
 String WiFiConnector::getStatus()
 {
-    if (status == ConnectionStatus::SMART_CONFIG)
-        return "SmartConfig Mode";
-    return (status == ConnectionStatus::CONNECTED) ? "Connected" : "Disconnected";
+    switch (status)
+    {
+    case ConnectionStatus::DISCONNECTED:
+        return "Disconnected";
+    case ConnectionStatus::PROVISIONING:
+        return "Provisioning";
+    case ConnectionStatus::CONNECTING:
+        return "Connecting";
+    case ConnectionStatus::CONNECTED:
+        return "Connected";
+    default:
+        return "Unknown";
+    }
 }
 
 String WiFiConnector::getWiFiStatus()
 {
-    return (WiFi.status() == WL_CONNECTED) ? "Connected" : "Disconnected";
+    switch (WiFi.status())
+    {
+    case WL_CONNECTED:
+        return "WL_CONNECTED";
+    case WL_DISCONNECTED:
+        return "WL_DISCONNECTED";
+    case WL_CONNECTION_LOST:
+        return "WL_CONNECTION_LOST";
+    case WL_NO_SHIELD:
+        return "WL_NO_SHIELD";
+    case WL_IDLE_STATUS:
+        return "WL_IDLE_STATUS";
+    case WL_NO_SSID_AVAIL:
+        return "WL_NO_SSID_AVAIL";
+    default:
+        return "Unknown";
+    }
 }
 
 void WiFiConnector::displayConnectionInfo()
 {
     Serial.println("\n=== WiFi Info ===");
-    Serial.printf("Internal Status: %s\n", getStatus().c_str());
-    Serial.printf("ESP Status: %d\n", WiFi.status());
-
-    if (WiFi.status() == WL_CONNECTED)
+    Serial.printf("Status: %s\n", getStatus().c_str());
+    if (isConnected())
     {
         Serial.printf("SSID: %s\n", WiFi.SSID().c_str());
         Serial.printf("IP: %s\n", WiFi.localIP().toString().c_str());
-        Serial.printf("RSSI: %d dBm\n", WiFi.RSSI());
+        Serial.printf("Signal: %d dBm\n", WiFi.RSSI());
     }
     Serial.println("=================\n");
 }
 
 bool WiFiConnector::isConnected()
 {
-    return WiFi.status() == WL_CONNECTED;
-}
-
-bool WiFiConnector::reConnect()
-{
-    unsigned long startTime = millis();
-    Serial.print("[WiFi] Connecting");
-
-    // 简单的阻塞等待，用于首次上电快速连接
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        if (millis() - startTime > CONNECTION_TIMEOUT)
-        {
-            Serial.println("\n[WiFi] Timeout!");
-            // 注意：这里超时仅返回 false，具体的重试或进入 SmartConfig 由外部逻辑或 update 控制
-            return false;
-        }
-        delay(500);
-        Serial.print(".");
-    }
-
-    Serial.println("\n[WiFi] Connected!");
-    status = ConnectionStatus::CONNECTED;
-    retryCount = 0;
-    Serial.printf("[WiFi] IP: %s\n", WiFi.localIP().toString().c_str());
-    return true;
-}
-
-void WiFiConnector::saveConfig()
-{
-    Serial.println("[WiFi] Saving config...");
-    preferences.putString("ssid", config.ssid);
-    preferences.putString("password", config.password);
-    Serial.printf("[WiFi] Saved - SSID: %s, Password: %s\n", config.ssid.c_str(), config.password.c_str());
-}
-
-void WiFiConnector::loadConfig()
-{
-    config.ssid = preferences.getString("ssid", "");
-    config.password = preferences.getString("password", "");
-
-    if (config.ssid.length() > 0)
-    {
-        Serial.printf("[WiFi] Loaded Config - SSID: %s, Password: %s\n", config.ssid.c_str(), config.password.c_str());
-    }
-    else
-    {
-        Serial.println("[WiFi] No saved config found.");
-    }
-}
-
-void WiFiConnector::clearConfig()
-{
-    Serial.println("[WiFi] Clearing configuration...");
-    preferences.begin("wifi-config", false);
-    preferences.clear();
-    preferences.end();
-
-    config.ssid = "";
-    config.password = "";
-    Serial.println("[WiFi] Configuration cleared!");
+    return (WiFi.status() == WL_CONNECTED);
 }
 
 WiFiConnector wifi;

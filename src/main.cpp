@@ -1,33 +1,13 @@
-#include "timeUtils.h"
-#include "common.h"
-#include "displayManager.h"
-#include <Arduino.h>
-#include <Ticker.h>
-#include <PubSubClient.h>
-#include "wifiManager.h"
-#include "dht11.h"
-#include "mqttConfig.h"
-#include "control.h"
+#include "main.h"
 
-// === 定义引脚 ===
-#define RESET_BTN_PIN 0 // 通常开发板上的 BOOT 键是 GPIO 0，或者定义你自己的按键引脚
-
-// === 函数前向声明 ===
-void orderController();
-void factoryReset();
-void showHelp();
-
-// 全局变量
-String mode = "STANDARD";
+// 全局变量定义
+DeviceMode currentMode = DeviceMode::STANDARD;
 DeviceStatus currentStatus = DeviceStatus::UNBOUND;
 const char *DEV_SN = "SK-156400423935CCBA9720B608";
 Preferences preferences;
-
-// === 按键计时变量 ===
 unsigned long pressStartTime = 0;
 bool isPressing = false;
-const unsigned long RESET_TIME_MS = 15000; // 15秒
-
+const unsigned long RESET_TIME_MS = 20000; // 20秒
 Ticker ticker;
 
 void setup()
@@ -38,7 +18,6 @@ void setup()
   displayMgr.begin();
   // 初始化WiFi
   wifi.begin();
-  wifi.connect();
   // 初始化MQTT
   mqttInit();
   // 初始化DHT11
@@ -48,13 +27,14 @@ void setup()
   // 初始化按键
   pinMode(RESET_BTN_PIN, INPUT_PULLUP);
   // 温度监测
-  ticker.attach(10.0, publishMessage);
+  ticker.attach(10.0, publishSensorData);
 
   // 初始状态设定
   preferences.begin("config", false);
-  if (preferences.getBool("isBind", false)){
-    wifi.startSmartConfig();
+  if (preferences.getBool("isBind", false))
+  {
   }
+  preferences.end();
 }
 
 void loop()
@@ -62,7 +42,7 @@ void loop()
   wifi.update();
   mqttLoop();
   orderController();
-  temperatureControl(freezingTemp, refrigerationTemp);
+  temperatureControl();
 
   // === 按键长按检测 ===
   if (digitalRead(RESET_BTN_PIN) == LOW)
@@ -110,12 +90,25 @@ void factoryReset()
 
   // 1. 屏幕提示
   displayMgr.update(-1);
-  delay(1000);
+  delay(500);
 
-  // 2. 清除 WiFi 配置
-  wifi.clearConfig();
+  // 2. 发送MQTT解绑消息
+  publishBindVerify();
+  delay(2000);
 
-  // 4. 重启
+  // 3. 清除 WiFi 配置
+  Serial.println("[FactoryReset] 清除WiFi配置...");
+  wifi.resetSettings();
+
+  // 4. 清除设备绑定信息
+  Serial.println("[FactoryReset] 清除设备绑定信息...");
+  preferences.begin("deviceConfig", false);
+  preferences.clear();
+  preferences.end();
+
+  // 5. 重启
+  Serial.println("[FactoryReset] 3秒后重启...");
+  delay(3000);
   ESP.restart();
 }
 
@@ -151,16 +144,16 @@ void orderController()
         }
         else if (command == "send" || command == "s")
         {
-          publishMessage();
+          publishSensorData();
         }
         else if (command == "tempThr" || command == "t")
         {
-          Serial.printf("Temp Threshold 1: %.2f, Temp Threshold 2: %.2f\n", freezingTemp, refrigerationTemp);
+          Serial.printf("Temp Threshold 1: %.2f, Temp Threshold 2: %.2f\n", targetFreezeTemp, targetFridgeTemp);
         }
         else if (command == "reset" || command == "r")
         {
           Serial.println("Resetting WiFi config and restarting...");
-          wifi.clearConfig();
+          wifi.resetSettings();
           delay(500);
           ESP.restart();
         }
@@ -170,7 +163,7 @@ void orderController()
         }
         else
         {
-          publishMessage();
+          publishSensorData();
         }
         return;
       }

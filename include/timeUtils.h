@@ -1,13 +1,18 @@
+#ifndef TIME_UTILS_H
+#define TIME_UTILS_H
+
 #include <Arduino.h>
 #include <time.h>
 
-static const char *NTP_SERVER1 = "pool.ntp.org";
-static const char *NTP_SERVER2 = "cn.ntp.org.cn";
-static const long GMT_OFFSET_SEC = 8 * 3600;
-static const int DAYLIGHT_OFFSET_SEC = 0;
+extern const char *NTP_SERVER1;
+extern const char *NTP_SERVER2;
+extern const long GMT_OFFSET_SEC;
+extern const int DAYLIGHT_OFFSET_SEC;
 
 extern char timeStr[20];
 extern char dateStr[40];
 
 void printCurrentTime();
 bool syncNTPTime();
+
+#endif
