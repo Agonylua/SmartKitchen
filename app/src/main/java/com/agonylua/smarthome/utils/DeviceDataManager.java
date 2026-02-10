@@ -30,7 +30,7 @@ public class DeviceDataManager {
 
     //------------------------------- Device Methods -------------------------------//
     public String getDeviceMode() {
-        return sp.getString(DEVICE_MODE, "");
+        return sp.getString(DEVICE_MODE, null);
     }
 
     public void setDeviceMode(String mode) {
@@ -67,6 +67,11 @@ public class DeviceDataManager {
     public void saveMicrowaveSet(String time, String temperature) {
         editor.putString(MICROWAVE_TIME, time);
         editor.putString(MICROWAVE_TEMPERATURE, temperature);
+        editor.apply();
+    }
+
+    public void clearAll() {
+        editor.clear();
         editor.apply();
     }
 

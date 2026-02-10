@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.agonylua.smarthome.repository.HomeRepository;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
 import com.agonylua.smarthome.utils.TokenManager;
+import com.agonylua.smarthome.utils.UserManager;
 
 public class SplashViewModel extends AndroidViewModel {
     private final String TAG = "SplashViewModel";
@@ -45,6 +46,7 @@ public class SplashViewModel extends AndroidViewModel {
                     tokenValid.postValue(1);
                 } else {
                     tokenValid.postValue(0);
+                    UserManager.getInstance(getApplication()).clear();
                 }
                 Log.d(TAG, "Verify Token result: " + valid);
             }

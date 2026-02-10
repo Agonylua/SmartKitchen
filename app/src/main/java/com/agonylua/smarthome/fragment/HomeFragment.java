@@ -11,6 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -78,6 +79,17 @@ public class HomeFragment extends Fragment {
         homeViewModel.loadDevices();
         String nickname = userManager.getNickName() + "的智能家居";
         toolbar.setTitle(nickname);
+        toolbar.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+
+            // 处理分享点击
+            if (itemId == R.id.menu_add_device) {
+                if (this.getView() != null) {
+                    Navigation.findNavController(getView()).navigate(R.id.provisionFragment);
+                }
+                return true;
+            } else return itemId == R.id.menu_scan_code;
+        });
     }
 
     private void init(View view) {

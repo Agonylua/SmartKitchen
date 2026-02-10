@@ -4,6 +4,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="viewModel"
             type="com.agonylua.smarthome.viewModel.DeviceViewModel" />
@@ -187,8 +189,9 @@
                             android:value="@={viewModel.setFridgeTemp}"
                             android:valueFrom="2"
                             android:valueTo="8"
-                            app:thumbColor="@color/primary"
-                            app:trackColorActive="@color/primary"
+                            android:enabled="@{viewModel.selectedMode == `标准`}"
+                            app:thumbColor="@{viewModel.selectedMode == `标准` ? @color/primary : @color/primary_variant}"
+                            app:trackColorActive="@{viewModel.selectedMode == `标准` ? @color/primary : @color/primary_variant}"
                             app:trackColorInactive="#E0E0E0" />
 
                         <TextView
@@ -221,8 +224,9 @@
                             android:value="@={viewModel.setFreezeTemp}"
                             android:valueFrom="-24"
                             android:valueTo="-18"
-                            app:thumbColor="@color/secondary"
-                            app:trackColorActive="@color/secondary"
+                            android:enabled="@{viewModel.selectedMode == `标准`}"
+                            app:thumbColor="@{viewModel.selectedMode == `标准` ? @color/secondary : @color/secondary_variant}"
+                            app:trackColorActive="@{viewModel.selectedMode == `标准` ? @color/secondary : @color/secondary_variant}"
                             app:trackColorInactive="#E0E0E0" />
 
                         <TextView
@@ -238,19 +242,38 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginHorizontal="16dp">
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_start"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginHorizontal="16dp"
-                android:text="提交任务"
+                android:layout_height="match_parent"
+                android:enabled="@{viewModel.status != `离线`}"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:enabled="@{viewModel.state == `空闲` || viewModel.state == `运行中`}"
+                android:text="@{viewModel.subTaskLoading ? `` : `提交任务`}"
                 app:backgroundTint="@color/primary"
                 app:cornerRadius="30dp"
                 app:iconGravity="textStart"
-                app:iconPadding="8dp" />
+                app:iconPadding="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+                <ProgressBar
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:elevation="10dp"
+                    android:indeterminateTint="#2196F3"
+                    android:visibility="@{viewModel.subTaskLoading ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBottom_toBottomOf="@+id/btn_start"
+                    app:layout_constraintEnd_toEndOf="@+id/btn_start"
+                    app:layout_constraintStart_toStartOf="@id/btn_start"
+                    app:layout_constraintTop_toTopOf="@+id/btn_start" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

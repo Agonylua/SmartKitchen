@@ -19,6 +19,7 @@ import com.agonylua.smarthome.model.DeviceMode;
 import com.agonylua.smarthome.model.DeviceType;
 import com.agonylua.smarthome.repository.DeviceRepository;
 import com.agonylua.smarthome.utils.DeviceDataManager;
+import com.agonylua.smarthome.utils.JsonUtils;
 
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -30,14 +31,15 @@ public class DeviceViewModel extends AndroidViewModel {
     private static final String TAG = "DeviceViewModel";
     //----------------- LiveData 定义 -----------------
     // 设备公共部分
-    public final MutableLiveData<String> state = new MutableLiveData<>();// 设备状态数据
-    public final MutableLiveData<Integer> stateColor = new MutableLiveData<>();// 设备状态颜色数据
+    public final MutableLiveData<String> status = new MutableLiveData<>();// 设备状态数据
+    public final MutableLiveData<Integer> statusColor = new MutableLiveData<>();// 设备状态颜色数据
     public final MutableLiveData<Drawable> deviceImage = new MutableLiveData<>();// 设备图片数据
     public final MutableLiveData<String> deviceName = new MutableLiveData<>();// 设备名称数据
     public final MutableLiveData<String> deviceMode = new MutableLiveData<>();// 设备模式数据
     public final MutableLiveData<List<String>> modeTags = new MutableLiveData<>(); // 模式标签数据
     public final MutableLiveData<String> selectedMode = new MutableLiveData<>(); // 选中模式标签数据
-    public final MutableLiveData<Integer> stateLoading = new MutableLiveData<>(View.GONE);// 加载状态数据
+    public final MutableLiveData<Integer> statusLoading = new MutableLiveData<>(View.GONE);// 加载状态数据
+    public final MutableLiveData<Boolean> subTaskLoading = new MutableLiveData<>(false);// 加载状态数据
     // 冰箱
     public final MutableLiveData<Float> fridgeTemp = new MutableLiveData<>();// 冰箱温度数据
     public final MutableLiveData<Float> freezeTemp = new MutableLiveData<>();// 冰箱湿度数据
@@ -71,8 +73,8 @@ public class DeviceViewModel extends AndroidViewModel {
     private DeviceRepository deviceRepository;
     public DeviceViewModel(@NonNull Application application) {
         super(application);
-        autoSaverData.addSource(fridgeTemp, value -> autoSaverData.setValue(true));
-        autoSaverData.addSource(freezeTemp, value -> autoSaverData.setValue(true));
+//        autoSaverData.addSource(fridgeTemp, value -> autoSaverData.setValue(true));
+//        autoSaverData.addSource(freezeTemp, value -> autoSaverData.setValue(true));
         autoSaverSetup.addSource(selectedMode, value -> autoSaverSetup.setValue(true));
         autoSaverSetup.addSource(setFridgeTemp, value -> autoSaverSetup.setValue(true));
         autoSaverSetup.addSource(setFreezeTemp, value -> autoSaverSetup.setValue(true));
@@ -84,9 +86,13 @@ public class DeviceViewModel extends AndroidViewModel {
         fridgeTemp.setValue(Float.valueOf(device.getDeviceData().get("fridgeTemp")));
         freezeTemp.setValue(Float.valueOf(device.getDeviceData().get("freezeTemp")));
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
-        selectedMode.setValue(deviceDataManager.getDeviceMode());
         setFridgeTemp.setValue(deviceDataManager.getFridgeTemp());
         setFreezeTemp.setValue(deviceDataManager.getFreezeTemp());
+        if (deviceDataManager.getDeviceMode() == null) {
+            selectedMode.setValue("标准");
+        } else {
+            selectedMode.setValue(deviceDataManager.getDeviceMode());
+        }
     }
 
 
@@ -151,21 +157,17 @@ public class DeviceViewModel extends AndroidViewModel {
     public void setDeviceState(String deviceState) {
         if (deviceState != null) {
             switch (deviceState) {
-                case "IDLE":
-                    state.setValue("空闲");
-                    stateColor.setValue(R.color.state_info);
-                    break;
-                case "RUNNING":
-                    state.setValue("运行中");
-                    stateColor.setValue(R.color.state_success);
+                case "ONLINE":
+                    status.setValue("在线");
+                    statusColor.setValue(R.color.state_info);
                     break;
                 case "OFFLINE":
-                    state.setValue("离线");
-                    stateColor.setValue(R.color.state_disabled);
+                    status.setValue("离线");
+                    statusColor.setValue(R.color.state_disabled);
                     break;
                 default:
-                    state.setValue("未知");
-                    stateColor.setValue(R.color.state_error);
+                    status.setValue("未知");
+                    statusColor.setValue(R.color.state_error);
                     break;
             }
         }
@@ -205,14 +207,17 @@ public class DeviceViewModel extends AndroidViewModel {
 
 
     public void submitTask() {
+        subTaskLoading.setValue(true);
+        Map<String, String> data = new HashMap<>();
         Map<String, String> payload = new HashMap<>();
-        payload.put("mode", selectedMode.getValue());
+        payload.put("mode", DeviceMode.toMode(selectedMode.getValue()));
         if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
-            payload.put("fridgeTemp", String.valueOf(setFridgeTemp.getValue()));
-            payload.put("freezeTemp", String.valueOf(setFreezeTemp.getValue()));
+            data.put("fridgeTempThreshold", String.valueOf(setFridgeTemp.getValue()));
+            data.put("freezeTempThreshold", String.valueOf(setFreezeTemp.getValue()));
         } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
         } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
         }
+        payload.put("data", JsonUtils.toJson(data));
         deviceRepository.mqttControlMessage(payload, device.getDeviceSn());
     }
 }

@@ -37,4 +37,14 @@ public class SliderBindingAdapter {
             }
         });
     }
+
+    @BindingAdapter("thumbColor")
+    public static void setThumbColor(Slider slider, int color) {
+        slider.setThumbTintList(android.content.res.ColorStateList.valueOf(color));
+    }
+
+    @BindingAdapter("trackColorActive")
+    public static void setTrackActiveColor(Slider slider, int color) {
+        slider.setTrackActiveTintList(android.content.res.ColorStateList.valueOf(color));
+    }
 }

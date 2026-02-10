@@ -27,7 +27,7 @@ public class HomeRepository {
     }
 
     public LiveData<List<Device>> getDeviceList(String homeId) {
-        return deviceDao.getDevicesByHomeId(homeId);
+        return deviceDao.getDevicesListByHomeId(homeId);
     }
 
     public void getDevices(Context context, String homeId, DeviceListCallback callback) {
@@ -41,6 +41,7 @@ public class HomeRepository {
                     if (DeviceResponse.getCode() == 200) {
                         Log.d(TAG, "onResponse: 设备列表获取成功，设备数量: " + DeviceResponse.getData().size());
                         new Thread(() -> {
+                            deviceDao.clearAll();
                             deviceDao.insertAll(response.body().getData());
                         }).start();
                         callback.onSuccess(DeviceResponse.getData());
@@ -59,12 +60,13 @@ public class HomeRepository {
     }
 
     public void validateToken(Context context, String token, VerifyCallback callback) {
-
-        Call<Void> call = RetrofitClient.getInstance(context).getApi().validateToken(token);
+        Log.d(TAG, "validateToken: " + token);
+        Call<Void> call = RetrofitClient.getInstance(context).getApi().validateToken();
 
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                Log.d(TAG, "onResponse: " + response.code());
                 // 处理服务器响应
                 if (response.isSuccessful()) {
                     // HTTP 200 OK -> Token 有效

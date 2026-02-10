@@ -68,4 +68,17 @@
             android:name="currentDevice"
             app:argType="com.agonylua.smarthome.database.entity.Device" />
     </fragment>
+    <fragment
+        android:id="@+id/provisionFragment"
+        android:name="com.agonylua.smarthome.fragment.ProvisionFragment"
+        android:label="ProvisionFragment" />
+    <fragment
+        android:id="@+id/scanQrFragment"
+        android:name="com.agonylua.smarthome.fragment.ScanQrFragment"
+        android:label="ScanQrFragment">
+        <action
+            android:id="@+id/action_scanQrFragment_pop_including_provisionFragment"
+            app:popUpTo="@id/provisionFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>

@@ -74,6 +74,7 @@ public class DeviceFragment extends Fragment {
             mViewModel.saveDataGeneral();
         });
         mViewModel.getDevice(device.getDeviceSn()).observe(getViewLifecycleOwner(), updatedDevice -> {
+            mViewModel.subTaskLoading.setValue(false);
             if (updatedDevice != null) {
                 this.device = updatedDevice;
                 mViewModel.initDevice(this.device);

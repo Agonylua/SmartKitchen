@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         MqttLiveBus.getInstance().init(getApplicationContext());
-        MqttManager.getInstance().connect();
+        MqttManager.getInstance().connect(getApplicationContext());
         tokenManager = new TokenManager(getApplication());
 
         initFragments();

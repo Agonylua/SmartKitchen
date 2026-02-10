@@ -4,13 +4,13 @@ import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.dto.UserDTO;
 import com.agonylua.smarthome.model.UserRequest;
 import com.agonylua.smarthome.network.ApiResponse;
+import com.agonylua.smarthome.network.DeviceBindRequest;
 import com.agonylua.smarthome.network.DeviceResponse;
 import com.agonylua.smarthome.network.LoginRequest;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 
@@ -57,8 +57,15 @@ public interface ApiService {
     /**
      * 验证 Token 接口
      *
-     * @param token 用户 Token
      */
     @POST("/user/validateToken")
-    Call<Void> validateToken(@Header("Authorization") String token);
+    Call<Void> validateToken();
+
+    /**
+     * 绑定设备接口
+     *
+     * @param request 绑定请求数据
+     */
+    @POST("/device/bind")
+    Call<ApiResponse<Integer>> bindDevice(@Body DeviceBindRequest request);
 }

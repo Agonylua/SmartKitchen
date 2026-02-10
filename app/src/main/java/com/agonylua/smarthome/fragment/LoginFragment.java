@@ -79,6 +79,7 @@ public class LoginFragment extends Fragment {
             if (getContext() != null) {
                 tokenManager = new TokenManager(getContext());
             }
+            Log.d(TAG, "observeViewModel: " + token);
             tokenManager.saveToken(token);
 
             Toast.makeText(getContext(), "登录成功！", Toast.LENGTH_SHORT).show();

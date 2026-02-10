@@ -1,9 +1,6 @@
 package com.agonylua.smarthome.fragment;
 
-import static com.agonylua.smarthome.network.MqttManager.SUB_TOPIC;
-
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +11,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smarthome.R;
-import com.agonylua.smarthome.network.MqttManager;
 import com.agonylua.smarthome.repository.MainRepository;
 
 import org.jspecify.annotations.NonNull;
@@ -106,17 +102,17 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mainRepository = new MainRepository(getContext());
-        MqttManager.getInstance().setOnMessageListener(new MqttManager.OnMessageListener() {
-            @Override
-            public void onMessage(String topic, String message) {
-                String sn = topic.substring(SUB_TOPIC.length());
-                Log.d(TAG, "onViewCreated: " + sn + " message: " + message);
-                // 在这里处理接收到的 MQTT 消息
-                mainRepository.updateDeviceData(sn, message);
-
-            }
-        });
+//        mainRepository = new MainRepository(getContext());
+//        MqttManager.getInstance().setOnMessageListener(new MqttManager.OnMessageListener() {
+//            @Override
+//            public void onMessage(String topic, String message) {
+//                String sn = topic.substring(SUB_TOPIC.length());
+//                Log.d(TAG, "onViewCreated: " + sn + " message: " + message);
+//                // 在这里处理接收到的 MQTT 消息
+//                mainRepository.updateDeviceData(sn, message);
+//
+//            }
+//        });
     }
 
     /**

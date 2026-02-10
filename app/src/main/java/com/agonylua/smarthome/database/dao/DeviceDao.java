@@ -15,10 +15,13 @@ import java.util.List;
 public interface DeviceDao {
     // 查：返回 LiveData，这样数据库一变，UI 自动变
     @Query("SELECT * FROM devices WHERE homeId = :homeId")
-    LiveData<List<Device>> getDevicesByHomeId(String homeId);
+    LiveData<List<Device>> getDevicesListByHomeId(String homeId);
 
     @Query("SELECT * FROM devices WHERE deviceSn = :deviceSn")
     LiveData<Device> getDeviceDataBySn(String deviceSn);
+
+    @Query("SELECT * FROM devices WHERE homeId = :homeId")
+    List<Device> getDevicesByHomeId(String homeId);
 
     @Query("SELECT COUNT(*) FROM devices")
     int getCount();
@@ -37,7 +40,11 @@ public interface DeviceDao {
     @Query("UPDATE devices SET deviceMode = :newMode WHERE deviceSn = :sn")
     void updateDeviceMode(String sn, String newMode);
 
+    @Query("UPDATE devices SET deviceStatus = :newStatus WHERE deviceSn = :sn")
+    void updateDeviceStatus(String sn, String newStatus);
+
     // 删：清空缓存 (可选)
     @Query("DELETE FROM devices")
     void clearAll();
 }
+

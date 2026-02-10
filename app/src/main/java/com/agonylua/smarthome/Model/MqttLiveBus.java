@@ -1,9 +1,6 @@
 package com.agonylua.smarthome.model;
 
-import static com.agonylua.smarthome.network.MqttManager.SUB_TOPIC;
-
 import android.content.Context;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -36,14 +33,24 @@ public class MqttLiveBus {
     }
 
     public void post(String topic, String message) {
-        Log.d(TAG, "post: " + topic + " , " + message);
         //mqttEvent.postValue(new MqttEvent(topic, message));
         try {
-            String[] topicParts = topic.substring(SUB_TOPIC.length()).split("/");
-            String sn = topicParts[0];
-            Map<String, Object> payload = JsonUtils.toMap(message);
-            deviceDao.updateDeviceMode(sn, Objects.requireNonNull(payload.get("mode")).toString());
-            deviceDao.updateDeviceData(sn, Objects.requireNonNull(payload.get("data")).toString());
+            String[] topicParts = topic.substring("smartKitchen/".length()).split("/");
+            if (topicParts.length != 3) return;
+            String sn = topicParts[1];
+            if (topicParts[0].equals("application") && topicParts[2].equals("update")) {
+                Map<String, Object> payload = JsonUtils.toMap(message);
+                deviceDao.updateDeviceMode(sn, Objects.requireNonNull(payload.get("mode")).toString());
+                deviceDao.updateDeviceData(sn, Objects.requireNonNull(payload.get("data")).toString());
+            } else if (topicParts[0].equals("device") && topicParts[2].equals("status")) {
+                if (message.equals("offline")) {
+                    deviceDao.updateDeviceStatus(sn, DeviceStatus.OFFLINE.name());
+                } else if (message.equals("online")) {
+                    deviceDao.updateDeviceStatus(sn, DeviceStatus.ONLINE.name());
+                } else {
+                    deviceDao.updateDeviceStatus(sn, DeviceStatus.UNKNOWN.name());
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

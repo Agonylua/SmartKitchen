@@ -1,9 +1,13 @@
 package com.agonylua.smarthome.network;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.agonylua.smarthome.database.AppDatabase;
+import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.model.MqttLiveBus;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
+import com.agonylua.smarthome.utils.UserManager;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -12,6 +16,8 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+
+import java.util.List;
 
 /**
  * MQTT 连接管理类 (单例)
@@ -25,8 +31,8 @@ public class MqttManager {
     private static final String CLIENT_ID = "Android_App";
     private static final String USERNAME = "smartKitchen";
     private static final String PASSWORD = "wei.liu-liu";
-    public static final String SUB_TOPIC = "smartKitchen/App/";
-    private static final String PUB_TOPIC = "smartKitchen/Devices";
+    public static final String SUB_TOPIC = "smartKitchen/application/";
+    private static final String PUB_TOPIC = "smartKitchen/devices/";
     // 消息质量 (0:最多一次, 1:至少一次, 2:只有一次)
     // 智能家居控制建议用 1，状态上报用 0
     private static final int QoS = 1;
@@ -98,15 +104,24 @@ public class MqttManager {
     /**
      * 连接服务器 (必须在子线程调用)
      */
-    public void connect() {
+    public void connect(Context context) {
         ThreadPoolUtils.getInstance().execute(() -> {
             try {
+                String homeId = UserManager.getInstance(context).getHomeId();
+                List<Device> deviceList = AppDatabase.getInstance(context).deviceDao().getDevicesByHomeId(homeId);
                 if (mqttClient != null && !mqttClient.isConnected()) {
                     mqttClient.connect(options);
                     Log.i(TAG, "连接 MQTT 成功");
 
                     // 连接成功后，立即订阅相关主题
-                    subscribe(SUB_TOPIC + "/#"); // 订阅所有房间的状态
+                    if (deviceList != null) {
+                        for (Device device : deviceList) {
+                            subscribe(SUB_TOPIC + device.getDeviceSn() + "/#");
+                            subscribe("smartKitchen/device/" + device.getDeviceSn() + "/#");
+                        }
+                    } else {
+                        Log.d(TAG, "connect: " + "设备列表为空，无法订阅主题");
+                    }
                 }
             } catch (MqttException e) {
                 Log.e(TAG, "连接失败: " + e.getMessage());
@@ -139,7 +154,7 @@ public class MqttManager {
                 if (mqttClient != null && mqttClient.isConnected()) {
                     MqttMessage message = new MqttMessage(msg.getBytes());
                     message.setQos(QoS);
-                    String topic = PUB_TOPIC + deviceSn;
+                    String topic = PUB_TOPIC + deviceSn + "/control";
                     mqttClient.publish(topic, message);
 
                     Log.d(TAG, "发送指令: " + msg);

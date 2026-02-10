@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.database.entity.Device;
-import com.agonylua.smarthome.model.DeviceState;
+import com.agonylua.smarthome.model.DeviceStatus;
 import com.agonylua.smarthome.model.DeviceType;
 import com.agonylua.smarthome.viewModel.DeviceViewModel;
 
@@ -76,7 +76,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         if (deviceType == null) {
             return;
         }
-        if (!Objects.equals(device.getDeviceStatus(), DeviceState.OFFLINE.name())) {
+        if (!Objects.equals(device.getDeviceStatus(), DeviceStatus.OFFLINE.name())) {
             Log.d(TAG, "device info: " + device);
             holder.ivDeviceIcon.setImageResource(deviceType.getOnline());
         } else {
