@@ -1,28 +1,35 @@
 package com.agonylua.smarthome.repository;
 
 import android.app.Application;
-import android.util.Log;
+import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
 import com.agonylua.smarthome.database.AppDatabase;
 import com.agonylua.smarthome.database.dao.DeviceDao;
 import com.agonylua.smarthome.database.entity.Device;
+import com.agonylua.smarthome.network.ApiResponse;
 import com.agonylua.smarthome.network.MqttManager;
+import com.agonylua.smarthome.network.RetrofitClient;
 import com.agonylua.smarthome.utils.JsonUtils;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
 
+import java.util.List;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DeviceRepository {
     private static final String TAG = "DeviceRepository";
-    private DeviceDao deviceDao;
+    private final DeviceDao deviceDao;
     private LiveData<Device> device;
 
-    public DeviceRepository(Application application, String deviceSn) {
-        Log.d(TAG, "DeviceRepository: " + deviceSn);
+
+    public DeviceRepository(Application application) {
         deviceDao = AppDatabase.getInstance(application).deviceDao();
-        device = deviceDao.getDeviceDataBySn(deviceSn);
     }
 
 
@@ -32,6 +39,7 @@ public class DeviceRepository {
 
     public void updateDevice(Device device) {
         ThreadPoolUtils.getInstance().execute(() -> {
+            this.device = deviceDao.getDeviceDataBySn(device.getDeviceSn());
             deviceDao.update(device);
         });
 
@@ -39,5 +47,35 @@ public class DeviceRepository {
 
     public void mqttControlMessage(Map<String, String> payload, String deviceSn) {
         MqttManager.getInstance().publish(deviceSn, JsonUtils.toJson(payload));
+    }
+
+    public void sendControlCmd(Context context, Map<String, String> payload, callback callback) {
+
+        //调用 Retrofit 发送控制命令到服务器进行验证
+        RetrofitClient.getInstance(context).getApi().controlDevice(payload).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
+                if (response.body() != null && response.body().getCode() == 200) {
+                    callback.onSuccess("Control command sent successfully");
+                } else {
+                    callback.onFailure("error code: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+                callback.onFailure(t.getMessage());
+            }
+        });
+    }
+
+    public LiveData<List<Device>> getOnlineDevices() {
+        return deviceDao.getOnlineDevices();
+    }
+
+    public interface callback {
+        void onSuccess(String message);
+
+        void onFailure(String errorMessage);
     }
 }

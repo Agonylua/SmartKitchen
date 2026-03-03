@@ -11,6 +11,7 @@ import com.agonylua.smarthome.database.AppDatabase;
 import com.agonylua.smarthome.database.dao.DeviceDao;
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.repository.HomeRepository;
+import com.agonylua.smarthome.utils.NetworkMonitor;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
 
 import org.jspecify.annotations.NonNull;
@@ -45,6 +46,10 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public void syncServiceData(String homeId) {
+        if (NetworkMonitor.getInstance(getApplication()).isInternetReachable()) {
+            errorMessage.setValue("无网络，请检查网络连接");
+            return;
+        }
         repository.getDevices(getApplication(), homeId, new HomeRepository.DeviceListCallback() {
             @Override
             public void onSuccess(List<Device> devices) {

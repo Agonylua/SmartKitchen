@@ -5,7 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -23,6 +25,7 @@ public class MainFragment extends Fragment {
     private RadioGroup mRadioGroup;
     private MainRepository mainRepository;
     private int currentPosition = 0;
+    private long mExitTime = 0;
 
     @Nullable
     @Override
@@ -36,6 +39,10 @@ public class MainFragment extends Fragment {
 
         mViewPager2 = view.findViewById(R.id.viewPager);
         mRadioGroup = view.findViewById(R.id.radioGroup);
+
+        // 注册返回键监听回调
+        registerBackPressedCallback();
+
         // Adapter
         mViewPager2.setAdapter(new FragmentStateAdapter(this) {
             @NonNull
@@ -101,28 +108,6 @@ public class MainFragment extends Fragment {
                 }
             }
         });
-
-//        mainRepository = new MainRepository(getContext());
-//        MqttManager.getInstance().setOnMessageListener(new MqttManager.OnMessageListener() {
-//            @Override
-//            public void onMessage(String topic, String message) {
-//                String sn = topic.substring(SUB_TOPIC.length());
-//                Log.d(TAG, "onViewCreated: " + sn + " message: " + message);
-//                // 在这里处理接收到的 MQTT 消息
-//                mainRepository.updateDeviceData(sn, message);
-//
-//            }
-//        });
-    }
-
-    /**
-     * 系统会在 Fragment 销毁 View 时调用此方法保存数据
-     */
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        // 保存当前的 Tab 索引
-        outState.putInt("saved_tab_index", currentPosition);
     }
 
     private void updateRadioButton(int position) {
@@ -144,6 +129,40 @@ public class MainFragment extends Fragment {
         if (mRadioGroup.getCheckedRadioButtonId() != targetId) {
             mRadioGroup.check(targetId);
         }
+    }
+
+    /**
+     * 注册处理系统返回按键的回调
+     */
+    private void registerBackPressedCallback() {
+        // 使用 getViewLifecycleOwner() 可以保证当 Fragment 视图销毁时自动移除该回调，防止内存泄漏
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // 判断当前是否在首页
+                if (mViewPager2.getCurrentItem() != 0) {
+                    mViewPager2.setCurrentItem(0);
+                } else {
+                    // 执行退出的逻辑
+                    if ((System.currentTimeMillis() - mExitTime) > 2000) {
+                        Toast.makeText(requireContext(), "再按一次退出", Toast.LENGTH_SHORT).show();
+                        mExitTime = System.currentTimeMillis();
+                    } else {
+                        requireActivity().finish();
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 系统会在 Fragment 销毁 View 时调用此方法保存数据
+     */
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // 保存当前的 Tab 索引
+        outState.putInt("saved_tab_index", currentPosition);
     }
 
 }

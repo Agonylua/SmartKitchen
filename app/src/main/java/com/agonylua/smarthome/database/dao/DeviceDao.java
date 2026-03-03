@@ -26,6 +26,12 @@ public interface DeviceDao {
     @Query("SELECT COUNT(*) FROM devices")
     int getCount();
 
+    @Query("SELECT COUNT(*) FROM devices WHERE deviceStatus = 'ONLINE'")
+    LiveData<Integer> getOnlineCount();
+
+    @Query("SELECT * FROM devices WHERE deviceMode != 'IDLE'")
+    LiveData<List<Device>> getOnlineDevices();
+
     // 增/改：如果有重复的 SN 码，直接覆盖 (REPLACE)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Device> devices);

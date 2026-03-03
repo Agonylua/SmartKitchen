@@ -118,7 +118,7 @@ public class UserManager {
         editor.apply();
     }
 
-    public boolean isLoggedIn() {
+    public boolean isLogIn() {
         return !getToken().isEmpty();
     }
 

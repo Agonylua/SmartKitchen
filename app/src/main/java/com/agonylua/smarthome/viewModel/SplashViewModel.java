@@ -10,14 +10,12 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.agonylua.smarthome.repository.HomeRepository;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
-import com.agonylua.smarthome.utils.TokenManager;
 import com.agonylua.smarthome.utils.UserManager;
 
 public class SplashViewModel extends AndroidViewModel {
     private final String TAG = "SplashViewModel";
-    private TokenManager tokenManager;
     private HomeRepository repository;
-    private MutableLiveData<Integer> tokenValid = new MutableLiveData<>();
+    private MutableLiveData<Boolean> tokenValid = new MutableLiveData<>();
 
     public SplashViewModel(@NonNull Application application) {
         super(application);
@@ -32,34 +30,32 @@ public class SplashViewModel extends AndroidViewModel {
      * 验证Token有效性
      */
     public void validateToken() {
-        tokenManager = new TokenManager(getApplication());
-        Log.d(TAG, "Verify Token" + tokenManager.getToken());
-        if (tokenManager.getToken() == null) {
-            tokenValid.postValue(0);
+        UserManager userManager = UserManager.getInstance(getApplication());
+        if (userManager.isLogIn()) {
+            tokenValid.postValue(false);
             return;
         }
-        String token = tokenManager.getToken();
+        String token = userManager.getToken();
         repository.validateToken(getApplication(), token, new HomeRepository.VerifyCallback() {
             @Override
             public void onVerify(Boolean valid) {
                 if (valid) {
-                    tokenValid.postValue(1);
+                    tokenValid.postValue(true);
                 } else {
-                    tokenValid.postValue(0);
-                    UserManager.getInstance(getApplication()).clear();
+                    tokenValid.postValue(false);
+                    userManager.clear();
                 }
                 Log.d(TAG, "Verify Token result: " + valid);
             }
 
             @Override
             public void onFailure(String errorMessage) {
-                tokenValid.postValue(-1);
+                tokenValid.postValue(false);
             }
         });
     }
 
-
-    public LiveData<Integer> getTokenValid() {
+    public LiveData<Boolean> getTokenValid() {
         return tokenValid;
     }
 

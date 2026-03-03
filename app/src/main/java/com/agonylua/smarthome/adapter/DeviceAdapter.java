@@ -53,7 +53,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     @Override
     public DeviceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // 绑定之前写的 item_device_card.xml
-        View view = LayoutInflater.from(context).inflate(R.layout.card_device, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_device_card, parent, false);
         return new DeviceViewHolder(view);
     }
 

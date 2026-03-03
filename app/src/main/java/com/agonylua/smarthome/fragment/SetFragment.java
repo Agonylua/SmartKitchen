@@ -34,6 +34,7 @@ public class SetFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setViewModel = new ViewModelProvider(this).get(SetViewModel.class);
         btnLogout = view.findViewById(R.id.btn_logout);
+        toolbar = view.findViewById(R.id.toolbar);
 
 
         btnLogout.setOnClickListener(new View.OnClickListener() {

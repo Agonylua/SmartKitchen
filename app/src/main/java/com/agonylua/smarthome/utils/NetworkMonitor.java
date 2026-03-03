@@ -11,12 +11,21 @@ import androidx.annotation.NonNull;
 import com.agonylua.smarthome.repository.GlobalRepository;
 
 public class NetworkMonitor {
-
+    private static NetworkMonitor instance;
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
 
     public NetworkMonitor(Context context) {
         connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    }
+
+    public static NetworkMonitor getInstance(Context context) {
+        synchronized (NetworkMonitor.class) {
+            if (instance == null) {
+                instance = new NetworkMonitor(context);
+            }
+        }
+        return instance;
     }
 
     // 开启监听

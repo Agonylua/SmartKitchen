@@ -97,4 +97,6 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.2.0'
     // Code Scanner
     implementation 'com.github.yuriy-budiyev:code-scanner:2.3.2'
+    // MPAndroidChart for data visualization
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

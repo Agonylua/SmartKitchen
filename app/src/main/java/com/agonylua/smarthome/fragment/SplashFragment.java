@@ -42,18 +42,13 @@ public class SplashFragment extends Fragment {
     private void observeViewModel() {
         showLoading();
         splashViewModel.getTokenValid().observe(getViewLifecycleOwner(), tokenValid -> {
-            if (tokenValid == 1) {
+            if (tokenValid) {
                 if (getView() != null) {
                     Navigation.findNavController(getView()).navigate(R.id.mainFragment);
                 }
-            } else if (tokenValid == 0) {
-                Toast.makeText(getContext(), "身份验证失败，请重新登录。", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "登录状态无效，请重新登录。", Toast.LENGTH_SHORT).show();
                 Navigation.findNavController(this.requireView()).navigate(R.id.loginFragment);
-            } else if (tokenValid == -1) {
-                if (getView() != null) {
-                    // TODO: 这里需要添加离线情况的处理逻辑
-                    Navigation.findNavController(getView()).navigate(R.id.mainFragment);
-                }
             }
         });
 

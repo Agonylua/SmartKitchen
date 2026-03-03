@@ -8,6 +8,8 @@ import com.agonylua.smarthome.network.DeviceBindRequest;
 import com.agonylua.smarthome.network.DeviceResponse;
 import com.agonylua.smarthome.network.LoginRequest;
 
+import java.util.Map;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -68,4 +70,7 @@ public interface ApiService {
      */
     @POST("/device/bind")
     Call<ApiResponse<Integer>> bindDevice(@Body DeviceBindRequest request);
+
+    @POST("/device/control")
+    Call<ApiResponse<Void>> controlDevice(@Body Map<String, String> payload);
 }

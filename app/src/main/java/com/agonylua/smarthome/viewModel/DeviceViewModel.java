@@ -119,7 +119,7 @@ public class DeviceViewModel extends AndroidViewModel {
 
     // ================== 设备通用业务逻辑 ==================
     public LiveData<Device> getDevice(String deviceSn) {
-        deviceRepository = new DeviceRepository(getApplication(), deviceSn);
+        deviceRepository = new DeviceRepository(getApplication());
         return deviceRepository.getDevice();
     }
 
@@ -218,6 +218,16 @@ public class DeviceViewModel extends AndroidViewModel {
         } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
         }
         payload.put("data", JsonUtils.toJson(data));
-        deviceRepository.mqttControlMessage(payload, device.getDeviceSn());
+        deviceRepository.sendControlCmd(getApplication(), payload, new DeviceRepository.callback() {
+            @Override
+            public void onSuccess(String message) {
+                deviceRepository.mqttControlMessage(payload, device.getDeviceSn());
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                subTaskLoading.setValue(false);
+            }
+        });
     }
 }

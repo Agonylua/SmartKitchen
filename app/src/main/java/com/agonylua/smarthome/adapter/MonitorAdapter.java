@@ -1,86 +1,57 @@
 package com.agonylua.smarthome.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.database.entity.Device;
+import com.agonylua.smarthome.databinding.ItemMonitorCardBinding;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.MonitorViewHolder> {
+public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceViewHolder> {
 
-    private Context context;
-    private List<Device> deviceList;
-    private OnDeviceClickListener listener;
+    private List<Device> runningDevices = new ArrayList<>();
 
-    public MonitorAdapter(Context context) {
-        this.context = context;
-        this.deviceList = new ArrayList<>();
-    }
-
-    public void setDeviceList(List<Device> list) {
-        this.deviceList = list;
-        notifyDataSetChanged(); // 刷新列表
-    }
-
-    public void setOnDeviceClickListener(OnDeviceClickListener listener) {
-        this.listener = listener;
+    public void submitList(List<Device> devices) {
+        this.runningDevices = devices;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
-    public MonitorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // 绑定之前写的 item_device_card.xml
-        View view = LayoutInflater.from(context).inflate(R.layout.card_device, parent, false);
-        return new MonitorViewHolder(view);
+    public DeviceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // 使用 DataBinding 自动生成的 Binding 类进行 inflate
+        ItemMonitorCardBinding binding = ItemMonitorCardBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new DeviceViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MonitorViewHolder holder, int position) {
-        Device device = deviceList.get(position);
-        Map<String, String> data = device.getDeviceData();
-
-        // 设置通用信息
-        holder.tvDeviceName.setText(device.getDeviceName());
-        //holder.tvStatus.setText("状态未知");
-        // TODO: 添加更多设备类型
-        // 3. 点击事件处理
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onDeviceClick(device);
-        });
+    public void onBindViewHolder(@NonNull DeviceViewHolder holder, int position) {
+        holder.bind(runningDevices.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return deviceList.size();
+        return runningDevices == null ? 0 : runningDevices.size();
     }
 
-    // 定义点击事件接口，供 Fragment 调用
-    public interface OnDeviceClickListener {
-        void onDeviceClick(Device device);
+    static class DeviceViewHolder extends RecyclerView.ViewHolder {
+        private final ItemMonitorCardBinding binding;
 
-        void onSwitchClick(Device device, boolean isChecked);
-    }
+        public DeviceViewHolder(ItemMonitorCardBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
 
-    // ViewHolder 类
-    static class MonitorViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDeviceStatus, tvDeviceName, tvCurrentTask, tvRemainingTime;
-
-        public MonitorViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvDeviceName = itemView.findViewById(R.id.monitor_device_name);
-            tvDeviceStatus = itemView.findViewById(R.id.monitor_device_status);
-            tvCurrentTask = itemView.findViewById(R.id.monitor_current_task);
-            tvRemainingTime = itemView.findViewById(R.id.monitor_remaining_time);
+        public void bind(Device device) {
+            // 一行代码，搞定所有 UI 赋值与视图更新
+            binding.setDevice(device);
+            binding.executePendingBindings(); // 强制立即刷新绑定
         }
     }
 }
