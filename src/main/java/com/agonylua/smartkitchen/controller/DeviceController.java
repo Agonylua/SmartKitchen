@@ -57,7 +57,7 @@ public class DeviceController {
      */
     @PostMapping("/control")
     public ApiResponse<String> controlDevice(@RequestBody String req) {
-        //mqttController.sendCmdMessage(req);
+        mqttController.sendCmdMessage(req);
         return ApiResponse.success("指令已下发");
     }
 

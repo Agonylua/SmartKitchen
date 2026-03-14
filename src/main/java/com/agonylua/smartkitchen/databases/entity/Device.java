@@ -36,4 +36,7 @@ public class Device {
 
     @UpdateTimestamp
     private LocalDateTime updateTime;
+
+    @Column(nullable = false)
+    private LocalDateTime startTime;
 }
