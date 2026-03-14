@@ -23,5 +23,6 @@ extern DeviceStatus currentStatus;
 extern const char *DEV_SN;
 extern DeviceMode currentMode;
 extern Preferences preferences;
+extern String homeId;
 
 #endif

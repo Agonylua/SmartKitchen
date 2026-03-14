@@ -26,6 +26,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length);
 void mqttReconnect();
 void publishBindVerify();
 void publishSensorData();
+void publishBindHomeId();
 void mqttLoop();
 String deviceModeToString(DeviceMode mode);
 bool mqttIsConnected();

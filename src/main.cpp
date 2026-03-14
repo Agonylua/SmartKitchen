@@ -7,6 +7,7 @@ const char *DEV_SN = "SK-156400423935CCBA9720B608";
 Preferences preferences;
 unsigned long pressStartTime = 0;
 bool isPressing = false;
+bool isBind = false;
 const unsigned long RESET_TIME_MS = 20000; // 20秒
 Ticker ticker;
 
@@ -26,14 +27,15 @@ void setup()
   RGBinit();
   // 初始化按键
   pinMode(RESET_BTN_PIN, INPUT_PULLUP);
-  // 温度监测
-  ticker.attach(10.0, publishSensorData);
 
   // 初始状态设定
-  preferences.begin("config", false);
-  if (preferences.getBool("isBind", false))
-  {
-  }
+  preferences.begin("deviceConfig", false);
+  // if (!preferences.getString("homeId", "").isEmpty())
+  // {
+  //   isBind = true;
+  //   // 温度监测
+  //   ticker.attach(10.0, publishSensorData);
+  // }
   preferences.end();
 }
 

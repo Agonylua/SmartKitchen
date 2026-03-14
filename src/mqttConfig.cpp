@@ -77,22 +77,14 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
     {
         factoryReset();
     }
-    else if (cmd.equals("bind"))
+    else if (cmd.equals("bindStatus"))
     {
-        if (!String(msg).equals("null"))
-        {
-            preferences.begin("deviceConfig", false);
-            preferences.putString("homeId", String(msg));
-            preferences.end();
-            Serial.println("设备已绑定");
-        }
-        else
+        if (!String(msg).equals("1"))
         {
             wifi.resetSettings();
-            Serial.println("设备解绑，清除配置");
+            Serial.println("设备绑定无效，清除配置");
             ESP.restart();
         }
-        Serial.println("设备绑定状态已更新");
     }
     else if (cmd.equals("control"))
     {
@@ -251,6 +243,21 @@ void publishSensorData()
         String topic = String(TOPIC_PUB[i]) + "update";
         mqtt.publish(topic.c_str(), payload);
     }
+}
+
+void publishBindHomeId()
+{
+    if (!mqtt.connected())
+    {
+        return;
+    }
+
+    JsonDocument doc;
+    JsonObject root = doc.to<JsonObject>();
+    root["homeId"] = homeId;
+    char payload[256];
+    serializeJson(doc, payload);
+    mqtt.publish(TOPIC_STATUS, payload, true);
 }
 
 // 将DeviceMode枚举转换为字符串

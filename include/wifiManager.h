@@ -5,6 +5,10 @@
 #include <WiFiProv.h>
 #include <Preferences.h>
 #include "mqttConfig.h"
+#include <esp_wifi.h>
+#include <ArduinoJson.h>
+#include <wifi_provisioning/manager.h>
+#include <wifi_provisioning/scheme_ble.h>
 
 class WiFiConnector
 {
@@ -24,7 +28,6 @@ private:
 
     WiFiConfig config;
     ConnectionStatus status;
-    Preferences preferences;
 
     // 参数配置
     static const unsigned long RETRY_DELAY = 5000;
@@ -35,6 +38,7 @@ private:
     const char *pop = "smart123";
 
 public:
+    Preferences preferences;
     WiFiConnector();
 
     bool begin();

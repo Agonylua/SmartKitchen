@@ -21,6 +21,7 @@ extern DeviceMode currentMode;
 extern DeviceStatus currentStatus;
 extern const char *DEV_SN;
 extern Preferences preferences;
+extern bool isBind;
 // === 按键计时变量 ===
 extern unsigned long pressStartTime;
 extern bool isPressing;
