@@ -18,7 +18,6 @@ import com.agonylua.smarthome.model.MqttLiveBus;
 import com.agonylua.smarthome.network.MqttManager;
 import com.agonylua.smarthome.utils.NetworkMonitor;
 import com.agonylua.smarthome.utils.TokenManager;
-import com.agonylua.smarthome.utils.UserManager;
 import com.agonylua.smarthome.viewModel.HomeViewModel;
 
 import java.util.ArrayList;
@@ -42,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
         initFragments();
 
-        homeViewModel = new HomeViewModel(getApplication());
-        homeViewModel.syncServiceData(UserManager.getInstance(getApplication()).getHomeId());
+        //homeViewModel = new HomeViewModel(getApplication());
+        //homeViewModel.syncServiceData(UserManager.getInstance(getApplication()).getHomeId());
 
         networkMonitor = new NetworkMonitor(getApplicationContext());
         networkMonitor.startMonitoring();

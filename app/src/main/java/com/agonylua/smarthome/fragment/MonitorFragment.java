@@ -56,7 +56,7 @@ public class MonitorFragment extends Fragment {
     }
 
     private void observeChartData() {
-        monitorViewModel.getRunningDevices().observe(getViewLifecycleOwner(), devices -> {
+        monitorViewModel.getOnlineDevices().observe(getViewLifecycleOwner(), devices -> {
             boolean hasData = devices != null && !devices.isEmpty();
             binding.setHasRunningDevice(hasData);
         });

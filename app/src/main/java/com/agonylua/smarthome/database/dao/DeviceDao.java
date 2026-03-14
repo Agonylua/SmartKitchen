@@ -29,7 +29,7 @@ public interface DeviceDao {
     @Query("SELECT COUNT(*) FROM devices WHERE deviceStatus = 'ONLINE'")
     LiveData<Integer> getOnlineCount();
 
-    @Query("SELECT * FROM devices WHERE deviceMode != 'IDLE'")
+    @Query("SELECT * FROM devices WHERE deviceStatus == 'ONLINE'")
     LiveData<List<Device>> getOnlineDevices();
 
     // 增/改：如果有重复的 SN 码，直接覆盖 (REPLACE)

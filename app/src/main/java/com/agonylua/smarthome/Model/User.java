@@ -10,9 +10,8 @@ public class User {
 
     public User(Map<String, String> users) {
         this.userId = users.get("userId");
-        this.nickname = users.get("nickname");
-        this.username = users.get("username");
-        this.homeName = users.get("homeName");
+        this.nickname = users.get("nickName");
+        this.username = users.get("userName");
     }
 
     public String getUserId() {

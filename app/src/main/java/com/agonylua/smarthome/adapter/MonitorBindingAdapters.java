@@ -2,6 +2,7 @@ package com.agonylua.smarthome.adapter;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class MonitorBindingAdapters {
 
+    private static final String TAG = "MonitorBindingAdapters";
     /**
      * 控制视图的“呼吸灯”动画
      * 只要 isBreathing 为 true，动画就自动开启，在 XML 中一行代码搞定
@@ -22,7 +24,7 @@ public class MonitorBindingAdapters {
     @BindingAdapter("isBreathing")
     public static void setBreathingAnimation(View view, boolean isBreathing) {
         ObjectAnimator animator = (ObjectAnimator) view.getTag();
-
+        Log.d(TAG, "setBreathingAnimation: " + isBreathing);
         if (isBreathing) {
             view.setVisibility(View.VISIBLE);
             if (animator == null) {

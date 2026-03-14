@@ -73,7 +73,7 @@ public class DeviceFragment extends Fragment {
         mViewModel.autoSaverSetup.observe(getViewLifecycleOwner(), trigger -> {
             mViewModel.saveDataGeneral();
         });
-        mViewModel.getDevice(device.getDeviceSn()).observe(getViewLifecycleOwner(), updatedDevice -> {
+        mViewModel.getDevice().observe(getViewLifecycleOwner(), updatedDevice -> {
             mViewModel.subTaskLoading.setValue(false);
             if (updatedDevice != null) {
                 this.device = updatedDevice;

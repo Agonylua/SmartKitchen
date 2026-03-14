@@ -4,14 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <!-- 引入 View 类以使用 VISIBLE 和 GONE -->
         <import type="android.view.View" />
 
         <variable
             name="viewModel"
             type="com.agonylua.smarthome.viewModel.MonitorViewModel" />
 
-        <!-- 计算是否有设备在运行，简化后续的逻辑表达式 -->
         <variable
             name="hasRunningDevice"
             type="boolean" />
@@ -90,7 +88,7 @@
                         android:layout_height="10dp"
                         android:layout_marginStart="8dp"
                         android:background="@drawable/circle_progress_teal"
-                        app:isBreathing="@{hasRunningDevice}"
+                        app:isBreathing="@{viewModel.onlineCount > 0}"
                         app:layout_constraintBottom_toBottomOf="@id/tv_hero_label"
                         app:layout_constraintStart_toEndOf="@id/tv_hero_label"
                         app:layout_constraintTop_toTopOf="@id/tv_hero_label" />
@@ -101,7 +99,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="@{viewModel.runningDevices != null ? String.valueOf(viewModel.runningDevices.size()) : `0`}"
+                        android:text="@{viewModel.onlineCount.toString()}"
                         android:textColor="#FFFFFF"
                         android:textSize="56sp"
                         android:textStyle="bold"
@@ -181,7 +179,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_device_info_title"
-                app:runningDeviceList="@{viewModel.runningDevices}"
+                app:runningDeviceList="@{viewModel.onlineDevices}"
                 tools:listitem="@layout/item_monitor_card" />
 
             <!-- 无设备时的空状态提示，反向判断可见性 -->

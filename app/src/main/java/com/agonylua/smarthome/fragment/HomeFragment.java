@@ -7,118 +7,119 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.adapter.DeviceAdapter;
 import com.agonylua.smarthome.database.entity.Device;
+import com.agonylua.smarthome.databinding.FragmentHomeBinding;
 import com.agonylua.smarthome.utils.UserManager;
 import com.agonylua.smarthome.viewModel.HomeViewModel;
-import com.scwang.smart.refresh.layout.SmartRefreshLayout;
-import com.scwang.smart.refresh.layout.api.RefreshLayout;
-import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
-
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
-
 
 public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
-    private RecyclerView rvDevices;
-    private Toolbar toolbar;
     private String homeId;
     private UserManager userManager;
     private DeviceAdapter adapter;
-    private SmartRefreshLayout refreshLayout;
     private String TAG = "HomeFragment";
+
+    // 引入 ViewBinding
+    private FragmentHomeBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        // 使用 DataBinding/ViewBinding 渲染布局
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@androidx.annotation.NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 初始化
-        init(view);
+        // 初始化基础数据
+        userManager = UserManager.getInstance(getContext());
+        homeId = userManager.getHomeId();
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        // 设置RecyclerView
-        adapter = new DeviceAdapter(getContext());
-        rvDevices.setLayoutManager(new GridLayoutManager(getContext(), 2)); // 网格布局，一行2个
-        rvDevices.setAdapter(adapter);
-        adapter.setOnDeviceClickListener(new DeviceAdapter.OnDeviceClickListener() {
+
+        // 绑定 ViewModel 到 XML 以支持 DataBinding
+        binding.setViewModel(homeViewModel);
+        binding.setLifecycleOwner(getViewLifecycleOwner());
+
+        setupRecyclerView();
+        setupRefreshLayout();
+        observeViewModel();
+
+        homeViewModel.loadDevices();
+
+        // 替代原有 Toolbar 的标题逻辑，渲染新 UI 的沉浸式大标题
+        String nickname = userManager.getNickName() != null ? userManager.getNickName() : "我";
+        binding.tvGreeting.setText(nickname + "的厨房");
+
+        binding.ivAddDevice.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.scanQrFragment);
+        });
+    }
+
+    private void setupRecyclerView() {
+        // 适配重构后的 DeviceAdapter
+        adapter = new DeviceAdapter();
+        binding.rvDevices.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        binding.rvDevices.setAdapter(adapter);
+
+        // 适配新的点击事件监听器
+        adapter.setOnItemClickListener(new DeviceAdapter.OnItemClickListener() {
             @Override
-            public void onDeviceClick(Device device) {
+            public void onItemClick(Device device) {
                 NavController navController = NavHostFragment.findNavController(HomeFragment.this);
                 MainFragmentDirections.ActionMainFragmentToDeviceFragment2 action =
                         MainFragmentDirections.actionMainFragmentToDeviceFragment2(device);
                 navController.navigate(action);
             }
         });
-        // 下拉刷新监听
-        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
-            @Override
-            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                homeViewModel.syncServiceData(homeId);
-            }
-        });
-
-        observeViewModel();
-
-        homeViewModel.loadDevices();
-        String nickname = userManager.getNickName() + "的智能家居";
-        toolbar.setTitle(nickname);
-        toolbar.setOnMenuItemClickListener(item -> {
-            int itemId = item.getItemId();
-
-            // 处理分享点击
-            if (itemId == R.id.menu_add_device) {
-                if (this.getView() != null) {
-                    Navigation.findNavController(getView()).navigate(R.id.provisionFragment);
-                }
-                return true;
-            } else return itemId == R.id.menu_scan_code;
-        });
     }
 
-    private void init(View view) {
-        toolbar = view.findViewById(R.id.topbar);
-        rvDevices = view.findViewById(R.id.rv_devices);
-        refreshLayout = view.findViewById(R.id.refreshLayout);
-        userManager = UserManager.getInstance(getContext());
-        homeId = userManager.getHomeId();
+    private void setupRefreshLayout() {
+        binding.refreshLayout.setOnRefreshListener(refreshLayout -> {
+            homeViewModel.syncServiceData(homeId);
+        });
     }
 
     private void observeViewModel() {
         // 观察列表数据变化
         homeViewModel.getDeviceList(homeId).observe(getViewLifecycleOwner(), devices -> {
             if (devices != null) {
-                adapter.setDeviceList(devices);
+                adapter.submitList(devices); // 适配新 Adapter 的 submitList 方法
             }
-            refreshLayout.finishRefresh(true);
+            binding.refreshLayout.finishRefresh(true);
         });
 
         // 观察错误信息
         homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
-            Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Error: " + msg);
-            refreshLayout.finishRefresh(false);
+            if (msg != null && !msg.isEmpty()) {
+                Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Error: " + msg);
+            }
+            binding.refreshLayout.finishRefresh(false);
         });
 
         homeViewModel.getDeviceCount().observe(getViewLifecycleOwner(), count -> {
-            count = " " + count + " 台设备";
-            toolbar.setSubtitle(count);
+            binding.tvWeather.setText("在线设备 · 共 " + count + " 台");
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

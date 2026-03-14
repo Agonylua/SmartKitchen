@@ -1,6 +1,7 @@
 package com.agonylua.smarthome.viewModel;
 
 import android.app.Application;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,10 +15,13 @@ import com.agonylua.smarthome.utils.UserManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class UserViewModel extends AndroidViewModel {
     private UserRepository repository;
     private MutableLiveData<Map<String, String>> usersDataList = new MutableLiveData<>();
+    private static final String TAG = "UserViewModel";
+    private MutableLiveData<Boolean> isLogin = new MutableLiveData<>();
 
     public UserViewModel(@NonNull Application application) {
         super(application);
@@ -27,11 +31,23 @@ public class UserViewModel extends AndroidViewModel {
     public void loadUserData() {
         UserManager userManager = UserManager.getInstance(getApplication());
         Map<String, String> currentData = new HashMap<>();
+        currentData.put("userId", userManager.getUserId());
         currentData.put("userName", userManager.getUserName());
-        currentData.put("homeName", userManager.getNickName() + "的家");
-        currentData.put("nickname", userManager.getNickName());
+        currentData.put("homeName", userManager.getNickName());
+        currentData.put("nickName", userManager.getNickName());
         currentData.put("avatarUrl", userManager.getAvatarUrl());
         usersDataList.setValue(currentData);
+        if (Objects.equals(currentData.get("userId"), "000000")) {
+            Log.d(TAG, "loadUserData: " + "管理员账号");
+        }
+        isLogin.setValue(userManager.isLogIn());
+    }
+
+    public void logout() {
+        UserManager userManager = UserManager.getInstance(getApplication());
+        userManager.clear();
+        isLogin.setValue(false);
+        Toast.makeText(getApplication(), "已退出登录", Toast.LENGTH_SHORT).show();
     }
 
     // 供 UI 调用
@@ -57,5 +73,9 @@ public class UserViewModel extends AndroidViewModel {
     //-- Getters for LiveData --//
     public LiveData<Map<String, String>> getUsersDataList() {
         return usersDataList;
+    }
+
+    public MutableLiveData<Boolean> getIsLogin() {
+        return isLogin;
     }
 }

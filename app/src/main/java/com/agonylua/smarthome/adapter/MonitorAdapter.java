@@ -14,10 +14,10 @@ import java.util.List;
 
 public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceViewHolder> {
 
-    private List<Device> runningDevices = new ArrayList<>();
+    private List<Device> onlineDevices = new ArrayList<>();
 
     public void submitList(List<Device> devices) {
-        this.runningDevices = devices;
+        this.onlineDevices = devices;
         notifyDataSetChanged();
     }
 
@@ -32,12 +32,12 @@ public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceVi
 
     @Override
     public void onBindViewHolder(@NonNull DeviceViewHolder holder, int position) {
-        holder.bind(runningDevices.get(position));
+        holder.bind(onlineDevices.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return runningDevices == null ? 0 : runningDevices.size();
+        return onlineDevices == null ? 0 : onlineDevices.size();
     }
 
     static class DeviceViewHolder extends RecyclerView.ViewHolder {

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -118,9 +119,9 @@ public class DeviceViewModel extends AndroidViewModel {
 // ================== 洗碗机业务逻辑 ==================
 
     // ================== 设备通用业务逻辑 ==================
-    public LiveData<Device> getDevice(String deviceSn) {
+    public LiveData<Device> getDevice() {
         deviceRepository = new DeviceRepository(getApplication());
-        return deviceRepository.getDevice();
+        return deviceRepository.getDevice(device.getDeviceSn());
     }
 
     public void initDevice(Device device) {
@@ -221,12 +222,13 @@ public class DeviceViewModel extends AndroidViewModel {
         deviceRepository.sendControlCmd(getApplication(), payload, new DeviceRepository.callback() {
             @Override
             public void onSuccess(String message) {
-                deviceRepository.mqttControlMessage(payload, device.getDeviceSn());
+                subTaskLoading.setValue(false);
             }
 
             @Override
             public void onFailure(String errorMessage) {
                 subTaskLoading.setValue(false);
+                Toast.makeText(getApplication(), "指令下发 错误", Toast.LENGTH_SHORT).show();
             }
         });
     }

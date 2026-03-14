@@ -40,9 +40,9 @@ public class UserFragment extends Fragment {
         obServeViewModel();
         userViewModel.loadUserData();
 
-        binding.setMoreSettings((v) -> {
-            Navigation.findNavController(v).navigate(R.id.setFragment);
-        });
+//        binding.setMoreSettings((v) -> {
+//            Navigation.findNavController(v).navigate(R.id.setFragment);
+//        });
         binding.setViewModel(userViewModel);
         userManager = UserManager.getInstance(requireContext());
         Log.v(TAG, "User Info: " + userManager.getData());
@@ -54,6 +54,11 @@ public class UserFragment extends Fragment {
             Log.v(TAG, "User Data Updated: " + data);
             User user = new User(data);
             binding.setUser(user);
+        });
+        userViewModel.getIsLogin().observe(getViewLifecycleOwner(), isLogin -> {
+            if (!isLogin && getView() != null) {
+                Navigation.findNavController(getView()).navigate(R.id.loginFragment);
+            }
         });
     }
 

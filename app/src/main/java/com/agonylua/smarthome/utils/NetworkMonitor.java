@@ -66,14 +66,14 @@ public class NetworkMonitor {
     // 手动检查互联网连接
     public boolean isInternetReachable() {
         try {
-            // 尝试连接 Google DNS 或 百度/国内可靠域名
-            // 这里的 1500 是超时时间 (毫秒)
-            String ipAddr = "8.8.8.8"; // 或者 www.baidu.com
-            Process p = Runtime.getRuntime().exec("ping -c 1 -w 1 " + ipAddr);
-            int returnVal = p.waitFor();
-            return (returnVal == 0);
+            // 改用 Socket 连接检测，因为现代 Android 系统常限制 ping 命令权限
+            // 尝试连接 阿里DNS (223.5.5.5) 的 53 端口 (DNS)，超时设为 2000ms
+            java.net.Socket socket = new java.net.Socket();
+            socket.connect(new java.net.InetSocketAddress("223.5.5.5", 53), 2000);
+            socket.close();
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.w("NetworkMonitor", "Internet reachability check failed: " + e.getMessage());
         }
         return false;
     }

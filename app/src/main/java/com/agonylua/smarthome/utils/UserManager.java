@@ -16,6 +16,7 @@ public class UserManager {
     private static UserManager instance;
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
+    private static final String TAG = "UserManager";
 
     // 单例模式
     private UserManager(Context context) {

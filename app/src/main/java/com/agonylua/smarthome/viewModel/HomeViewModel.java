@@ -13,6 +13,7 @@ import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.repository.HomeRepository;
 import com.agonylua.smarthome.utils.NetworkMonitor;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
+import com.agonylua.smarthome.utils.UserManager;
 
 import org.jspecify.annotations.NonNull;
 
@@ -23,9 +24,9 @@ public class HomeViewModel extends AndroidViewModel {
     private HomeRepository repository;
     private DeviceDao deviceDao;
     private final String TAG = "HomeViewModel";
-
+    private MutableLiveData<String> userName = new MutableLiveData<>();
     private LiveData<List<Device>> deviceList = new MutableLiveData<>();
-    private MutableLiveData<String> deviceCount = new MutableLiveData<>();
+    private LiveData<Integer> deviceCount = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
     public HomeViewModel(@NonNull Application application) {
@@ -40,8 +41,7 @@ public class HomeViewModel extends AndroidViewModel {
      */
     public void loadDevices() {
         ThreadPoolUtils.getInstance().execute(() -> {
-            String count = String.valueOf(deviceDao.getCount());
-            deviceCount.postValue(count);
+            deviceCount = deviceDao.getOnlineCount();
         });
     }
 
@@ -70,11 +70,16 @@ public class HomeViewModel extends AndroidViewModel {
         return deviceList;
     }
 
-    public LiveData<String> getDeviceCount() {
+    public LiveData<Integer> getDeviceCount() {
         return deviceCount;
     }
 
     public LiveData<String> getErrorMessage() {
         return errorMessage;
+    }
+
+    public LiveData<String> getUserName() {
+        userName.setValue(UserManager.getInstance(getApplication()).getUserName());
+        return userName;
     }
 }

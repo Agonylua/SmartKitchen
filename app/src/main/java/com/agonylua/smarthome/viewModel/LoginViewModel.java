@@ -3,7 +3,6 @@ package com.agonylua.smarthome.viewModel;
 import android.app.Application;
 
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.agonylua.smarthome.repository.LoginRepository;
@@ -14,11 +13,8 @@ import org.jspecify.annotations.NonNull;
 public class LoginViewModel extends AndroidViewModel {
 
     private LoginRepository repository;
-
-    // LiveData 用于通知 Activity 更新 UI
-    private MutableLiveData<String> loginSuccessToken = new MutableLiveData<>();
-    private MutableLiveData<String> loginErrorMsg = new MutableLiveData<>();
-    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> loginResult = new MutableLiveData<>();
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
     public LoginViewModel(@NonNull Application application) {
         super(application);
@@ -27,24 +23,16 @@ public class LoginViewModel extends AndroidViewModel {
 
     // 供 Activity 调用的方法
     public void login(String username, String password) {
-        if (username.isEmpty() || password.isEmpty()) {
-            loginErrorMsg.setValue("用户名或密码不能为空");
-            return;
-        }
-
-        isLoading.postValue(true); // 显示加载圈
         ThreadPoolUtils.getInstance().executeDelay(() -> {
-
-            // 调用仓库，传入 LiveData 以便回调
             repository.login(getApplication(), username, password, new LoginRepository.LoginCallback() {
                 @Override
                 public void onSuccess(String token) {
-                    loginSuccessToken.setValue(token);
+                    loginResult.postValue(true);
                 }
 
                 @Override
                 public void onError(String message) {
-                    loginErrorMsg.setValue(message);
+                    errorMessage.postValue(message);
                 }
 
             });
@@ -53,16 +41,16 @@ public class LoginViewModel extends AndroidViewModel {
     }
 
 
-    // Getters for LiveData (供 Activity 观察)
-    public LiveData<String> getLoginSuccessToken() {
-        return loginSuccessToken;
+    public void clearErrorMessage() {
+        errorMessage.setValue(null);
     }
 
-    public LiveData<String> getLoginErrorMsg() {
-        return loginErrorMsg;
+    // Getters for LiveData
+    public MutableLiveData<Boolean> getLoginResult() {
+        return loginResult;
     }
 
-    public LiveData<Boolean> getIsLoading() {
-        return isLoading;
+    public MutableLiveData<String> getErrorMessage() {
+        return errorMessage;
     }
 }

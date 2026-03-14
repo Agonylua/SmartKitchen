@@ -15,18 +15,23 @@ public class MonitorViewModel extends AndroidViewModel {
 
     private final DeviceRepository repository;
 
-    private LiveData<List<Device>> runningDevices;
+    private static final String TAG = "MonitorViewModel";
+    private LiveData<List<Device>> onlineDevices;
+    private LiveData<Integer> onlineCount;
 
     public MonitorViewModel(@NonNull Application application) {
         super(application);
         repository = new DeviceRepository(application);
-
+        onlineCount = repository.getOnlineCount();
+        onlineDevices = repository.getOnlineDevices();
     }
 
 
-    public LiveData<List<Device>> getRunningDevices() {
-        runningDevices = repository.getOnlineDevices();
-        return runningDevices;
+    public LiveData<List<Device>> getOnlineDevices() {
+        return onlineDevices;
     }
 
+    public LiveData<Integer> getOnlineCount() {
+        return onlineCount;
+    }
 }

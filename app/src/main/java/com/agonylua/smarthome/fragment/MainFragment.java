@@ -39,6 +39,17 @@ public class MainFragment extends Fragment {
 
         mViewPager2 = view.findViewById(R.id.viewPager);
         mRadioGroup = view.findViewById(R.id.radioGroup);
+//        refreshLayout = view.findViewById(R.id.refreshLayout);
+
+        // 下拉刷新监听
+//        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
+//            @Override
+//            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+//                if (getContext() != null) {
+//                new HomeViewModel((Application) getContext()).syncServiceData(UserManager.getInstance(getContext()).getHomeId());
+//                }
+//            }
+//        });
 
         // 注册返回键监听回调
         registerBackPressedCallback();

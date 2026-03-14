@@ -24,7 +24,7 @@ import retrofit2.Response;
 
 public class DeviceRepository {
     private static final String TAG = "DeviceRepository";
-    private final DeviceDao deviceDao;
+    private DeviceDao deviceDao;
     private LiveData<Device> device;
 
 
@@ -33,8 +33,8 @@ public class DeviceRepository {
     }
 
 
-    public LiveData<Device> getDevice() {
-        return device;
+    public LiveData<Device> getDevice(String deviceSn) {
+        return deviceDao.getDeviceDataBySn(deviceSn);
     }
 
     public void updateDevice(Device device) {
@@ -71,6 +71,10 @@ public class DeviceRepository {
 
     public LiveData<List<Device>> getOnlineDevices() {
         return deviceDao.getOnlineDevices();
+    }
+
+    public LiveData<Integer> getOnlineCount() {
+        return deviceDao.getOnlineCount();
     }
 
     public interface callback {
