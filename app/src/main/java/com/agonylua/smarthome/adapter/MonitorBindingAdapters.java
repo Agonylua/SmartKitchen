@@ -2,7 +2,6 @@ package com.agonylua.smarthome.adapter;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -24,7 +23,6 @@ public class MonitorBindingAdapters {
     @BindingAdapter("isBreathing")
     public static void setBreathingAnimation(View view, boolean isBreathing) {
         ObjectAnimator animator = (ObjectAnimator) view.getTag();
-        Log.d(TAG, "setBreathingAnimation: " + isBreathing);
         if (isBreathing) {
             view.setVisibility(View.VISIBLE);
             if (animator == null) {
@@ -71,12 +69,13 @@ public class MonitorBindingAdapters {
      * 模拟能耗转换 (未来可以替换为真实的 device.power)
      */
     @BindingAdapter("mockPowerText")
-    public static void setMockPowerText(TextView textView, String type) {
-        if (type == null) {
-            textView.setText("0 W");
+    public static void setMockPowerText(TextView textView, String power) {
+
+        if (power == null) {
+            textView.setText("-- W");
             return;
         }
-        String powerStr = "500 W";
+        String powerStr = power + " W";
         textView.setText(powerStr);
     }
 }

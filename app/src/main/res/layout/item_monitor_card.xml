@@ -106,7 +106,7 @@
                             android:textColor="#14B8A6"
                             android:textSize="15sp"
                             android:textStyle="bold"
-                            app:deviceModeText="@{device.deviceMode}" />
+                            app:deviceModeText="@{device.deviceMode != null ? device.deviceMode : `--`}" />
                     </LinearLayout>
 
                     <!-- 使用自定义的 mockPowerText -->
@@ -127,7 +127,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="80W"
+                            app:mockPowerText="@{device.deviceData.get(`realTimePower`)}"
                             android:textColor="#1F2937"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -147,6 +147,7 @@
                             android:textSize="12sp" />
 
                         <TextView
+                            android:id="@+id/run_time"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"

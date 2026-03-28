@@ -17,6 +17,7 @@ import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.adapter.ChipDeviceMode;
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.model.DeviceMode;
+import com.agonylua.smarthome.model.DeviceSet;
 import com.agonylua.smarthome.model.DeviceType;
 import com.agonylua.smarthome.repository.DeviceRepository;
 import com.agonylua.smarthome.utils.DeviceDataManager;
@@ -70,6 +71,7 @@ public class DeviceViewModel extends AndroidViewModel {
     public MediatorLiveData<Boolean> autoSaverData = new MediatorLiveData<>();
     public MediatorLiveData<Boolean> autoSaverSetup = new MediatorLiveData<>();
     private Device device;
+    private DeviceSet deviceSet;
     private DeviceDataManager deviceDataManager;
     private DeviceRepository deviceRepository;
     public DeviceViewModel(@NonNull Application application) {
@@ -84,6 +86,11 @@ public class DeviceViewModel extends AndroidViewModel {
     // ================== 冰箱业务逻辑 ==================
 
     public void getFridgeData() {
+        if (device.getDeviceData() == null) {
+            fridgeTemp.setValue(null);
+            freezeTemp.setValue(null);
+            return;
+        }
         fridgeTemp.setValue(Float.valueOf(device.getDeviceData().get("fridgeTemp")));
         freezeTemp.setValue(Float.valueOf(device.getDeviceData().get("freezeTemp")));
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
@@ -211,6 +218,7 @@ public class DeviceViewModel extends AndroidViewModel {
         subTaskLoading.setValue(true);
         Map<String, String> data = new HashMap<>();
         Map<String, String> payload = new HashMap<>();
+        payload.put("deviceSn", device.getDeviceSn());
         payload.put("mode", DeviceMode.toMode(selectedMode.getValue()));
         if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
             data.put("fridgeTempThreshold", String.valueOf(setFridgeTemp.getValue()));

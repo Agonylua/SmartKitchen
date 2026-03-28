@@ -49,6 +49,9 @@ public interface DeviceDao {
     @Query("UPDATE devices SET deviceStatus = :newStatus WHERE deviceSn = :sn")
     void updateDeviceStatus(String sn, String newStatus);
 
+    @Query("UPDATE devices SET runTime = :newRunTime WHERE deviceSn = :sn")
+    void updateDeviceRunTime(String sn, long newRunTime);
+
     // 删：清空缓存 (可选)
     @Query("DELETE FROM devices")
     void clearAll();

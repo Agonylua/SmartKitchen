@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.databinding.ItemMonitorCardBinding;
+import com.agonylua.smarthome.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceViewHolder> {
 
     private List<Device> onlineDevices = new ArrayList<>();
+    private static final String TAG = "MonitorAdapter";
 
     public void submitList(List<Device> devices) {
         this.onlineDevices = devices;
@@ -24,7 +26,6 @@ public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceVi
     @NonNull
     @Override
     public DeviceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // 使用 DataBinding 自动生成的 Binding 类进行 inflate
         ItemMonitorCardBinding binding = ItemMonitorCardBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false);
         return new DeviceViewHolder(binding);
@@ -51,6 +52,8 @@ public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceVi
         public void bind(Device device) {
             // 一行代码，搞定所有 UI 赋值与视图更新
             binding.setDevice(device);
+            String runTime = TimeUtils.formatToDdHhMm(device.getRunTime());
+            binding.runTime.setText(runTime);
             binding.executePendingBindings(); // 强制立即刷新绑定
         }
     }

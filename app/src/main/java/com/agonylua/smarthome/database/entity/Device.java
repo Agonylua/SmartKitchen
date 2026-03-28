@@ -45,8 +45,47 @@ public class Device implements Parcelable {
     @TypeConverters(DataConverter.class)
     @ColumnInfo(name = "deviceData")
     private Map<String, String> deviceData;
+    @ColumnInfo(name = "runTime")
+    private long runTime;
 
     public Device() {
+    }
+
+    @Ignore
+    public Device(@NonNull String sn, String name, String type, String deviceStatus, String homeId, Map<String, String> data) {
+        this.deviceSn = sn;
+        this.deviceName = name;
+        this.deviceType = type;
+        this.deviceStatus = deviceStatus;
+        this.homeId = String.valueOf(homeId);
+        this.deviceData = data;
+
+    }
+
+    // Parcelable implementation
+    protected Device(Parcel in) {
+        deviceSn = in.readString();
+        deviceName = in.readString();
+        deviceType = in.readString();
+        homeId = in.readString();
+        deviceStatus = in.readString();
+        deviceMode = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
+        parcel.writeString(deviceSn);
+        parcel.writeString(deviceName);
+        parcel.writeString(deviceType);
+        parcel.writeString(homeId);
+        parcel.writeString(deviceStatus);
+        parcel.writeString(deviceMode);
+        parcel.writeString(deviceData != null ? new Gson().toJson(deviceData) : null);
     }
 
     // --- Getters ---
@@ -76,27 +115,6 @@ public class Device implements Parcelable {
         this.deviceType = deviceType;
     }
 
-    @Ignore
-    public Device(@NonNull String sn, String name, String type, String deviceStatus, String homeId, Map<String, String> data) {
-        this.deviceSn = sn;
-        this.deviceName = name;
-        this.deviceType = type;
-        this.deviceStatus = deviceStatus;
-        this.homeId = String.valueOf(homeId);
-        this.deviceData = data;
-
-    }
-
-    // Parcelable implementation
-    protected Device(Parcel in) {
-        deviceSn = in.readString();
-        deviceName = in.readString();
-        deviceType = in.readString();
-        homeId = in.readString();
-        deviceStatus = in.readString();
-        deviceMode = in.readString();
-    }
-
     public String getHomeId() {
         return homeId;
     }
@@ -121,22 +139,6 @@ public class Device implements Parcelable {
         this.deviceStatus = deviceStatus;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeString(deviceSn);
-        parcel.writeString(deviceName);
-        parcel.writeString(deviceType);
-        parcel.writeString(homeId);
-        parcel.writeString(deviceStatus);
-        parcel.writeString(deviceMode);
-        parcel.writeString(deviceData != null ? new Gson().toJson(deviceData) : null);
-    }
-
     public String getDeviceMode() {
         return deviceMode;
     }
@@ -145,4 +147,11 @@ public class Device implements Parcelable {
         this.deviceMode = deviceMode;
     }
 
+    public long getRunTime() {
+        return runTime;
+    }
+
+    public void setRunTime(long runTime) {
+        this.runTime = runTime;
+    }
 }

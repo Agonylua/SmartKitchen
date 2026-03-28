@@ -1,6 +1,7 @@
 package com.agonylua.smarthome.model;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -40,9 +41,20 @@ public class MqttLiveBus {
             String sn = topicParts[1];
             if (topicParts[0].equals("application") && topicParts[2].equals("update")) {
                 Map<String, Object> payload = JsonUtils.toMap(message);
+                Log.d(TAG, "post: 收到设备更新消息, Payload: " + payload);
                 deviceDao.updateDeviceMode(sn, Objects.requireNonNull(payload.get("mode")).toString());
                 deviceDao.updateDeviceData(sn, Objects.requireNonNull(payload.get("data")).toString());
-            } else if (topicParts[0].equals("device") && topicParts[2].equals("status")) {
+                Object runTimeObj = payload.get("runTime");
+                long runTime = 0;
+                if (runTimeObj != null) {
+                    try {
+                        runTime = (long) Double.parseDouble(runTimeObj.toString());
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                }
+                deviceDao.updateDeviceRunTime(sn, runTime);
+            } else if (topicParts[0].equals("status")) {
                 if (message.equals("offline")) {
                     deviceDao.updateDeviceStatus(sn, DeviceStatus.OFFLINE.name());
                 } else if (message.equals("online")) {

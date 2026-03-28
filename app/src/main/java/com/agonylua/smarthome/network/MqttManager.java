@@ -26,15 +26,13 @@ public class MqttManager {
 
     private static final String TAG = "MqttManager";
     // ================= 配置参数 =================
-    // 测试用公共 Broker (开发阶段可用，生产环境请换成自己的服务器)
-    private static final String BROKER_URL = "tcp://10.1.1.110:1883";
+    private static final String BROKER_URL = "tcp://192.168.250.52:1883";
     private static final String CLIENT_ID = "Android_App";
     private static final String USERNAME = "smartKitchen";
     private static final String PASSWORD = "wei.liu-liu";
     public static final String SUB_TOPIC = "smartKitchen/application/";
     private static final String PUB_TOPIC = "smartKitchen/devices/";
     // 消息质量 (0:最多一次, 1:至少一次, 2:只有一次)
-    // 智能家居控制建议用 1，状态上报用 0
     private static final int QoS = 1;
     private static volatile MqttManager instance;
     private MqttClient mqttClient;
@@ -67,6 +65,7 @@ public class MqttManager {
             options.setCleanSession(false); // false: 保留会话 (离线也能收到之前的消息)
             options.setUserName(USERNAME);
             options.setPassword(PASSWORD.toCharArray());
+            options.setMaxReconnectDelay(30000); // 最大重连间隔 (毫秒)
             options.setConnectionTimeout(10); // 连接超时 (秒)
             options.setKeepAliveInterval(20); // 心跳间隔 (秒) - 越短越灵敏但耗电
             options.setAutomaticReconnect(true); // 开启自动重连

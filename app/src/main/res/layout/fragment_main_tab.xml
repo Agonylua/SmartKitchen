@@ -45,6 +45,7 @@
             android:drawablePadding="2dp"
             android:gravity="center"
             android:text="@string/bottom_bar_home"
+            android:textSize="12sp"
             android:textColor="@color/bar_text_color" />
 
         <RadioButton
@@ -57,6 +58,7 @@
             android:drawablePadding="2dp"
             android:gravity="center"
             android:text="@string/bottom_bar_smart"
+            android:textSize="12sp"
             android:textColor="@color/bar_text_color" />
 
         <RadioButton
@@ -69,6 +71,7 @@
             android:drawablePadding="2dp"
             android:gravity="center"
             android:text="@string/bottom_bar_monitor"
+            android:textSize="12sp"
             android:textColor="@color/bar_text_color" />
 
         <RadioButton
@@ -81,6 +84,7 @@
             android:drawablePadding="2dp"
             android:gravity="center"
             android:text="@string/bottom_bar_user"
+            android:textSize="12sp"
             android:textColor="@color/bar_text_color" />
     </RadioGroup>
 </androidx.constraintlayout.widget.ConstraintLayout>

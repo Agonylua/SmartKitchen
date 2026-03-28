@@ -15,7 +15,6 @@ import com.agonylua.smarthome.network.RetrofitClient;
 import com.agonylua.smarthome.utils.JsonUtils;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
 
-import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -67,14 +66,6 @@ public class DeviceRepository {
                 callback.onFailure(t.getMessage());
             }
         });
-    }
-
-    public LiveData<List<Device>> getOnlineDevices() {
-        return deviceDao.getOnlineDevices();
-    }
-
-    public LiveData<Integer> getOnlineCount() {
-        return deviceDao.getOnlineCount();
     }
 
     public interface callback {

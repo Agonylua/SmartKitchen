@@ -1,7 +1,6 @@
 package com.agonylua.smarthome.fragment;
 
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +14,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.agonylua.smarthome.adapter.MonitorAdapter;
 import com.agonylua.smarthome.databinding.FragmentMonitorBinding;
+import com.agonylua.smarthome.dto.DevicePowerDTO;
 import com.agonylua.smarthome.viewModel.MonitorViewModel;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class MonitorFragment extends Fragment {
         binding.setLifecycleOwner(getViewLifecycleOwner());
         binding.setViewModel(monitorViewModel);
 
-
+        monitorViewModel.getDevicePowerData();
         observeChartData();
         setupChart();
     }
@@ -60,59 +61,100 @@ public class MonitorFragment extends Fragment {
             boolean hasData = devices != null && !devices.isEmpty();
             binding.setHasRunningDevice(hasData);
         });
+
+        monitorViewModel.getPowerData().observe(getViewLifecycleOwner(), this::setMockChartData);
     }
 
     private void setupChart() {
-        // [图表初始化代码保持不变，与上一版本一致，略]
         binding.lineChartPower.getDescription().setEnabled(false);
         binding.lineChartPower.getLegend().setEnabled(false);
         binding.lineChartPower.setDrawGridBackground(false);
         binding.lineChartPower.setDrawBorders(false);
         binding.lineChartPower.setTouchEnabled(true);
         binding.lineChartPower.setScaleEnabled(false);
+        binding.lineChartPower.animateX(1000);
+        binding.lineChartPower.getAxisRight().setEnabled(false);
 
         XAxis xAxis = binding.lineChartPower.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);
         xAxis.setTextColor(Color.parseColor("#9CA3AF"));
+        xAxis.setGranularity(1f); // 标签间隔为1
+        xAxis.setAxisMinimum(-0.1f); // 设置X轴起点的最小值为负数，与Y轴拉开一点距离
 
-        binding.lineChartPower.getAxisRight().setEnabled(false);
         YAxis yAxis = binding.lineChartPower.getAxisLeft();
-        yAxis.setDrawAxisLine(false);
+        yAxis.setAxisMinimum(0f); // 最小值为0
         yAxis.setDrawGridLines(true);
         yAxis.setGridColor(Color.parseColor("#F3F4F6"));
         yAxis.setTextColor(Color.parseColor("#9CA3AF"));
 
-        setMockChartData();
     }
 
-    private void setMockChartData() {
-        // [图表数据模拟保持不变，略]
-        List<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(1, 1.2f));
-        entries.add(new Entry(2, 2.5f));
-        entries.add(new Entry(3, 1.8f));
-        entries.add(new Entry(4, 3.2f));
-        entries.add(new Entry(5, 4.0f));
-        entries.add(new Entry(6, 2.1f));
-        entries.add(new Entry(7, 3.5f));
+    private void setMockChartData(List<DevicePowerDTO> dataList) {
+        if (dataList == null || dataList.isEmpty()) {
+            binding.lineChartPower.clear();
+            return;
+        }
 
-        LineDataSet dataSet = new LineDataSet(entries, "用电量");
+        ArrayList<Entry> entries = new ArrayList<>();
+        ArrayList<String> xLabels = new ArrayList<>();
+
+        for (int i = 0; i < dataList.size(); i++) {
+            DevicePowerDTO item = dataList.get(i);
+            entries.add(new Entry(i, item.totalKwh));
+            // 截取日期字符串，例如 "2023-10-25" -> "10-25"
+            String shortDate = item.date != null && item.date.length() >= 10
+                    ? item.date.substring(5) : item.date;
+            xLabels.add(shortDate);
+        }
+
+        // 自定义 X 轴显示
+        binding.lineChartPower.getXAxis().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                int index = (int) value;
+                if (index >= 0 && index < xLabels.size()) {
+                    return xLabels.get(index);
+                }
+                return "";
+            }
+        });
+
+        // 配置折线数据集
+        LineDataSet dataSet = new LineDataSet(entries, "日功耗");
+
+        // 关键美化：设置为平滑的贝塞尔曲线
         dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        dataSet.setCubicIntensity(0.2f);
-        dataSet.setColor(Color.parseColor("#14B8A6"));
-        dataSet.setLineWidth(3f);
-        dataSet.setDrawFilled(true);
-        GradientDrawable gradientDrawable = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{Color.parseColor("#6614B8A6"), Color.parseColor("#0014B8A6")}
-        );
-        dataSet.setFillDrawable(gradientDrawable);
-        dataSet.setDrawValues(false);
 
-        binding.lineChartPower.setData(new LineData(dataSet));
-        binding.lineChartPower.animateX(1000);
+        // 颜色配置 (使用项目的主题色 Teal)
+        int tealColor = Color.parseColor("#00BFA5");
+        dataSet.setColor(tealColor);
+        dataSet.setLineWidth(3f); // 线条宽度
+        dataSet.setCircleColor(tealColor);
+        dataSet.setCircleRadius(4f); // 数据点圆圈大小
+        dataSet.setDrawCircleHole(true);
+        dataSet.setCircleHoleColor(Color.WHITE);
+
+        // 关键美化：开启下方区域填充渐变色
+        dataSet.setDrawFilled(true);
+        // 如果你有 bg_app_gradient.xml，可以用 ContextCompat.getDrawable() 替换，这里用纯色带透明度示例
+        dataSet.setFillColor(tealColor);
+        dataSet.setFillAlpha(50); // 透明度 0-255
+
+        // 数据点上的文本标签加上 "度"
+        dataSet.setValueTextSize(10f);
+        dataSet.setValueTextColor(Color.DKGRAY);
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format("%.2f 度", value);
+            }
+        });
+
+        LineData lineData = new LineData(dataSet);
+        binding.lineChartPower.setData(lineData);
+        binding.lineChartPower.invalidate(); // 刷新图表
     }
 
     @Override

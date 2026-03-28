@@ -1,6 +1,7 @@
 package com.agonylua.smarthome.model;
 
 public class DeviceData {
+    private int realTimePower;
     // 冰箱的数据
     private float fridgeTemp;
     private float freezerTemp;
@@ -114,5 +115,13 @@ public class DeviceData {
 
     public void setFreezerTemp(int freezerTemp) {
         this.freezerTemp = freezerTemp;
+    }
+
+    public int getRealTimePower() {
+        return realTimePower;
+    }
+
+    public void setRealTimePower(int realTimePower) {
+        this.realTimePower = realTimePower;
     }
 }
