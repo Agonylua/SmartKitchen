@@ -88,4 +88,8 @@
             android:id="@+id/action_scanQrFragment_to_provisionFragment"
             app:destination="@id/provisionFragment" />
     </fragment>
+    <dialog
+        android:id="@+id/addRuleBottomSheetFragment"
+        android:name="com.agonylua.smarthome.fragment.CustomRulesFragment"
+        android:label="AddRuleBottomSheetFragment" />
 </navigation>

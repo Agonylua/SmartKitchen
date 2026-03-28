@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <data>
-        <!-- 暂时无需复杂的 ViewModel 绑定，先搭框架 -->
+        <!-- DataBinding placeholder -->
     </data>
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#F4F6F8"
         android:fillViewport="true">
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="48dp">
-
             <!-- 顶部大标题 -->
             <TextView
                 android:id="@+id/tv_smart_header"
@@ -24,13 +20,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="32dp"
-                android:text="智能场景"
+                android:text="@string/smart_header"
                 android:textColor="#111827"
                 android:textSize="28sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
             <!-- 第 1 部分：一键执行 (横向滑动) -->
             <TextView
                 android:id="@+id/tv_tap_to_run_title"
@@ -38,13 +33,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
-                android:text="一键执行"
+                android:text="@string/tap_to_run_title"
                 android:textColor="#374151"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_smart_header" />
-
             <HorizontalScrollView
                 android:id="@+id/hsv_tap_to_run"
                 android:layout_width="match_parent"
@@ -54,12 +48,10 @@
                 android:paddingHorizontal="16dp"
                 android:scrollbars="none"
                 app:layout_constraintTop_toBottomOf="@id/tv_tap_to_run_title">
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-
                     <!-- 场景卡片 1：一键烹饪 -->
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="140dp"
@@ -69,31 +61,27 @@
                         app:cardCornerRadius="16dp"
                         app:cardElevation="4dp"
                         app:strokeWidth="0dp">
-
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="vertical"
                             android:padding="12dp">
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="🍳"
+                                android:text="@string/emoji_cooking"
                                 android:textSize="24sp" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="备餐模式"
+                                android:text="@string/cooking_mode"
                                 android:textColor="#FFFFFF"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
-
                     <!-- 场景卡片 2：离家关闭 -->
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="140dp"
@@ -103,25 +91,22 @@
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
                         app:strokeWidth="0dp">
-
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="vertical"
                             android:padding="12dp">
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="🚶‍♂️"
+                                android:text="@string/emoji_leaving"
                                 android:textSize="24sp" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="离家安全断电"
+                                android:text="@string/leaving_mode"
                                 android:textColor="#111827"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -129,7 +114,6 @@
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
             </HorizontalScrollView>
-
             <!-- 第 2 部分：自动触发规则 -->
             <TextView
                 android:id="@+id/tv_automation_title"
@@ -137,14 +121,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
-                android:text="自动触发规则"
+                android:text="@string/automation_title"
                 android:textColor="#374151"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/hsv_tap_to_run" />
-
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_add_rule"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="24dp"
@@ -155,7 +139,6 @@
                 app:layout_constraintTop_toTopOf="@id/tv_automation_title"
                 app:srcCompat="@drawable/ic_add"
                 app:tint="#FFFFFF" />
-
             <!-- 这里先放置一个硬编码的自动化卡片展示样式 -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_auto_rule_1"
@@ -168,24 +151,21 @@
                 app:cardElevation="2dp"
                 app:layout_constraintTop_toBottomOf="@id/tv_automation_title"
                 app:strokeWidth="0dp">
-
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="20dp">
-
                     <TextView
                         android:id="@+id/tv_rule_name"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="高温自动排气"
+                        android:text="@string/high_temp_vent"
                         android:textColor="#111827"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         app:layout_constraintEnd_toStartOf="@+id/switch_rule"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_rule"
                         android:layout_width="wrap_content"
@@ -194,7 +174,6 @@
                         app:layout_constraintBottom_toBottomOf="@id/tv_rule_name"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/tv_rule_name" />
-
                     <View
                         android:id="@+id/divider_rule"
                         android:layout_width="match_parent"
@@ -202,7 +181,6 @@
                         android:layout_marginTop="12dp"
                         android:background="#F3F4F6"
                         app:layout_constraintTop_toBottomOf="@id/tv_rule_name" />
-
                     <!-- IF 条件 -->
                     <TextView
                         android:id="@+id/tv_if_label"
@@ -218,18 +196,16 @@
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/divider_rule" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="环境温度 > 32°C"
+                        android:text="@string/condition_high_temp"
                         android:textColor="#4B5563"
                         android:textSize="14sp"
                         app:layout_constraintBottom_toBottomOf="@id/tv_if_label"
                         app:layout_constraintStart_toEndOf="@id/tv_if_label"
                         app:layout_constraintTop_toTopOf="@id/tv_if_label" />
-
                     <!-- THEN 动作 -->
                     <TextView
                         android:id="@+id/tv_then_label"
@@ -245,21 +221,18 @@
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tv_if_label" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="开启排气扇"
+                        android:text="@string/action_turn_on_fan"
                         android:textColor="#4B5563"
                         android:textSize="14sp"
                         app:layout_constraintBottom_toBottomOf="@id/tv_then_label"
                         app:layout_constraintStart_toEndOf="@id/tv_then_label"
                         app:layout_constraintTop_toTopOf="@id/tv_then_label" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </layout>

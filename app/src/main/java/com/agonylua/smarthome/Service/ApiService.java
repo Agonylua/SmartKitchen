@@ -1,6 +1,8 @@
 package com.agonylua.smarthome.service;
 
 import com.agonylua.smarthome.database.entity.Device;
+import com.agonylua.smarthome.dto.AutomationRuleDTO;
+import com.agonylua.smarthome.dto.DevicePowerDTO;
 import com.agonylua.smarthome.dto.UserDTO;
 import com.agonylua.smarthome.model.UserRequest;
 import com.agonylua.smarthome.network.ApiResponse;
@@ -8,6 +10,7 @@ import com.agonylua.smarthome.network.DeviceBindRequest;
 import com.agonylua.smarthome.network.DeviceResponse;
 import com.agonylua.smarthome.network.LoginRequest;
 
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -15,6 +18,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -71,6 +75,22 @@ public interface ApiService {
     @POST("/device/bind")
     Call<ApiResponse<Integer>> bindDevice(@Body DeviceBindRequest request);
 
+    /**
+     * 控制设备接口
+     *
+     * @param payload 控制命令数据 (例如: {"deviceSn": "12345", "power": "on"})
+     */
     @POST("/device/control")
     Call<ApiResponse<Void>> controlDevice(@Body Map<String, String> payload);
+
+    /**
+     * 获取设备功率接口
+     *
+     * @param homeId 家庭 ID
+     */
+    @GET("/device/power")
+    Call<ApiResponse<List<DevicePowerDTO>>> getDevicesPower(@Query("homeId") String homeId);
+
+    @POST("/rules/create")
+    Call<ApiResponse<Void>> createRule(@Body AutomationRuleDTO ruleData);
 }

@@ -21,7 +21,6 @@ import com.espressif.provisioning.ESPConstants;
 import com.espressif.provisioning.device_scanner.BleScanner;
 import com.espressif.provisioning.listeners.BleScanListener;
 import com.espressif.provisioning.listeners.ProvisionListener;
-import com.espressif.provisioning.listeners.ResponseListener;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -88,8 +87,8 @@ public class ProvisionViewModel extends AndroidViewModel {
                 @Override
                 public void onSuccess(int code) {
                     if (code == 1) {
-                        bindResultMsg.postValue("设备绑定成功！准备配置网络。");
-                        scanStatus.postValue("设备绑定成功，正在搜索蓝牙...");
+                        bindResultMsg.postValue("设备验证成功！准备配置网络。");
+                        scanStatus.postValue("设备验证成功，正在搜索蓝牙...");
                         qrCodeParsed.postValue(true); // 放行：允许蓝牙扫描
                     } else if (code == 0) {
                         setErrorState(true, "设备已被绑定！将继续配置本地网络。");
@@ -155,9 +154,12 @@ public class ProvisionViewModel extends AndroidViewModel {
 
             @Override
             public void scanCompleted() {
+                Log.d(TAG, "scanCompleted: " + "扫描完成，未找到设备");
             }
+
             @Override
             public void onFailure(Exception e) {
+                Log.d(TAG, "onFailure: 蓝牙扫描异常: " + e.getMessage());
             }
         });
         bleScanner.startScan();
@@ -195,65 +197,53 @@ public class ProvisionViewModel extends AndroidViewModel {
             case ESPConstants.EVENT_DEVICE_DISCONNECTED:
             case ESPConstants.EVENT_DEVICE_CONNECTION_FAILED:
                 scanStatus.setValue("蓝牙连接断开");
-                //isConnected.setValue(false);
+                startBleScan(); // 连接断开后重新扫描
                 break;
         }
     }
 
     public void startProvisioning(String ssid, String password) {
         provisionStatus.setValue("正在发送网络配置...");
-        String homeId = userManager.getHomeId();
-        provisioningHelper.sendHomeId(homeId, new ResponseListener() {
+        provisioningHelper.startProvisioning(ssid, password, new ProvisionListener() {
             @Override
-            public void onSuccess(byte[] bytes) {
-                Log.i("Provision", "HomeId 发送成功，开始发送 Wi-Fi 凭证...");
-                provisioningHelper.startProvisioning(ssid, password, new ProvisionListener() {
-                    @Override
-                    public void createSessionFailed(Exception e) {
-                        provisionStatus.postValue("会话创建失败: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void wifiConfigSent() {
-                        provisionStatus.postValue("Wi-Fi 配置已发送...");
-                    }
-
-                    @Override
-                    public void wifiConfigFailed(Exception e) {
-                        provisionStatus.postValue("Wi-Fi 配置发送失败");
-                    }
-
-                    @Override
-                    public void wifiConfigApplied() {
-                        provisionStatus.postValue("设备正在连接 Wi-Fi...");
-                    }
-
-                    @Override
-                    public void wifiConfigApplyFailed(Exception e) {
-                        provisionStatus.postValue("设备连接 Wi-Fi 失败");
-                    }
-
-                    @Override
-                    public void provisioningFailedFromDevice(ESPConstants.ProvisionFailureReason failureReason) {
-                        provisionStatus.postValue("设备配网失败: " + failureReason.name());
-                    }
-
-                    @Override
-                    public void deviceProvisioningSuccess() {
-                        provisionStatus.postValue("Success");
-                        new HomeViewModel(getApplication()).syncServiceData(UserManager.getInstance(getApplication()).getHomeId());
-                    }
-
-                    @Override
-                    public void onProvisioningFailed(Exception e) {
-                        provisionStatus.postValue("配网流程异常: " + e.getMessage());
-                    }
-                });
+            public void createSessionFailed(Exception e) {
+                provisionStatus.postValue("会话创建失败: " + e.getMessage());
             }
 
             @Override
-            public void onFailure(Exception e) {
-                Log.e("Provision", "HomeId 发送失败！", e);
+            public void wifiConfigSent() {
+                provisionStatus.postValue("Wi-Fi 配置已发送...");
+            }
+
+            @Override
+            public void wifiConfigFailed(Exception e) {
+                provisionStatus.postValue("Wi-Fi 配置发送失败");
+            }
+
+            @Override
+            public void wifiConfigApplied() {
+                provisionStatus.postValue("设备正在连接 Wi-Fi...");
+            }
+
+            @Override
+            public void wifiConfigApplyFailed(Exception e) {
+                provisionStatus.postValue("设备连接 Wi-Fi 失败");
+            }
+
+            @Override
+            public void provisioningFailedFromDevice(ESPConstants.ProvisionFailureReason failureReason) {
+                provisionStatus.postValue("设备配网失败: " + failureReason.name());
+            }
+
+            @Override
+            public void deviceProvisioningSuccess() {
+                provisionStatus.postValue("Success");
+                new HomeViewModel(getApplication()).syncServiceData(UserManager.getInstance(getApplication()).getHomeId());
+            }
+
+            @Override
+            public void onProvisioningFailed(Exception e) {
+                provisionStatus.postValue("配网流程异常: " + e.getMessage());
             }
         });
 

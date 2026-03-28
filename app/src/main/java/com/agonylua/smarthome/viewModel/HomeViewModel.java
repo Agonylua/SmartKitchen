@@ -28,6 +28,7 @@ public class HomeViewModel extends AndroidViewModel {
     private LiveData<List<Device>> deviceList = new MutableLiveData<>();
     private LiveData<Integer> deviceCount = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isRefresh = new MutableLiveData<>(false);
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
@@ -46,19 +47,23 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public void syncServiceData(String homeId) {
+        Log.d(TAG, "syncServiceData: 开始同步设备数据");
         if (NetworkMonitor.getInstance(getApplication()).isInternetReachable()) {
             errorMessage.setValue("无网络，请检查网络连接");
+            isRefresh.postValue(false);
             return;
         }
         repository.getDevices(getApplication(), homeId, new HomeRepository.DeviceListCallback() {
             @Override
             public void onSuccess(List<Device> devices) {
                 loadDevices();
+                isRefresh.postValue(true);
             }
 
             @Override
             public void onFailure(String error) {
                 errorMessage.setValue("网络异常" + error);
+                isRefresh.postValue(false);
             }
         });
     }
@@ -81,5 +86,9 @@ public class HomeViewModel extends AndroidViewModel {
     public LiveData<String> getUserName() {
         userName.setValue(UserManager.getInstance(getApplication()).getUserName());
         return userName;
+    }
+
+    public MutableLiveData<Boolean> getIsRefresh() {
+        return isRefresh;
     }
 }

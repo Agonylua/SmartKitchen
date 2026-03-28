@@ -39,7 +39,8 @@ public class LoginRepository {
                                 body.getData().getUserId(),
                                 body.getData().getHomeId(),
                                 body.getData().getUsername(),
-                                body.getData().getNickname()
+                                body.getData().getNickname(),
+                                body.getData().getToken()
                         );
                         callback.onSuccess(body.getData().getToken());
                         Log.i(TAG, "登陆成功信息: " + body.getData());

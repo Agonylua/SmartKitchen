@@ -100,7 +100,6 @@ public class HomeFragment extends Fragment {
             if (devices != null) {
                 adapter.submitList(devices); // 适配新 Adapter 的 submitList 方法
             }
-            binding.refreshLayout.finishRefresh(true);
         });
 
         // 观察错误信息
@@ -114,6 +113,10 @@ public class HomeFragment extends Fragment {
 
         homeViewModel.getDeviceCount().observe(getViewLifecycleOwner(), count -> {
             binding.tvWeather.setText("在线设备 · 共 " + count + " 台");
+        });
+
+        homeViewModel.getIsRefresh().observe(getViewLifecycleOwner(), isRefresh -> {
+            binding.refreshLayout.finishRefresh(isRefresh);
         });
     }
 

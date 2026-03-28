@@ -18,6 +18,7 @@ import com.agonylua.smarthome.model.MqttLiveBus;
 import com.agonylua.smarthome.network.MqttManager;
 import com.agonylua.smarthome.utils.NetworkMonitor;
 import com.agonylua.smarthome.utils.TokenManager;
+import com.agonylua.smarthome.utils.UserManager;
 import com.agonylua.smarthome.viewModel.HomeViewModel;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         // 获取 controller 进行跳转
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
-            if (tokenManager.getToken() == null) {
+            if (UserManager.getInstance(getApplication()).getToken() == null) {
                 navController.navigate(R.id.loginFragment);
             }
         }

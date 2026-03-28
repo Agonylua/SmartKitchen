@@ -11,4 +11,14 @@
     <string name="user_name_hint">Username/UserID</string>
     <string name="user_password_hint">Password</string>
     <string name="forget_password">forget password?</string>
+    <string name="smart_header">智能场景</string>
+    <string name="tap_to_run_title">一键执行</string>
+    <string name="emoji_cooking">🍳</string>
+    <string name="cooking_mode">备餐模式</string>
+    <string name="emoji_leaving">🚶‍♂️</string>
+    <string name="leaving_mode">离家安全断电</string>
+    <string name="automation_title">自动触发规则</string>
+    <string name="high_temp_vent">高温自动排气</string>
+    <string name="condition_high_temp">环境温度 > 32°C</string>
+    <string name="action_turn_on_fan">开启排气扇</string>
 </resources>

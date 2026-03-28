@@ -32,11 +32,12 @@ public class UserManager {
     }
 
     // 保存登录用户信息
-    public void saveLoginInfo(String id, String homeId, String username, String nickname) {
+    public void saveLoginInfo(String id, String homeId, String username, String nickname, String token) {
         editor.putString(KEY_USER_ID, id);
         editor.putString(KEY_USERNAME, username);
         editor.putString(KEY_HOME_ID, homeId);
         editor.putString(KEY_NICKNAME, nickname);
+        editor.putString(KEY_TOKEN, token);
         editor.apply(); // 异步提交
     }
 
