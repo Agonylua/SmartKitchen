@@ -26,7 +26,7 @@ mqtt:
   password: wei.liu-liu
   clientId_in: smartKitchen-service_in
   clientId_out: smartKitchen-service_out
-  subscribe-topics: smartKitchen/service/#,smartKitchen/device/#
+  subscribe-topics: smartKitchen/service/#,smartKitchen/status/#
   publish-topics: smartKitchen/devices/
   publish-qos: 1
   bind-topics: smartKitchen/devices/

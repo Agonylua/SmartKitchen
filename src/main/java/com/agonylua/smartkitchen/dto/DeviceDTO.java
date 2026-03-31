@@ -14,10 +14,10 @@ public class DeviceDTO {
     private String deviceStatus;
     private String deviceMode;
     private String homeId;
+    private String runTime;
 
     // 重点：前端拿到的直接是对象 {"temp": -18, "mode": "eco"}
     private Map<String, Object> deviceData;
-    private Map<String, Object> deviceSet;
 
     public static DeviceDTO fromEntity(Device device) {
         DeviceDTO dto = new DeviceDTO();
@@ -25,6 +25,7 @@ public class DeviceDTO {
         dto.setDeviceName(device.getDeviceName());
         dto.setHomeId(device.getHomeId());
         dto.setDeviceStatus(device.getDeviceStatus().name());
+        dto.setRunTime(device.getRunTime());
         // 枚举转字符串
         dto.setDeviceType(device.getDeviceType().name());
         dto.setDeviceMode(device.getDeviceMode());

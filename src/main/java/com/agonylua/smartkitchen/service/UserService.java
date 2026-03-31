@@ -9,16 +9,19 @@ import com.agonylua.smartkitchen.dto.UserDTO;
 import com.agonylua.smartkitchen.utils.IdUtil;
 import com.agonylua.smartkitchen.utils.JwtUtil;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final HomeRepository homeRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private HomeRepository homeRepository;
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -71,11 +74,8 @@ public class UserService {
             throw new RuntimeException("密码错误");
         }
 
-        String token = jwtUtil.generateToken(req.getUsername());
+        String token = jwtUtil.generateToken(req.getUsername(), user.getUserId());
         UserDTO dto = UserDTO.fromEntity(user);
-        dto.setUserId(user.getUserId());
-        dto.setNickname(user.getNickname());
-        dto.setAvatarUrl(user.getAvatarUrl());
         dto.setHomeId(home.getHomeId());
         dto.setToken(token);
         return dto;
@@ -88,4 +88,27 @@ public class UserService {
         user.setAvatarUrl(avatarUrl);
         userRepository.save(user);
     }
+
+    public List<UserDTO> findAllByHomeId(String homeId) {
+        List<UserDTO> dto = new ArrayList<>();
+        List<User> users = userRepository.findByHomeId(homeId);
+        for (User user : users) {
+            UserDTO userDTO = UserDTO.fromEntity(user);
+            dto.add(userDTO);
+        }
+        return dto;
+    }
+
+    public UserDTO exitHome(String homeId, String userId) {
+        return userRepository.findByUserId(userId)
+                .map(user -> {
+                    if (user.getHomeId().equals(homeId)) return UserDTO.fromEntity(user);
+                    String newHome = IdUtil.generateHomeId();
+                    user.setHomeId(newHome);
+                    userRepository.save(user);
+                    return UserDTO.fromEntity(user);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("未找到相关家庭信息"));
+    }
+
 }

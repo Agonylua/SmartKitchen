@@ -25,6 +25,7 @@ public class User {
 
     private String nickname; // 允许为 NULL
     private String avatarUrl;
+    private String homeId; // 允许为 NULL，表示未加入任何家庭
 
     @CreationTimestamp
     private LocalDateTime createTime;

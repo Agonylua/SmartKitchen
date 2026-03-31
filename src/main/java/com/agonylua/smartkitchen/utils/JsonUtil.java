@@ -49,7 +49,7 @@ public class JsonUtil {
         try {
             return mapper.readValue(jsonStr, new TypeReference<Map<String, Object>>() {
             });
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.error("JSON反序列化失败: {}", jsonStr, e);
             return null;
         }

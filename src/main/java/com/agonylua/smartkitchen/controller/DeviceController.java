@@ -7,12 +7,14 @@ import com.agonylua.smartkitchen.databases.entity.Device;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
 import com.agonylua.smartkitchen.dto.DeviceDTO;
 import com.agonylua.smartkitchen.service.DeviceService;
-import com.agonylua.smartkitchen.service.mqtt.MqttController;
+import com.agonylua.smartkitchen.service.mqtt.MqttService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,7 +25,8 @@ public class DeviceController {
 
     private final DeviceService deviceService;
     private final DeviceRepository deviceRepository;
-    private final MqttController mqttController;
+    private final MqttService mqttService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 添加设备
@@ -56,8 +59,8 @@ public class DeviceController {
      * 前端传: {"deviceSn": "SN123456", "payload": {"switch": "on"}}
      */
     @PostMapping("/control")
-    public ApiResponse<String> controlDevice(@RequestBody String req) {
-        mqttController.sendCmdMessage(req);
+    public ApiResponse<String> controlDevice(@RequestBody Map<String, String> payload) {
+        mqttService.sendCmdMessage(payload);
         return ApiResponse.success("指令已下发");
     }
 
@@ -70,4 +73,50 @@ public class DeviceController {
         int result = deviceService.bindDevice(req.getDeviceSn(), req.getHomeId());
         return ApiResponse.success(result);
     }
+
+    /**
+     * 获取家庭下所有设备的近7天功耗数据
+     *
+     * @param homeId
+     * @return
+     */
+    @GetMapping("/power")
+    public ApiResponse<List<Map<String, Object>>> getDevicesPower(@RequestParam String homeId) {
+        List<Device> devices = deviceRepository.findByHomeId(homeId);
+
+        // 用于汇总家庭所有设备的每日功耗，TreeMap 自动按日期排序
+        Map<String, Double> homeAggregatedPower = new TreeMap<>();
+
+        for (Device device : devices) {
+            String powerJson = device.getDevicePower();
+            if (powerJson != null && powerJson.trim().startsWith("{")) {
+                try {
+                    // 解析当前设备的 JSON {"2023-10-25": 1.2, "2023-10-26": 2.1}
+                    Map<String, Double> devicePowerMap = objectMapper.readValue(
+                            powerJson, new TypeReference<TreeMap<String, Double>>() {
+                            }
+                    );
+
+                    // 汇总到家庭大集合中
+                    devicePowerMap.forEach((date, kwh) -> {
+                        homeAggregatedPower.merge(date, kwh, Double::sum);
+                    });
+                } catch (Exception e) {
+                    // 忽略 JSON 格式不正确的脏数据
+                }
+            }
+        }
+
+        // 组装成前端图表需要的 List 格式: [{"date": "2023-10-25", "totalKwh": 5.4}, ...]
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        for (Map.Entry<String, Double> entry : homeAggregatedPower.entrySet()) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("date", entry.getKey());
+            item.put("totalKwh", entry.getValue());
+            resultList.add(item);
+        }
+
+        return ApiResponse.success(resultList);
+    }
+
 }

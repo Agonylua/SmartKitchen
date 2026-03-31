@@ -43,5 +43,9 @@ public class IdUtil {
         }
         return sb.toString();
     }
+
+    public static String generateRulesId() {
+        return generateHomeId();
+    }
 }
 

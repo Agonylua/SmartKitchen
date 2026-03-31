@@ -4,9 +4,8 @@ import com.agonylua.smartkitchen.databases.entity.Device;
 import com.agonylua.smartkitchen.databases.entity.DeviceStatus;
 import com.agonylua.smartkitchen.databases.entity.DeviceType;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
-import com.agonylua.smartkitchen.service.mqtt.MqttController;
+import com.agonylua.smartkitchen.service.mqtt.MqttService;
 import com.agonylua.smartkitchen.utils.IdUtil;
-import com.agonylua.smartkitchen.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,7 @@ public class DeviceService {
     @Autowired
     private DeviceRepository deviceRepository;
     @Autowired
-    private MqttController mqttController;
+    private MqttService mqttService;
 
     public void addDevice(String homeId, String customName, String typeStr) {
         Device device = new Device();
@@ -70,17 +69,15 @@ public class DeviceService {
         // 核心：验证通过，注册异步回调，不再立即操作数据库
         log.info("验证通过！正在等待设备 {} 硬件端联网确认...", deviceSn);
 
-        mqttController.registerBindCallback(deviceSn, (mqttPayload) -> {
+        mqttService.sendBind(homeId, deviceSn);
+        mqttService.registerBindCallback(deviceSn, (mqttPayload) -> {
             try {
-                String hardwareHomeId = JsonUtil.getValue(mqttPayload, "homeId");
-
-                if (homeId.equals(hardwareHomeId)) {
+                if (mqttPayload) {
                     device.setHomeId(homeId);
+                    device.setDeviceStatus(DeviceStatus.ONLINE);
                     deviceRepository.save(device);
-                    log.info("🎉 绑定成功！设备 {} 已安全连接并分配至家庭 {}", deviceSn, homeId);
                 } else {
-                    mqttController.sendBindStatus(false, deviceSn);
-                    log.error("⚠️ 绑定防伪校验失败！期望家庭ID: {}, 硬件实际上报家庭ID: {}", homeId, hardwareHomeId);
+                    mqttService.sendUnBind(homeId, deviceSn);
                 }
             } catch (Exception e) {
                 log.error("执行设备 {} 绑定回调时发生数据解析异常", deviceSn, e);

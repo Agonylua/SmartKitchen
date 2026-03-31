@@ -29,8 +29,9 @@ public class JwtUtil {
     /**
      * 生成 Token
      */
-    public String generateToken(String username) {
+    public String generateToken(String username, String userId) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
         return createToken(claims, username);
     }
 
@@ -59,6 +60,13 @@ public class JwtUtil {
      */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    /**
+     * 从 Token 中提取用户ID
+     */
+    public String extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", String.class));
     }
 
     /**

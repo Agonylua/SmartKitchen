@@ -42,6 +42,7 @@ public class MqttConfig {
         MqttConnectOptions options = new MqttConnectOptions();
         options.setServerURIs(new String[]{brokerUrl});
         options.setAutomaticReconnect(true);
+        options.setMaxReconnectDelay(30000);
         options.setCleanSession(false);
         options.setConnectionTimeout(10);
         options.setKeepAliveInterval(20);
@@ -71,8 +72,8 @@ public class MqttConfig {
     //接收消息
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
-    public MessageHandler handler(MqttController mqttController) {
-        return mqttController::handleReceivedMessage;
+    public MessageHandler handler(MqttService mqttService) {
+        return mqttService::handleReceivedMessage;
     }
 
     @Bean

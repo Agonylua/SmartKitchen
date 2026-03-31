@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum DeviceMode {
+    IDLE("待机"),
     //--- Refrigerator Modes ---
     STANDARD("标准"),
     FAST_COOL("速冷"),

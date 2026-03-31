@@ -38,5 +38,8 @@ public class Device {
     private LocalDateTime updateTime;
 
     @Column(nullable = false)
-    private LocalDateTime startTime;
+    private String runTime;
+
+    @Column(nullable = false)
+    private String devicePower;
 }
