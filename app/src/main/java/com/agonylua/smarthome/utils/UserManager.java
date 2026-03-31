@@ -1,5 +1,6 @@
 package com.agonylua.smarthome.utils;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -19,24 +20,25 @@ public class UserManager {
     private static final String TAG = "UserManager";
 
     // 单例模式
-    private UserManager(Context context) {
-        sp = context.getApplicationContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    private UserManager(Application application) {
+        sp = application.getApplicationContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
     }
 
-    public static synchronized UserManager getInstance(Context context) {
+    public static synchronized UserManager getInstance(Application application) {
         if (instance == null) {
-            instance = new UserManager(context);
+            instance = new UserManager(application);
         }
         return instance;
     }
 
     // 保存登录用户信息
-    public void saveLoginInfo(String id, String homeId, String username, String nickname, String token) {
+    public void saveUserInfo(String id, String homeId, String username, String nickname, String avatarUrl, String token) {
         editor.putString(KEY_USER_ID, id);
         editor.putString(KEY_USERNAME, username);
         editor.putString(KEY_HOME_ID, homeId);
         editor.putString(KEY_NICKNAME, nickname);
+        editor.putString(KEY_AVATAR, avatarUrl);
         editor.putString(KEY_TOKEN, token);
         editor.apply(); // 异步提交
     }

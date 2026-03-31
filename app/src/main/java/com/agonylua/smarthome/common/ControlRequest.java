@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.network;
+package com.agonylua.smarthome.common;
 
 import com.agonylua.smarthome.model.DeviceData;
 

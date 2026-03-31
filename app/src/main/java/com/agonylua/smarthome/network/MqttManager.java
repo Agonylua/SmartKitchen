@@ -1,6 +1,6 @@
 package com.agonylua.smarthome.network;
 
-import android.content.Context;
+import android.app.Application;
 import android.util.Log;
 
 import com.agonylua.smarthome.database.AppDatabase;
@@ -103,11 +103,11 @@ public class MqttManager {
     /**
      * 连接服务器 (必须在子线程调用)
      */
-    public void connect(Context context) {
+    public void connect(Application application) {
         ThreadPoolUtils.getInstance().execute(() -> {
             try {
-                String homeId = UserManager.getInstance(context).getHomeId();
-                List<Device> deviceList = AppDatabase.getInstance(context).deviceDao().getDevicesByHomeId(homeId);
+                String homeId = UserManager.getInstance(application).getHomeId();
+                List<Device> deviceList = AppDatabase.getInstance(application).deviceDao().getDevicesByHomeId(homeId);
                 if (mqttClient != null && !mqttClient.isConnected()) {
                     mqttClient.connect(options);
                     Log.i(TAG, "连接 MQTT 成功");

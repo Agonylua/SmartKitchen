@@ -23,6 +23,9 @@ public interface DeviceDao {
     @Query("SELECT * FROM devices WHERE homeId = :homeId")
     List<Device> getDevicesByHomeId(String homeId);
 
+    @Query("SELECT * FROM devices WHERE deviceName = :deviceName")
+    LiveData<Device> getDeviceByDeviceName(String deviceName);
+
     @Query("SELECT COUNT(*) FROM devices")
     int getCount();
 

@@ -31,7 +31,10 @@ public enum DeviceMode {
     //--- Sterilizer Modes ---
     HIGH_TEMP("高温"),
     UVB("UVB"),
-    STERILIZER_DRY("烘干");
+    STERILIZER_DRY("烘干"),
+
+    //--- Other ---
+    UNKNOWN("未知");
 
     private final String label;
 
@@ -45,7 +48,7 @@ public enum DeviceMode {
                 return mode.name();
             }
         }
-        throw new IllegalArgumentException("No enum constant with label " + label);
+        return DeviceMode.UNKNOWN.name();
     }
 
     public static String toLabel(String mode) {
@@ -54,7 +57,7 @@ public enum DeviceMode {
                 return deviceMode.label;
             }
         }
-        throw new IllegalArgumentException("No enum constant with mode " + mode);
+        return DeviceMode.UNKNOWN.label;
     }
 
     public String getLabel() {

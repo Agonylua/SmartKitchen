@@ -13,16 +13,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.databinding.FragmentLoginBinding;
+import com.agonylua.smarthome.repository.LoginRepository;
 import com.agonylua.smarthome.viewModel.LoginViewModel;
 
 public class LoginFragment extends Fragment {
 
     private FragmentLoginBinding binding;
     private LoginViewModel loginViewModel;
+    private LoginRepository loginRepository;
 
     @Nullable
     @Override
@@ -36,7 +39,7 @@ public class LoginFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // 初始化 ViewModel
-        loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
+        loginViewModel = new ViewModelProvider(requireActivity()).get(LoginViewModel.class);
         binding.setViewModel(loginViewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
 
@@ -96,7 +99,12 @@ public class LoginFragment extends Fragment {
                 Toast.makeText(requireContext(), "登录成功", Toast.LENGTH_SHORT).show();
                 // 登录成功后跳转到主页 MainFragment (即包含底部导航栏的宿主)
                 if (getView() != null) {
-                    Navigation.findNavController(getView()).navigate(R.id.mainFragment);
+                    NavOptions navOptions = new NavOptions.Builder()
+                            .setPopUpTo(R.id.splashFragment, true) // 清空栈
+                            .build();
+
+                    Navigation.findNavController(getView())
+                            .navigate(R.id.mainFragment, null, navOptions);
                 }
             }
         });

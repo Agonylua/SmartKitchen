@@ -6,9 +6,24 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class DataConverter {
+
+    @TypeConverter
+    public static String fromList(List<String> list) {
+        if (list == null) return "";
+        return new Gson().toJson(list);
+    }
+
+    @TypeConverter
+    public static List<String> toList(String value) {
+        if (value == null || value.isEmpty()) return null;
+        return new Gson().fromJson(value, new TypeToken<List<String>>() {
+        }.getType());
+    }
 
     @TypeConverter
     public String fromMap(Map<String, String> map) {
@@ -29,5 +44,15 @@ public class DataConverter {
         Type type = new TypeToken<Map<String, String>>() {
         }.getType();
         return gson.fromJson(data, type);
+    }
+
+    @TypeConverter
+    public Long fromDate(Date date) {
+        return date == null ? null : date.getTime();
+    }
+
+    @TypeConverter
+    public Date toDate(Long timestamp) {
+        return timestamp == null ? null : new Date(timestamp);
     }
 }

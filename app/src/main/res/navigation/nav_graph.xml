@@ -45,7 +45,9 @@
         android:label="LoginFragment">
         <action
             android:id="@+id/action_loginFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            app:destination="@id/mainFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/splashFragment"
@@ -53,21 +55,19 @@
         android:label="SplashFragment">
         <action
             android:id="@+id/action_splashFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_splashFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            app:destination="@id/mainFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/deviceFragment"
         android:name="com.agonylua.smarthome.fragment.DeviceFragment"
         android:label="DeviceFragment">
-        <!--        <argument-->
-        <!--            android:name="deviceType" />-->
-        <!--        <argument-->
-        <!--            android:name="deviceName"-->
-        <!--            app:argType="string"-->
-        <!--            app:nullable="true" />-->
         <argument
             android:name="currentDevice"
             app:argType="com.agonylua.smarthome.database.entity.Device" />
@@ -89,7 +89,11 @@
             app:destination="@id/provisionFragment" />
     </fragment>
     <dialog
-        android:id="@+id/addRuleBottomSheetFragment"
+        android:id="@+id/customRulesFragment"
         android:name="com.agonylua.smarthome.fragment.CustomRulesFragment"
-        android:label="AddRuleBottomSheetFragment" />
+        android:label="CustomRulesFragment" />
+    <fragment
+        android:id="@+id/homeManageFragment"
+        android:name="com.agonylua.smarthome.fragment.HomeManageFragment"
+        android:label="HomeManageFragment" />
 </navigation>

@@ -5,8 +5,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.agonylua.smarthome.network.ApiResponse;
-import com.agonylua.smarthome.network.DeviceBindRequest;
+import com.agonylua.smarthome.common.ApiResponse;
+import com.agonylua.smarthome.common.DeviceBindRequest;
 import com.agonylua.smarthome.network.RetrofitClient;
 
 import retrofit2.Call;

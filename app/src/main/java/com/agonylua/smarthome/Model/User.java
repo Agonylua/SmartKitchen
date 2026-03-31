@@ -6,12 +6,13 @@ public class User {
     private String userId;
     private String username;
     private String nickname;
-    private String homeName;
+    private String avatarUrl;
 
     public User(Map<String, String> users) {
         this.userId = users.get("userId");
         this.nickname = users.get("nickName");
         this.username = users.get("userName");
+        this.avatarUrl = users.get("avatarUrl");
     }
 
     public String getUserId() {
@@ -20,11 +21,11 @@ public class User {
     public String getUsername() {
         return username;
     }
-
-    public String getHomeName() {
-        return homeName;
-    }
     public String getNickname() {
         return nickname;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 }

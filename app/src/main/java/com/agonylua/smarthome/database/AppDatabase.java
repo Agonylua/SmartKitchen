@@ -5,12 +5,19 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
 import com.agonylua.smarthome.database.dao.DeviceDao;
+import com.agonylua.smarthome.database.dao.HomeDao;
+import com.agonylua.smarthome.database.dao.OfflineTaskDao;
+import com.agonylua.smarthome.database.dao.RulesDao;
 import com.agonylua.smarthome.database.entity.Device;
+import com.agonylua.smarthome.database.entity.Home;
+import com.agonylua.smarthome.database.entity.OfflineTask;
+import com.agonylua.smarthome.database.entity.Rules;
 
-@Database(entities = {Device.class}, version = 1, exportSchema = false)
-//@TypeConverters(DataConverter.class)
+@Database(entities = {Device.class, Rules.class, Home.class, OfflineTask.class}, version = 1, exportSchema = false)
+@TypeConverters({DataConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase mAppDatabase;
 
@@ -32,4 +39,10 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public abstract DeviceDao deviceDao();
+
+    public abstract RulesDao rulesDao();
+
+    public abstract HomeDao homeDao();
+
+    public abstract OfflineTaskDao offlineTaskDao();
 }

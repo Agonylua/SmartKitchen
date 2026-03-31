@@ -47,7 +47,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // 初始化基础数据
-        userManager = UserManager.getInstance(getContext());
+        userManager = UserManager.getInstance(requireActivity().getApplication());
         homeId = userManager.getHomeId();
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
@@ -59,7 +59,7 @@ public class HomeFragment extends Fragment {
         setupRefreshLayout();
         observeViewModel();
 
-        homeViewModel.loadDevices();
+        homeViewModel.syncServiceData(homeId);
 
         // 替代原有 Toolbar 的标题逻辑，渲染新 UI 的沉浸式大标题
         String nickname = userManager.getNickName() != null ? userManager.getNickName() : "我";

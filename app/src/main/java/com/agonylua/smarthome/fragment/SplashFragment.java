@@ -3,6 +3,7 @@ package com.agonylua.smarthome.fragment;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,18 +12,20 @@ import android.view.animation.DecelerateInterpolator;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.databinding.FragmentSplashBinding;
-import com.agonylua.smarthome.utils.ThreadPoolUtils;
-import com.agonylua.smarthome.utils.UserManager;
-import com.agonylua.smarthome.viewModel.SplashViewModel;
+import com.agonylua.smarthome.repository.LoginRepository;
+import com.agonylua.smarthome.viewModel.LoginViewModel;
 
 public class SplashFragment extends Fragment {
-
+    private static final String TAG = "SplashFragment";
     private FragmentSplashBinding binding;
-    private SplashViewModel viewModel;
+    private LoginViewModel viewModel;
+    private LoginRepository repository;
 
     @Nullable
     @Override
@@ -34,28 +37,61 @@ public class SplashFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new SplashViewModel(requireActivity().getApplication());
+        viewModel = new ViewModelProvider(requireActivity()).get(LoginViewModel.class);
+        repository = new LoginRepository(requireActivity().getApplication());
 
         playEntryAnimation();
-        checkLoginStateAndNavigate();
+        viewModel.init(repository);
+        viewModel.tokenValidate();
         observeViewModel();
-
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
     }
 
     private void observeViewModel() {
-        viewModel.getTokenValid().observe(getViewLifecycleOwner(), valid -> {
-            if (valid != null && isAdded() && getView() != null) {
-                if (valid) {
-                    Navigation.findNavController(getView()).navigate(R.id.mainFragment);
+        if (viewModel.isNetwork()) {
+            viewModel.getLoginResult().observe(getViewLifecycleOwner(), valid -> {
+                if (valid != null && isAdded() && getView() != null) {
+                    if (valid) {
+                        Log.d(TAG, "observeViewModel: Token valid, navigating to main");
+                        navigating(0);
+                    } else {
+                        Log.d(TAG, "observeViewModel: " + "Token invalid or not exist, navigating to login");
+                        navigating(1);
+                    }
+                }
+            });
+
+        } else {
+            if (isAdded() && getView() != null) {
+                if (viewModel.isExistToken()) {
+                    Log.d(TAG, "observeViewModel: " + "Network unavailable but token exists, navigating to main");
+                    navigating(0);
                 } else {
-                    Navigation.findNavController(getView()).navigate(R.id.loginFragment);
+                    Log.d(TAG, "observeViewModel: " + "Network unavailable and no token, navigating to login");
+                    navigating(1);
                 }
             }
-        });
+        }
     }
 
+    public void navigating(int n) {
+        if (getView() == null) return;
+        switch (n) {
+            case 0: {
+                NavOptions navOptions = new NavOptions.Builder()
+                        .setPopUpTo(R.id.splashFragment, true) // 清空栈
+                        .build();
+
+                Navigation.findNavController(getView())
+                        .navigate(R.id.mainFragment, null, navOptions);
+                break;
+            }
+            case 1:
+                Navigation.findNavController(getView()).navigate(R.id.loginFragment);
+                break;
+        }
+    }
     private void playEntryAnimation() {
         binding.llLogoContainer.setAlpha(0f);
         binding.llLogoContainer.setTranslationY(80f);
@@ -73,35 +109,6 @@ public class SplashFragment extends Fragment {
         animatorSet.setDuration(1200);
         animatorSet.setInterpolator(new DecelerateInterpolator(1.5f));
         animatorSet.start();
-    }
-
-    private void checkLoginStateAndNavigate() {
-        ThreadPoolUtils.getInstance().executeDelay(() -> {
-            if (!isAdded() && getView() == null) return;
-
-            if (viewModel.validateNetwork()) {
-                if (checkIsUserLoggedIn()) {
-                    viewModel.LoginCheck();
-                } else {
-                    requireActivity().runOnUiThread(() ->
-                            Navigation.findNavController(getView()).navigate(R.id.loginFragment)
-                    );
-                }
-            } else {
-                requireActivity().runOnUiThread(() -> {
-                    if (checkIsUserLoggedIn()) {
-                        Navigation.findNavController(getView()).navigate(R.id.mainFragment);
-                    } else {
-                        Navigation.findNavController(getView()).navigate(R.id.loginFragment);
-                    }
-                });
-            }
-        }, 2200);
-    }
-
-    private boolean checkIsUserLoggedIn() {
-        String token = UserManager.getInstance(requireContext()).getToken();
-        return token != null && !token.isEmpty();
     }
 
     @Override

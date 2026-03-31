@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.network;
+package com.agonylua.smarthome.common;
 
 public class DeviceBindRequest {
     private String deviceSn; // 设备 SN 码

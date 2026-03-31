@@ -15,4 +15,13 @@ public enum DeviceStatus {
         return state;
     }
 
+    public static String fromState(String state) {
+        for (DeviceStatus status : DeviceStatus.values()) {
+            if (status.state.equals(state)) {
+                return status.name();
+            }
+        }
+        return DeviceStatus.UNKNOWN.name();
+    }
+
 }

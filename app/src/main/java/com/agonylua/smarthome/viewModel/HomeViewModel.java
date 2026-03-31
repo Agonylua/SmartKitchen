@@ -48,7 +48,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     public void syncServiceData(String homeId) {
         Log.d(TAG, "syncServiceData: 开始同步设备数据");
-        if (NetworkMonitor.getInstance(getApplication()).isInternetReachable()) {
+        if (!NetworkMonitor.getInstance(getApplication()).isInternetReachable()) {
             errorMessage.setValue("无网络，请检查网络连接");
             isRefresh.postValue(false);
             return;
@@ -62,6 +62,7 @@ public class HomeViewModel extends AndroidViewModel {
 
             @Override
             public void onFailure(String error) {
+                loadDevices();
                 errorMessage.setValue("网络异常" + error);
                 isRefresh.postValue(false);
             }

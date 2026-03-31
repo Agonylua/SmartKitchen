@@ -1,5 +1,6 @@
 package com.agonylua.smarthome.utils;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -15,15 +16,16 @@ public class DeviceDataManager {
     private final String MICROWAVE_TEMPERATURE = "microwave_temp";
     // TODO: 添加更多设备数据键值对
 
-    public DeviceDataManager(Context context, String deviceSn) {
-        sp = context.getApplicationContext().getSharedPreferences(deviceSn, Context.MODE_PRIVATE);
+    public DeviceDataManager(Application application, String deviceSn) {
+        sp = application.getSharedPreferences(deviceSn, Context.MODE_PRIVATE);
         editor = sp.edit();
     }
 
-    public static DeviceDataManager Instance(Context context, String deviceSn) {
-        ;
-        if (Instance == null) {
-            Instance = new DeviceDataManager(context, deviceSn);
+    public static DeviceDataManager Instance(Application application, String deviceSn) {
+        synchronized (DeviceDataManager.class) {
+            if (Instance == null) {
+                Instance = new DeviceDataManager(application, deviceSn);
+            }
         }
         return Instance;
     }

@@ -5,7 +5,7 @@ public class UserDTO {
     private String username;
     private String nickname;
     private String homeId;
-    private String AvatarUrl;
+    private String avatarUrl;
     private String token;
 
 
@@ -23,7 +23,7 @@ public class UserDTO {
         return homeId;
     }
     public String getAvatarUrl() {
-        return AvatarUrl;
+        return avatarUrl;
     }
     public String getToken() {
         return token;

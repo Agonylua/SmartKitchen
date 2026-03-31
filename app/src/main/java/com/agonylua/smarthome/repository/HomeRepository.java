@@ -6,10 +6,10 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
+import com.agonylua.smarthome.common.DeviceResponse;
 import com.agonylua.smarthome.database.AppDatabase;
 import com.agonylua.smarthome.database.dao.DeviceDao;
 import com.agonylua.smarthome.database.entity.Device;
-import com.agonylua.smarthome.network.DeviceResponse;
 import com.agonylua.smarthome.network.RetrofitClient;
 
 import java.util.List;

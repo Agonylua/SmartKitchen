@@ -1,4 +1,4 @@
 package com.agonylua.smarthome.model;
 
-public class Home {
+public class SceneMode {
 }
