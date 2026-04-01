@@ -2,6 +2,8 @@ package com.agonylua.smarthome.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +47,21 @@ public class LoginFragment extends Fragment {
 
         setupListeners();
         observeViewModel();
+
+        InputFilter filter = new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    char c = source.charAt(i);
+                    if (!Character.isLetterOrDigit(c)) {
+                        return ""; // 不是字母/数字，直接拦截
+                    }
+                }
+                return null;
+            }
+        };
+        binding.etAccount.setFilters(new InputFilter[]{filter});
     }
 
     private void setupListeners() {

@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
@@ -42,7 +41,9 @@ public class UserFragment extends Fragment {
         obServeViewModel();
         userViewModel.loadUserData();
 
-        binding.btHomeSettings.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.homeManageFragment));
+        binding.btHomeManager.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.homeManageFragment));
+        binding.btUserInfo.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.userProfileFragment));
+        binding.btAbout.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.aboutFragment));
         userManager = UserManager.getInstance(requireActivity().getApplication());
         binding.setLifecycleOwner(getViewLifecycleOwner());
     }
@@ -60,16 +61,6 @@ public class UserFragment extends Fragment {
                     .circleCrop()                    // 再次确保图片内容被裁剪为圆形
                     .into(binding.ivAvatar);          // 渲染到控件上
 
-        });
-        userViewModel.getIsLogin().observe(getViewLifecycleOwner(), isLogin -> {
-            if (!isLogin && getView() != null) {
-                NavOptions navOptions = new NavOptions.Builder()
-                        .setPopUpTo(R.id.mainFragment, true) // 清空栈
-                        .build();
-
-                Navigation.findNavController(getView())
-                        .navigate(R.id.loginFragment, null, navOptions);
-            }
         });
     }
 

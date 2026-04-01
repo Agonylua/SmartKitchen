@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
 import com.agonylua.smarthome.common.ApiResponse;
-import com.agonylua.smarthome.common.UserRequest;
 import com.agonylua.smarthome.database.AppDatabase;
 import com.agonylua.smarthome.database.dao.HomeDao;
 import com.agonylua.smarthome.database.entity.Home;
@@ -17,9 +16,11 @@ import com.agonylua.smarthome.network.RetrofitClient;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
 import com.agonylua.smarthome.utils.UserManager;
 
+import java.io.File;
 import java.util.List;
 
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,22 +41,14 @@ public class UserRepository {
         return homeDao.getHomeByUserId(userManager.getUserId());
     }
 
-    /**
-     * 更新用户信息
-     *
-     * @param request  包含要修改的字段
-     * @param callback 回调给 ViewModel
-     */
-    public void updateUserInfo(UserRequest request, infoCallback callback) {
-        // 1. 发起网络请求
-        retrofit.getApi().updateUserInfo(request).enqueue(new Callback<ApiResponse<Void>>() {
+    public void updateUserNickname(String newNickname, infoCallback callback) {
+        retrofit.getApi().updateNickname(userManager.getUserId(), newNickname).enqueue(new Callback<ApiResponse<String>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<Void> apiResponse = response.body();
-
+                    ApiResponse<String> apiResponse = response.body();
                     if (apiResponse.getCode() == 200) {
-                        updateLocalCache(request);
+                        userManager.setNickname(newNickname);
                         callback.onSuccess();
                     } else {
                         callback.onError(apiResponse.getMessage());
@@ -66,15 +59,59 @@ public class UserRepository {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
                 callback.onError("网络连接失败: " + t.getMessage());
             }
         });
     }
 
-    // 同步更新本地缓存
-    private void updateLocalCache(UserRequest request) {
-        userManager.saveUser(request.getNickname(), request.getAvatarUrl(), request.getHomeId());
+    public void updateUserAvatar(File newAvatarFile, infoCallback callback) {
+        RequestBody requestFile = RequestBody.create(okhttp3.MediaType.parse("UserAvatar"), newAvatarFile);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", newAvatarFile.getName(), requestFile);
+        retrofit.getApi().updateAvatar(body, userManager.getUserId()).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<String> apiResponse = response.body();
+                    if (apiResponse.getCode() == 200) {
+                        userManager.setAvatarUrl(apiResponse.getData());
+                        callback.onSuccess();
+                    } else {
+                        callback.onError(apiResponse.getMessage());
+                    }
+                } else {
+                    callback.onError("服务器错误: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
+                callback.onError("网络连接失败: " + t.getMessage());
+            }
+        });
+    }
+
+    public void resetUserPassword(String oldPassword, String newPassword, infoCallback callback) {
+        retrofit.getApi().resetPassword(userManager.getUserId(), oldPassword, newPassword).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<String> apiResponse = response.body();
+                    if (apiResponse.getCode() == 200) {
+                        callback.onSuccess();
+                    } else {
+                        callback.onError(apiResponse.getMessage());
+                    }
+                } else {
+                    callback.onError("服务器错误: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
+                callback.onError("网络连接失败: " + t.getMessage());
+            }
+        });
     }
 
     public void getUsersInfo(usersInfoCallback callback) {
@@ -96,31 +133,6 @@ public class UserRepository {
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<UserDTO>>> call, @NonNull Throwable t) {
-                callback.onError("网络连接失败: " + t.getMessage());
-            }
-        });
-    }
-
-    public void uploadUserAvatar(MultipartBody.Part file, String userId, infoCallback callback) {
-        // 1. 发起网络请求
-        retrofit.getApi().uploadUserAvatar(file, userId).enqueue(new Callback<ApiResponse<String>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<String> apiResponse = response.body();
-                    if (apiResponse.getCode() == 200) {
-                        userManager.setAvatarUrl(apiResponse.getData());
-                        callback.onSuccess();
-                    } else {
-                        callback.onError(apiResponse.getMessage());
-                    }
-                } else {
-                    callback.onError("服务器错误: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
                 callback.onError("网络连接失败: " + t.getMessage());
             }
         });
@@ -174,6 +186,30 @@ public class UserRepository {
                                 body.getData().getAvatarUrl(),
                                 body.getData().getToken()
                         );
+                        retrofit.getApi().getHomeInfo(body.getData().getHomeId()).enqueue(new Callback<ApiResponse<Home>>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ApiResponse<Home>> call, @NonNull Response<ApiResponse<Home>> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    ApiResponse<Home> apiResponse = response.body();
+                                    if (apiResponse.getCode() == 200) {
+                                        ThreadPoolUtils.getInstance().execute(() -> {
+                                            homeDao.clearAll();
+                                            homeDao.insertAll(apiResponse.getData());
+                                        });
+                                        callback.onSuccess();
+                                    } else {
+                                        callback.onError(apiResponse.getMessage());
+                                    }
+                                } else {
+                                    callback.onError("服务器错误: " + response.code());
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<ApiResponse<Home>> call, @NonNull Throwable t) {
+                                callback.onError("网络连接失败: " + t.getMessage());
+                            }
+                        });
                         callback.onSuccess();
                     } else {
                         callback.onError(body.getMessage());

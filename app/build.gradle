@@ -100,4 +100,8 @@ dependencies {
     implementation 'com.github.yuriy-budiyev:code-scanner:2.3.2'
     // MPAndroidChart for data visualization
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    // uCrop for image cropping
+    implementation 'com.github.yalantis:ucrop:2.2.8'
+    // Luban for image compression
+    implementation 'top.zibin:Luban:1.1.8'
 }

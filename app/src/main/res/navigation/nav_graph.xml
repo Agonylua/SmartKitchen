@@ -17,9 +17,13 @@
         android:name="com.agonylua.smarthome.fragment.MonitorFragment"
         android:label="MonitorFragment" />
     <fragment
-        android:id="@+id/setFragment"
+        android:id="@+id/aboutFragment"
         android:name="com.agonylua.smarthome.fragment.SetFragment"
-        android:label="SetFragment" />
+        android:label="SetFragment">
+        <action
+            android:id="@+id/action_setFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
     <fragment
         android:id="@+id/smartFragment"
         android:name="com.agonylua.smarthome.fragment.SmartFragment"
@@ -96,4 +100,12 @@
         android:id="@+id/homeManageFragment"
         android:name="com.agonylua.smarthome.fragment.HomeManageFragment"
         android:label="HomeManageFragment" />
+    <dialog
+        android:id="@+id/globalPopup"
+        android:name="com.agonylua.smarthome.view.GlobalPopup"
+        android:label="GlobalPopup" />
+    <fragment
+        android:id="@+id/userProfileFragment"
+        android:name="com.agonylua.smarthome.fragment.UserProfileFragment"
+        android:label="UserProfileFragment" />
 </navigation>

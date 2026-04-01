@@ -63,6 +63,7 @@ public class HomeFragment extends Fragment {
 
         // 替代原有 Toolbar 的标题逻辑，渲染新 UI 的沉浸式大标题
         String nickname = userManager.getNickName() != null ? userManager.getNickName() : "我";
+        nickname = nickname.length() > 5 ? nickname.substring(0, 4) + "..." : nickname;
         binding.tvGreeting.setText(nickname + "的厨房");
 
         binding.ivAddDevice.setOnClickListener(v -> {

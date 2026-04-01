@@ -71,8 +71,14 @@ public interface ApiService {
      * @param userId 用户 ID
      */
     @Multipart
-    @POST("/user/uploadAvatar")
-    Call<ApiResponse<String>> uploadUserAvatar(@Part MultipartBody.Part file, @Part("userId") String userId);
+    @POST("/user/updateAvatar")
+    Call<ApiResponse<String>> updateAvatar(@Part MultipartBody.Part file, @Part("userId") String userId);
+
+    @POST("user/updateNickname")
+    Call<ApiResponse<String>> updateNickname(@Query("userId") String userId, @Query("nickName") String newNickName);
+
+    @POST("user/resetPassword")
+    Call<ApiResponse<String>> resetPassword(@Query("userId") String userId, @Query("oldPassword") String oldPassword, @Query("newPassword") String newPassword);
 
     //------------------------------ 设备相关接口 ---------------------------------
     /**

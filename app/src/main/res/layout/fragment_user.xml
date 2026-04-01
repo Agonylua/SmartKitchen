@@ -99,7 +99,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="10dp"
                         android:background="@drawable/background_round_corner"
                         android:drawablePadding="6dp"
                         android:padding="6dp"
@@ -112,10 +111,11 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/bt_home_settings"
+                        android:id="@+id/bt_home_manager"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="10dp"
                         android:background="@drawable/background_round_corner"
                         android:drawablePadding="6dp"
                         android:padding="6dp"
@@ -128,24 +128,7 @@
                         app:layout_constraintTop_toBottomOf="@id/bt_user_info" />
 
                     <TextView
-                        android:id="@+id/bt_gateway"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/background_round_corner"
-                        android:drawablePadding="6dp"
-                        android:padding="6dp"
-                        android:text="设备管理"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="normal"
-                        app:drawableEndCompat="@drawable/ic_arrow_right"
-                        app:drawableStartCompat="@drawable/ic_gateway"
-                        app:layout_constraintTop_toBottomOf="@id/bt_home_settings"
-                        tools:layout_editor_absoluteX="16dp" />
-
-                    <TextView
+                        android:id="@+id/bt_language"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
@@ -153,14 +136,32 @@
                         android:background="@drawable/background_round_corner"
                         android:drawablePadding="6dp"
                         android:padding="6dp"
-                        android:text="更多设置"
+                        android:text="语言设置"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="normal"
                         app:drawableEndCompat="@drawable/ic_arrow_right"
-                        app:drawableStartCompat="@drawable/ic_settings"
+                        app:drawableStartCompat="@drawable/ic_gateway"
+                        app:layout_constraintTop_toBottomOf="@id/bt_home_manager"
+                        tools:layout_editor_absoluteX="16dp" />
+
+                    <TextView
+                        android:id="@+id/bt_about"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/background_round_corner"
+                        android:drawablePadding="6dp"
+                        android:padding="6dp"
+                        android:text="关于"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="normal"
+                        app:drawableEndCompat="@drawable/ic_arrow_right"
+                        app:drawableStartCompat="@drawable/ic_info"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/bt_gateway" />
+                        app:layout_constraintTop_toBottomOf="@id/bt_language" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 

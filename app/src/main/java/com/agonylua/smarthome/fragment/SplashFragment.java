@@ -54,44 +54,26 @@ public class SplashFragment extends Fragment {
                 if (valid != null && isAdded() && getView() != null) {
                     if (valid) {
                         Log.d(TAG, "observeViewModel: Token valid, navigating to main");
-                        navigating(0);
+                        NavOptions navOptions = new NavOptions.Builder()
+                                .setPopUpTo(R.id.splashFragment, true) // 清空栈
+                                .build();
+
+                        Navigation.findNavController(getView())
+                                .navigate(R.id.mainFragment, null, navOptions);
                     } else {
                         Log.d(TAG, "observeViewModel: " + "Token invalid or not exist, navigating to login");
-                        navigating(1);
+                        Navigation.findNavController(getView()).navigate(R.id.loginFragment);
                     }
                 }
             });
 
         } else {
-            if (isAdded() && getView() != null) {
-                if (viewModel.isExistToken()) {
-                    Log.d(TAG, "observeViewModel: " + "Network unavailable but token exists, navigating to main");
-                    navigating(0);
-                } else {
-                    Log.d(TAG, "observeViewModel: " + "Network unavailable and no token, navigating to login");
-                    navigating(1);
-                }
-            }
-        }
-    }
-
-    public void navigating(int n) {
-        if (getView() == null) return;
-        switch (n) {
-            case 0: {
-                NavOptions navOptions = new NavOptions.Builder()
-                        .setPopUpTo(R.id.splashFragment, true) // 清空栈
-                        .build();
-
-                Navigation.findNavController(getView())
-                        .navigate(R.id.mainFragment, null, navOptions);
-                break;
-            }
-            case 1:
+            if (getView() != null) {
                 Navigation.findNavController(getView()).navigate(R.id.loginFragment);
-                break;
+            }
         }
     }
+
     private void playEntryAnimation() {
         binding.llLogoContainer.setAlpha(0f);
         binding.llLogoContainer.setTranslationY(80f);

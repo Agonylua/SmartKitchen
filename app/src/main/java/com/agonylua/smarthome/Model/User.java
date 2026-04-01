@@ -7,12 +7,14 @@ public class User {
     private String username;
     private String nickname;
     private String avatarUrl;
+    private String homeId;
 
     public User(Map<String, String> users) {
         this.userId = users.get("userId");
         this.nickname = users.get("nickName");
         this.username = users.get("userName");
         this.avatarUrl = users.get("avatarUrl");
+        this.homeId = users.get("homeId");
     }
 
     public String getUserId() {
@@ -27,5 +29,9 @@ public class User {
 
     public String getAvatarUrl() {
         return avatarUrl;
+    }
+
+    public String getHomeId() {
+        return homeId;
     }
 }

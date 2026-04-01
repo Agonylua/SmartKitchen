@@ -11,17 +11,18 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.network.MqttManager;
-import com.agonylua.smarthome.viewModel.SetViewModel;
+import com.agonylua.smarthome.viewModel.UserViewModel;
 
 public class SetFragment extends Fragment {
     private Button btnLogout;
     private Toolbar toolbar;
-    private SetViewModel setViewModel;
+    private UserViewModel viewModel;
 
     @Nullable
     @Override
@@ -32,7 +33,7 @@ public class SetFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setViewModel = new ViewModelProvider(this).get(SetViewModel.class);
+        viewModel = new ViewModelProvider(this).get(UserViewModel.class);
         btnLogout = view.findViewById(R.id.btn_logout);
         toolbar = view.findViewById(R.id.toolbar);
 
@@ -41,11 +42,14 @@ public class SetFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                setViewModel.logout();
+                viewModel.logout();
                 MqttManager.getInstance().disconnect();
-                if (getView() != null) {
-                    Navigation.findNavController(getView()).navigate(R.id.loginFragment);
-                }
+                NavOptions navOptions = new NavOptions.Builder()
+                        .setPopUpTo(R.id.mainFragment, true) // 清空栈
+                        .build();
+                Navigation.findNavController(v).navigate(R.id.loginFragment, null, navOptions);
+
+
             }
         });
         toolbar.setNavigationOnClickListener(v -> {
@@ -56,4 +60,10 @@ public class SetFragment extends Fragment {
     }
 
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        btnLogout = null;
+        toolbar = null;
+    }
 }
