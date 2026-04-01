@@ -9,14 +9,25 @@ import com.agonylua.smartkitchen.dto.UserDTO;
 import com.agonylua.smartkitchen.utils.IdUtil;
 import com.agonylua.smartkitchen.utils.JwtUtil;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+@Slf4j
 @Service
 public class UserService {
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    @Value("${file.access-url}")
+    private String accessUrl;
 
     @Autowired
     private UserRepository userRepository;
@@ -68,7 +79,7 @@ public class UserService {
     public UserDTO login(UserReq req) {
         User user = userRepository.findByUsername(req.getUsername())
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
-        Home home = homeRepository.findByOwnerId(user.getUserId())
+        Home home = homeRepository.findByMemberId(user.getUserId())
                 .orElseThrow(() -> new RuntimeException("家庭不存在"));
         if (!user.getPassword().equals(req.getPassword())) {
             throw new RuntimeException("密码错误");
@@ -77,16 +88,9 @@ public class UserService {
         String token = jwtUtil.generateToken(req.getUsername(), user.getUserId());
         UserDTO dto = UserDTO.fromEntity(user);
         dto.setHomeId(home.getHomeId());
+        dto.setAvatarUrl(user.getAvatarUrl());
         dto.setToken(token);
         return dto;
-    }
-
-    public void update(String id, String nickname, String avatarUrl) {
-        User user = userRepository.findByUserId(id)
-                .orElseThrow(() -> new RuntimeException("用户不存在"));
-        user.setNickname(nickname);
-        user.setAvatarUrl(avatarUrl);
-        userRepository.save(user);
     }
 
     public List<UserDTO> findAllByHomeId(String homeId) {
@@ -109,6 +113,52 @@ public class UserService {
                     return UserDTO.fromEntity(user);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("未找到相关家庭信息"));
+    }
+
+    public String uploadAvatarFile(String userId, MultipartFile file) {
+        // 1. 校验文件是否为空
+        if (file.isEmpty()) {
+            log.error("上传文件失败，文件为空");
+        }
+
+        try {
+            // 2. 获取原始文件名并提取后缀 (例如: .jpg, .png)
+            String originalFilename = file.getOriginalFilename();
+            String suffix = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            // 3. 生成全局唯一的崭新文件名，防止不同用户上传同名文件被覆盖
+            String newFileName = UUID.randomUUID().toString().replace("-", "") + suffix;
+
+            // 4. 确保物理存储目录存在
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                directory.mkdirs(); // 递归创建目录
+            }
+
+            // 5. 将内存中的文件流写入到磁盘的目标文件中
+            File destFile = new File(directory.getAbsolutePath(), newFileName);
+            file.transferTo(destFile);
+
+            // 6. 拼接文件的网络访问 URL 并返回给客户端
+            String fileUrl = accessUrl + newFileName;
+
+            // TODO: 如果有 userId，可以在这里将 fileUrl 更新到数据库的用户表中
+
+            // 返回成功响应及图片的 URL
+            userRepository.findByUserId(userId).ifPresent(user -> {
+                user.setAvatarUrl(fileUrl);
+                userRepository.save(user);
+            });
+            return fileUrl;
+
+        } catch (Exception e) {
+            // 7. 捕获并处理可能发生的异常，例如文件写入失败等
+            log.error("上传文件时发生异常", e);
+            return null; // 或者抛出自定义异常，视业务需求而定
+        }
     }
 
 }

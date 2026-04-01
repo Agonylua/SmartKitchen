@@ -19,6 +19,10 @@ spring:
         use_sql_comments: true
         jdbc:
           batch_size: 20
+  servlet:
+    multipart:
+      max-file-size: 5MB       # 单个文件最大限制
+      max-request-size: 20MB   # 单次请求总大小限制
 
 mqtt:
   broker: tcp://10.1.1.110:1883
@@ -35,6 +39,11 @@ mqtt:
 jwt:
   secret: 7Z8X9Y0W1V2U3T4S5R6Q7P8O9N0M1L2K3J4I5H6G7F8E9D0C1B2A3Z4Y5X6W7V8U9T0S
   expiration: 1296000000
+
+file:
+  upload-dir: ./avatars/  # 服务器本地存储的物理路径
+  # TODO: 生产环境中应使用实际的服务器地址替换localhost
+  access-url: http://192.168.89.85:1234/avatars/
 
 logging:
   level:

@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 2. 精确放行：只允许登录和注册接口匿名访问
-                        .requestMatchers("/user/login", "/user/register").permitAll()
+                        .requestMatchers("/user/login", "/user/register", "/avatars/**").permitAll()
                         // 3. 所有设备接口、用户信息修改接口，必须认证
                         .anyRequest().authenticated()
                 )
