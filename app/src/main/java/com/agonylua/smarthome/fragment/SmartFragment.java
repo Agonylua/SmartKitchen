@@ -35,13 +35,17 @@ public class SmartFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(SmartViewModel.class);
-        repository = new SmartRepository(requireActivity().getApplication());
+        repository = SmartRepository.getInstance(requireActivity().getApplication());
         viewModel.init(repository);
         adapter = new SmartAdapter();
 
         binding.setViewModel(viewModel);
         initListener();
         observeViewModel();
+
+        binding.refreshLayout.setOnRefreshListener(refreshLayout -> {
+            viewModel.syncRulesList();
+        });
     }
 
     private void initListener() {
@@ -92,6 +96,14 @@ public class SmartFragment extends Fragment {
     public void observeViewModel() {
         viewModel.getRulesList().observe(getViewLifecycleOwner(), rules -> {
             adapter.submitList(rules);
+        });
+        viewModel.refreshResult.observe(getViewLifecycleOwner(), result -> {
+            if (result) {
+                binding.refreshLayout.finishRefresh(true);
+            } else {
+                binding.refreshLayout.finishRefresh(false);
+            }
+
         });
     }
 }

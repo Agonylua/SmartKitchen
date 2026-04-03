@@ -5,8 +5,8 @@
     <data>
 
         <variable
-            name="data"
-            type="com.agonylua.smarthome.model.DeviceData" />
+            name="device"
+            type="com.agonylua.smarthome.database.entity.Device" />
 
         <variable
             name="viewModel"
@@ -41,8 +41,8 @@
                 android:layout_width="220dp"
                 android:layout_height="220dp"
                 android:indeterminate="false"
-                android:max="100"
-                android:progress="75"
+                android:max="@{viewModel.microwaveTotalTime}"
+                android:progress="@{viewModel.microwaveTime}"
                 android:progressDrawable="@drawable/circle_progress_orange"
                 android:rotation="-90"
                 app:layout_constraintBottom_toBottomOf="@+id/circle_bg"
@@ -72,15 +72,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="01:30"
+                    android:text="@{viewModel.microwaveTimeDisplay == null ? `--:--` : viewModel.microwaveTimeDisplay}"
                     android:textColor="@color/text_primary"
-                    android:textSize="56sp" />
+                    android:textSize="54sp" />
 
                 <TextView
                     android:id="@+id/tv_power_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="高火"
+                    android:text="@{viewModel.microwaveMode}"
                     android:textColor="@color/secondary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -95,7 +95,6 @@
                 android:textSize="12sp"
                 app:backgroundTint="@color/secondary"
                 app:cornerRadius="20dp"
-                app:layout_constraintBottom_toBottomOf="@+id/circle_bg"
                 app:layout_constraintEnd_toEndOf="@+id/circle_bg"
                 app:layout_constraintStart_toStartOf="@+id/circle_bg"
                 app:layout_constraintTop_toBottomOf="@+id/circle_bg" />
@@ -103,61 +102,19 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_power"
+            android:id="@+id/chip_group_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_timer_display"
-            app:selectionRequired="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_heat_mode"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:width="1dp"
-                android:checked="true"
-                android:text="加热模式"
-                android:textColor="@color/text_primary"
-                app:chipBackgroundColor="@color/white"
-                app:chipStrokeColor="@color/secondary"
-                app:chipStrokeWidth="1dp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_barbecue_mode"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="烧烤模式"
-                android:textColor="@color/text_primary"
-                app:chipBackgroundColor="@color/white"
-                app:chipStrokeColor="@color/secondary"
-                app:chipStrokeWidth="0dp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_thaw_mode"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="解冻模式"
-                android:textColor="@color/text_primary"
-                app:chipBackgroundColor="@color/white"
-                app:chipStrokeColor="@color/secondary"
-                app:chipStrokeWidth="0dp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_steam_mode"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="蒸汽模式"
-                android:textColor="@color/text_primary"
-                app:chipBackgroundColor="@color/white"
-                app:chipStrokeColor="@color/secondary"
-                app:chipStrokeWidth="0dp" />
-        </com.google.android.material.chip.ChipGroup>
+            app:chipItems="@{viewModel.modeTags}"
+            app:chipSpacing="10dp"
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true"
+            app:viewModel="@{viewModel}" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_controls"
@@ -168,7 +125,7 @@
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/chip_group_power">
+            app:layout_constraintTop_toBottomOf="@+id/chip_group_mode">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -200,7 +157,7 @@
                         android:id="@+id/tv_slider_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="00:40"
+                        android:text="@{viewModel.setMicrowaveTime.toString()}"
                         android:textColor="@color/secondary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -211,9 +168,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:stepSize="10"
-                    android:value="40"
+                    android:enabled="@{viewModel.selectedMode == `加热` || viewModel.deviceMode == `IDLE`}"
                     android:valueFrom="10"
-                    android:valueTo="90"
+                    android:value="@={viewModel.setMicrowaveTime}"
+                    android:valueTo="100"
                     app:thumbColor="@color/secondary"
                     app:tickVisible="false"
                     app:trackColorActive="@color/secondary"
@@ -249,7 +207,7 @@
                         android:id="@+id/tv_slider_temp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="200℃"
+                        android:text="@{String.valueOf(viewModel.setMicrowaveTemp) + `℃`}"
                         android:textColor="@color/secondary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -260,9 +218,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:stepSize="10"
-                    android:value="90"
-                    android:valueFrom="10"
-                    android:valueTo="300"
+                    android:enabled="@{viewModel.selectedMode == `加热` || viewModel.selectedMode == `待机`}"
+                    android:value="@={viewModel.setMicrowaveTemp}"
+                    android:valueFrom="30"
+                    android:valueTo="230"
                     app:thumbColor="@color/secondary"
                     app:tickVisible="false"
                     app:trackColorActive="@color/secondary"
@@ -272,7 +231,7 @@
         </androidx.cardview.widget.CardView>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_start_microwave"
+            android:id="@+id/btn_start"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginHorizontal="16dp"

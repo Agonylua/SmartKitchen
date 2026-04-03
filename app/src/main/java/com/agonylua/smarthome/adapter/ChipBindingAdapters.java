@@ -1,7 +1,9 @@
 package com.agonylua.smarthome.adapter;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.databinding.BindingAdapter;
 
@@ -14,6 +16,11 @@ import java.util.List;
 
 public class ChipBindingAdapters {
     private static final String TAG = "ChipBindingAdapters";
+
+    @BindingAdapter("app:tint")
+    public static void setTintColor(ImageView imageView, int color) {
+        imageView.setImageTintList(ColorStateList.valueOf(color));
+    }
 
     @BindingAdapter(value = {"chipItems", "viewModel"})
     public static void setChipItems(ChipGroup chipGroup, List<String> items, DeviceViewModel viewModel) {

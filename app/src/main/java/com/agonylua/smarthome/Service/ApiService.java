@@ -1,7 +1,7 @@
 package com.agonylua.smarthome.service;
 
 import com.agonylua.smarthome.common.ApiResponse;
-import com.agonylua.smarthome.common.DeviceBindRequest;
+import com.agonylua.smarthome.common.DeviceRequest;
 import com.agonylua.smarthome.common.DeviceResponse;
 import com.agonylua.smarthome.common.LoginRequest;
 import com.agonylua.smarthome.common.UserRequest;
@@ -56,13 +56,22 @@ public interface ApiService {
     @POST("/user/validateToken")
     Call<Void> validateToken();
 
+
     /**
-     * 获取用户信息接口
+     * 获取家庭用户信息接口
      *
-     * @param homeId 用户 ID 列表 (逗号分隔)
+     * @param userId 用户 ID
      */
     @GET("user/info")
-    Call<ApiResponse<List<UserDTO>>> getUsersInfo(@Query("homeId") String homeId);
+    Call<ApiResponse<UserDTO>> getUserInfo(@Query("userId") String userId);
+
+    /**
+     * 获取家庭用户信息接口
+     *
+     * @param homeId 家庭 ID 列表 (逗号分隔)
+     */
+    @GET("user/list")
+    Call<ApiResponse<List<UserDTO>>> getUserListInfo(@Query("homeId") String homeId);
 
     /**
      * 上传用户头像接口
@@ -80,6 +89,8 @@ public interface ApiService {
     @POST("user/resetPassword")
     Call<ApiResponse<String>> resetPassword(@Query("userId") String userId, @Query("oldPassword") String oldPassword, @Query("newPassword") String newPassword);
 
+    @POST("/user/exitHome")
+    Call<ApiResponse<UserDTO>> exitHome(@Query("homeId") String homeId);
     //------------------------------ 设备相关接口 ---------------------------------
     /**
      * 获取家庭设备信息
@@ -103,7 +114,15 @@ public interface ApiService {
      * @param request 绑定请求数据
      */
     @POST("/device/bind")
-    Call<ApiResponse<Integer>> bindDevice(@Body DeviceBindRequest request);
+    Call<ApiResponse<Integer>> bindDevice(@Body DeviceRequest request);
+
+    /**
+     * 删除/解绑设备接口
+     *
+     * @param request 解绑请求数据
+     */
+    @POST("/device/unBind")
+    Call<ApiResponse<Boolean>> unBindDevice(@Body DeviceRequest request);
 
     /**
      * 控制设备接口
@@ -134,8 +153,11 @@ public interface ApiService {
     @POST("/home/removeMember")
     Call<ApiResponse<HomeDTO>> removeMember(@Query("homeId") String homeId, @Query("userId") String userId);
 
-    @POST("/user/exitHome")
-    Call<ApiResponse<UserDTO>> exitHome(@Query("homeId") String homeId, @Query("userId") String userId);
+    @POST("/home/joinHome")
+    Call<ApiResponse<String>> joinHome(@Query("homeId") String homeId);
+
+    @POST("/home/joinHomeApproval")
+    Call<ApiResponse<String>> joinHomeApproval(@Query("result") Boolean result, @Query("ownerId") String ownerId, @Query("memberId") String memberId);
 
     //------------------------------ 自动化规则相关接口 ---------------------------------
 

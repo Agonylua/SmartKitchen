@@ -23,14 +23,25 @@ import retrofit2.Response;
 
 public class DeviceRepository {
     private static final String TAG = "DeviceRepository";
+    private static volatile DeviceRepository instance;
     private DeviceDao deviceDao;
     private LiveData<Device> device;
 
 
-    public DeviceRepository(Application application) {
+    private DeviceRepository(Application application) {
         deviceDao = AppDatabase.getInstance(application).deviceDao();
     }
 
+    public static DeviceRepository getInstance(Application application) {
+        if (instance == null) {
+            synchronized (DeviceRepository.class) {
+                if (instance == null) {
+                    instance = new DeviceRepository(application);
+                }
+            }
+        }
+        return instance;
+    }
 
     public LiveData<Device> getDevice(String deviceSn) {
         return deviceDao.getDeviceDataBySn(deviceSn);

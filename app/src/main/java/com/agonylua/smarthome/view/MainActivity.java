@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
         networkMonitor = new NetworkMonitor(getApplication());
         networkMonitor.startMonitoring();
-
     }
 
     private void initFragments() {

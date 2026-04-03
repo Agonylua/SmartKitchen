@@ -6,7 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.agonylua.smarthome.common.ApiResponse;
-import com.agonylua.smarthome.common.DeviceBindRequest;
+import com.agonylua.smarthome.common.DeviceRequest;
 import com.agonylua.smarthome.network.RetrofitClient;
 
 import retrofit2.Call;
@@ -15,14 +15,26 @@ import retrofit2.Response;
 
 public class AddDeviceRepository {
     private static final String TAG = "AddDeviceRepository";
+    private static volatile AddDeviceRepository instance;
     private RetrofitClient retrofitClient;
 
-    public AddDeviceRepository(Application application) {
+    private AddDeviceRepository(Application application) {
         retrofitClient = RetrofitClient.getInstance(application);
     }
 
+    public static AddDeviceRepository getInstance(Application application) {
+        if (instance == null) {
+            synchronized (AddDeviceRepository.class) {
+                if (instance == null) {
+                    instance = new AddDeviceRepository(application);
+                }
+            }
+        }
+        return instance;
+    }
+
     public void bindDevice(String deviceSn, String homeId, callback callback) {
-        DeviceBindRequest request = new DeviceBindRequest(deviceSn, homeId);
+        DeviceRequest request = new DeviceRequest(deviceSn, homeId);
         Log.d(TAG, "bindDevice: " + deviceSn + " " + homeId);
         retrofitClient.getApi().bindDevice(request).enqueue(new Callback<ApiResponse<Integer>>() {
             @Override

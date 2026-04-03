@@ -16,15 +16,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceViewHolder> {
-
+    private static final String TAG = "DeviceAdapter";
     private List<Device> deviceList = new ArrayList<>();
     private OnItemClickListener listener;
+    private OnItemLongClickListener longClickListener;
+    private String currentDeletingDeviceSn = null;
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
 
-    // 更新数据列表，配合 ViewModel 的 observe 自动刷新
+    public void setOnItemLongClickListener(OnItemLongClickListener longClickListener) {
+        this.longClickListener = longClickListener;
+    }
+
     public void submitList(List<Device> newDevices) {
         this.deviceList = newDevices;
         notifyDataSetChanged();
@@ -33,7 +38,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     @NonNull
     @Override
     public DeviceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // 绑定你最新的极简网格卡片布局
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_device_card, parent, false);
         return new DeviceViewHolder(view);
@@ -42,7 +46,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     @Override
     public void onBindViewHolder(@NonNull DeviceViewHolder holder, int position) {
         Device device = deviceList.get(position);
-        holder.bind(device, listener);
+        holder.bind(device, listener, longClickListener, currentDeletingDeviceSn, this);
     }
 
     @Override
@@ -50,22 +54,64 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         return deviceList == null ? 0 : deviceList.size();
     }
 
+    public void clearDeleteMode() {
+        if (currentDeletingDeviceSn != null) {
+            String tempId = currentDeletingDeviceSn;
+            currentDeletingDeviceSn = null;
+            for (int i = 0; i < deviceList.size(); i++) {
+                String dSn = deviceList.get(i).getDeviceSn();
+                if (dSn != null && dSn.equals(tempId)) {
+                    notifyItemChanged(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    public String getCurrentDeletingDeviceSn() {
+        return currentDeletingDeviceSn;
+    }
+
+    public void setCurrentDeletingDeviceSn(String sn) {
+        String oldSn = currentDeletingDeviceSn;
+        currentDeletingDeviceSn = sn;
+        if (oldSn != null && !oldSn.equals(currentDeletingDeviceSn)) {
+            for (int i = 0; i < deviceList.size(); i++) {
+                String dSn = deviceList.get(i).getDeviceSn();
+                if (dSn != null && dSn.equals(oldSn)) {
+                    notifyItemChanged(i);
+                    break;
+                }
+            }
+        }
+    }
+
     // 定义点击事件接口，方便在 Fragment 中处理页面跳转
     public interface OnItemClickListener {
         void onItemClick(Device device);
     }
 
+    // 定义长按事件接口，用于删除设备等操作
+    public interface OnItemLongClickListener {
+        void onItemLongClick(Device device);
+    }
+
     static class DeviceViewHolder extends RecyclerView.ViewHolder {
         ImageView ivDeviceIcon;
         TextView tvDeviceName;
+        View clDeleteOverlay;
+        View btnDeleteConfirm;
+        Runnable longPressRunnable;
 
         public DeviceViewHolder(@NonNull View itemView) {
             super(itemView);
             ivDeviceIcon = itemView.findViewById(R.id.iv_device_icon);
             tvDeviceName = itemView.findViewById(R.id.tv_device_name);
+            clDeleteOverlay = itemView.findViewById(R.id.cl_delete_overlay);
+            btnDeleteConfirm = itemView.findViewById(R.id.btn_delete_confirm);
         }
 
-        public void bind(Device device, OnItemClickListener listener) {
+        public void bind(Device device, OnItemClickListener listener, OnItemLongClickListener longClickListener, String currentDeletingSn, DeviceAdapter adapter) {
             // 设置设备名称
             tvDeviceName.setText(device.getDeviceName() != null ? device.getDeviceName() : "未知设备");
 
@@ -75,6 +121,55 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
 
             // 根据设备类型和在线状态加载不同的图标
             ivDeviceIcon.setImageResource(getIconForDevice(deviceType, isOnline));
+
+            boolean isDeleting = device.getDeviceSn() != null && device.getDeviceSn().equals(currentDeletingSn);
+            clDeleteOverlay.setVisibility(isDeleting ? View.VISIBLE : View.GONE);
+
+            // 自定义长按逻辑
+            itemView.setOnTouchListener((v, event) -> {
+                switch (event.getAction()) {
+                    case android.view.MotionEvent.ACTION_DOWN:
+                        if (adapter.getCurrentDeletingDeviceSn() != null && !device.getDeviceSn().equals(adapter.getCurrentDeletingDeviceSn())) {
+                            adapter.clearDeleteMode();
+                        }
+
+                        if (longPressRunnable != null) {
+                            v.removeCallbacks(longPressRunnable);
+                        }
+                        longPressRunnable = () -> {
+                            adapter.setCurrentDeletingDeviceSn(device.getDeviceSn());
+                            adapter.notifyItemChanged(getAdapterPosition());
+                        };
+                        v.postDelayed(longPressRunnable, 1000);
+                        break;
+                    case android.view.MotionEvent.ACTION_UP:
+                    case android.view.MotionEvent.ACTION_CANCEL:
+                    case android.view.MotionEvent.ACTION_MOVE:
+                        if (event.getAction() != android.view.MotionEvent.ACTION_MOVE ||
+                                (event.getAction() == android.view.MotionEvent.ACTION_MOVE && event.getHistorySize() > 0)) {
+                            if (longPressRunnable != null) {
+                                v.removeCallbacks(longPressRunnable);
+                            }
+                        }
+                        break;
+                }
+                return false;
+            });
+
+            // 遮罩存在拦截点击，使得点击卡片其他地方取消删除
+            clDeleteOverlay.setOnClickListener(v -> {
+                adapter.setCurrentDeletingDeviceSn(null);
+                adapter.notifyItemChanged(getAdapterPosition());
+            });
+
+            // 点击确认删除按钮
+            btnDeleteConfirm.setOnClickListener(v -> {
+                adapter.setCurrentDeletingDeviceSn(null);
+                adapter.notifyItemChanged(getAdapterPosition());
+                if (longClickListener != null) {
+                    longClickListener.onItemLongClick(device);
+                }
+            });
 
             // 处理卡片点击事件
             itemView.setOnClickListener(v -> {

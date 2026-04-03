@@ -4,70 +4,75 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/splashFragment">
 
-    <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.agonylua.smarthome.fragment.HomeFragment"
-        android:label="HomeFragment">
-        <action
-            android:id="@+id/action_homeFragment_to_scanQrFragment"
-            app:destination="@id/scanQrFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/monitorFragment"
-        android:name="com.agonylua.smarthome.fragment.MonitorFragment"
-        android:label="MonitorFragment" />
-    <fragment
-        android:id="@+id/aboutFragment"
-        android:name="com.agonylua.smarthome.fragment.SetFragment"
-        android:label="SetFragment">
-        <action
-            android:id="@+id/action_setFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/smartFragment"
-        android:name="com.agonylua.smarthome.fragment.SmartFragment"
-        android:label="SmartFragment" />
-    <fragment
-        android:id="@+id/userFragment"
-        android:name="com.agonylua.smarthome.fragment.UserFragment"
-        android:label="UserFragment" />
-    <fragment
-        android:id="@+id/mainFragment"
-        android:name="com.agonylua.smarthome.fragment.MainFragment"
-        android:label="MainFragment">
-        <action
-            android:id="@+id/action_mainFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
-        <action
-            android:id="@+id/action_mainFragment_to_deviceFragment2"
-            app:destination="@id/deviceFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/loginFragment"
-        android:name="com.agonylua.smarthome.fragment.LoginFragment"
-        android:label="LoginFragment">
-        <action
-            android:id="@+id/action_loginFragment_to_mainFragment"
-            app:destination="@id/mainFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
+    <action
+        android:id="@+id/action_global_to_login"
+        app:destination="@id/loginFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.agonylua.smarthome.fragment.SplashFragment"
         android:label="SplashFragment">
         <action
-            android:id="@+id/action_splashFragment_to_loginFragment"
+            android:id="@+id/action_splash_to_login"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
         <action
-            android:id="@+id/action_splashFragment_to_mainFragment"
+            android:id="@+id/action_splash_to_main"
             app:destination="@id/mainFragment"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.agonylua.smarthome.fragment.LoginFragment"
+        android:label="LoginFragment">
+        <action
+            android:id="@+id/action_login_to_main"
+            app:destination="@id/mainFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.agonylua.smarthome.fragment.MainFragment"
+        android:label="MainFragment">
+
+        <action
+            android:id="@+id/action_main_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/mainFragment"
+            app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/action_main_to_device"
+            app:destination="@id/deviceFragment" />
+
+        <action
+            android:id="@+id/action_main_to_set"
+            app:destination="@id/setFragment" />
+
+        <action
+            android:id="@+id/action_main_to_provision"
+            app:destination="@id/provisionFragment" />
+
+        <action
+            android:id="@+id/action_main_to_homeManage"
+            app:destination="@id/homeManageFragment" />
+
+        <action
+            android:id="@+id/action_main_to_userProfile"
+            app:destination="@id/userProfileFragment" />
+
+        <action
+            android:id="@+id/action_main_to_customRules"
+            app:destination="@id/customRulesFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/deviceFragment"
         android:name="com.agonylua.smarthome.fragment.DeviceFragment"
@@ -76,36 +81,61 @@
             android:name="currentDevice"
             app:argType="com.agonylua.smarthome.database.entity.Device" />
     </fragment>
+
+    <fragment
+        android:id="@+id/setFragment"
+        android:name="com.agonylua.smarthome.fragment.SetFragment"
+        android:label="SetFragment" />
+
     <fragment
         android:id="@+id/provisionFragment"
         android:name="com.agonylua.smarthome.fragment.ProvisionFragment"
-        android:label="ProvisionFragment" />
+        android:label="ProvisionFragment">
+        <action
+            android:id="@+id/action_provision_to_scanQr"
+            app:destination="@id/scanQrFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/scanQrFragment"
         android:name="com.agonylua.smarthome.fragment.ScanQrFragment"
         android:label="ScanQrFragment">
         <action
-            android:id="@+id/action_scanQrFragment_pop_including_provisionFragment"
-            app:popUpTo="@id/provisionFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_scanQrFragment_to_provisionFragment"
-            app:destination="@id/provisionFragment" />
+            android:id="@+id/action_scanQr_to_main"
+            app:destination="@id/mainFragment"
+            app:popUpTo="@id/mainFragment"
+            app:popUpToInclusive="false" />
     </fragment>
+
+    <fragment
+        android:id="@+id/homeManageFragment"
+        android:name="com.agonylua.smarthome.fragment.HomeManageFragment"
+        android:label="HomeManageFragment" />
+
+    <fragment
+        android:id="@+id/userProfileFragment"
+        android:name="com.agonylua.smarthome.fragment.UserProfileFragment"
+        android:label="UserProfileFragment" />
+
     <dialog
         android:id="@+id/customRulesFragment"
         android:name="com.agonylua.smarthome.fragment.CustomRulesFragment"
         android:label="CustomRulesFragment" />
     <fragment
-        android:id="@+id/homeManageFragment"
-        android:name="com.agonylua.smarthome.fragment.HomeManageFragment"
-        android:label="HomeManageFragment" />
-    <dialog
-        android:id="@+id/globalPopup"
-        android:name="com.agonylua.smarthome.view.GlobalPopup"
-        android:label="GlobalPopup" />
+        android:id="@+id/homeFragment"
+        android:name="com.agonylua.smarthome.fragment.HomeFragment"
+        android:label="HomeFragment" />
     <fragment
-        android:id="@+id/userProfileFragment"
-        android:name="com.agonylua.smarthome.fragment.UserProfileFragment"
-        android:label="UserProfileFragment" />
+        android:id="@+id/monitorFragment"
+        android:name="com.agonylua.smarthome.fragment.MonitorFragment"
+        android:label="MonitorFragment" />
+    <fragment
+        android:id="@+id/smartFragment"
+        android:name="com.agonylua.smarthome.fragment.SmartFragment"
+        android:label="SmartFragment" />
+    <fragment
+        android:id="@+id/userFragment"
+        android:name="com.agonylua.smarthome.fragment.UserFragment"
+        android:label="UserFragment" />
+
 </navigation>

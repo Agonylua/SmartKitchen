@@ -1,11 +1,11 @@
 package com.agonylua.smarthome.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,17 +13,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.databinding.FragmentDeviceBinding;
+import com.agonylua.smarthome.databinding.LayoutDishwasherBinding;
 import com.agonylua.smarthome.databinding.LayoutMicrowaveBinding;
 import com.agonylua.smarthome.databinding.LayoutRefrigeratorBinding;
+import com.agonylua.smarthome.databinding.LayoutRiceCookerBinding;
+import com.agonylua.smarthome.databinding.LayoutSterilizerBinding;
 import com.agonylua.smarthome.repository.DeviceRepository;
 import com.agonylua.smarthome.viewModel.DeviceViewModel;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
-import com.google.android.material.slider.Slider;
 
 public class DeviceFragment extends Fragment {
 
@@ -104,102 +102,55 @@ public class DeviceFragment extends Fragment {
                 break;
 
             case "MICROWAVE": // 微波炉
-                binding.toolbar.setTitle("微波炉");
-                binding.deviceImage.setImageResource(R.drawable.ic_device_microwave_online);
                 LayoutMicrowaveBinding microwaveBinding = LayoutMicrowaveBinding.inflate(inflater, container, false);
                 microwaveBinding.setViewModel(mViewModel);
+                microwaveBinding.setDevice(device);
+                Log.d(TAG, "setupDynamicContent: " + device.getDeviceMode());
+                mViewModel.initDevice(device);
+
+                // 4. "+30s" 快捷按钮
+                microwaveBinding.btnAdd30s.setOnClickListener(v -> {
+                    mViewModel.addMicrowaveTime(30);
+                });
+
+                // 5. 开始加热按钮
+                microwaveBinding.btnStart.setOnClickListener(v -> {
+                    mViewModel.submitTask();
+                });
+
                 microwaveBinding.setLifecycleOwner(getViewLifecycleOwner());
                 container.addView(microwaveBinding.getRoot());
-                initMicrowaveLogic(microwaveBinding.getRoot());
                 break;
             case "DISHWASHER": // 洗碗机
-                binding.toolbar.setTitle("洗碗机");
-                binding.deviceImage.setImageResource(R.drawable.ic_device_dishwasher_online);
+                LayoutDishwasherBinding dishwasherBinding = LayoutDishwasherBinding.inflate(inflater, container, false);
+                dishwasherBinding.setViewModel(mViewModel);
+                mViewModel.initDevice(device);
+
+                dishwasherBinding.setLifecycleOwner(getViewLifecycleOwner());
+                container.addView(dishwasherBinding.getRoot());
                 break;
             case "RICE_COOKER": // 电饭煲
-                binding.toolbar.setTitle("智能电饭煲");
-                binding.deviceImage.setImageResource(R.drawable.ic_device_rice_cooker_online);
-                contentView = inflater.inflate(R.layout.layout_rice_cooker, container, false);
-                container.addView(contentView);
+                LayoutRiceCookerBinding riceCookerBinding = LayoutRiceCookerBinding.inflate(inflater, container, false);
+                riceCookerBinding.setViewModel(mViewModel);
+                riceCookerBinding.setDevice(device);
+                mViewModel.initDevice(device);
+                riceCookerBinding.btnStart.setOnClickListener(v -> {
+                    mViewModel.submitTask();
+                });
+
+                riceCookerBinding.setLifecycleOwner(getViewLifecycleOwner());
+                container.addView(riceCookerBinding.getRoot());
                 break;
             case "STERILIZER": // 消毒柜
-                binding.toolbar.setTitle("智能消毒柜");
-                binding.deviceImage.setImageResource(R.drawable.ic_device_sterilizer_online);
-                contentView = inflater.inflate(R.layout.layout_sterilizer, container, false);
-                container.addView(contentView);
+                LayoutSterilizerBinding sterilizerBinding = LayoutSterilizerBinding.inflate(inflater, container, false);
+                sterilizerBinding.setViewModel(mViewModel);
+                mViewModel.initDevice(device);
+
+                sterilizerBinding.setLifecycleOwner(getViewLifecycleOwner());
+                container.addView(sterilizerBinding.getRoot());
                 break;
         }
     }
-
-    // ============================================================
-    //  设备逻辑：冰箱 (Fridge)
-    //  假设布局包含: Slider(温度), ChipGroup(模式: 速冻/节能)
-    // ============================================================
-
-    // ============================================================
-    //  设备逻辑：微波炉 (Microwave)
-    //  假设布局包含: ChipGroup(时间选择), ChipGroup(火力), Button(开始)
-    // ============================================================
-    private void initMicrowaveLogic(View view) {
-        TextView tvTimer = view.findViewById(R.id.tv_timer_big); // 巨大的数字显示
-        Slider sliderTime = view.findViewById(R.id.slider_time); // 预设时间: 30s, 1min, 3min
-        ChipGroup chipGroupPower = view.findViewById(R.id.chip_group_power); // 火力: 高火, 解冻
-        MaterialButton btnStart = view.findViewById(R.id.btn_start_microwave);
-
-        // 保存当前选择的时间 (在 Fragment 暂存 UI 状态，或者放到 ViewModel 也可以)
-        final int[] currentSeconds = {0};
-
-        // 2. 事件绑定
-        if (chipGroupPower != null) {
-            chipGroupPower.setOnCheckedStateChangeListener((group, checkedIds) -> {
-                if (checkedIds.isEmpty()) return;
-
-                // 简单的根据 ID 或 Tag 判断时间，这里简化处理
-                View chip = view.findViewById(checkedIds.get(0));
-                int seconds = 0;
-
-                // 假设 XML 中 chip 的 tag 存了秒数，或者根据 Text 判断
-                String text = ((Chip) chip).getText().toString();
-                if (text.contains("30秒")) seconds = 30;
-                else if (text.contains("1分钟")) seconds = 60;
-                else if (text.contains("3分钟")) seconds = 180;
-
-                currentSeconds[0] = seconds;
-                mViewModel.setMicrowaveTime(seconds); // 更新 UI 显示
-            });
-        }
-        if (sliderTime != null) {
-            // 滑动停止后才发送请求
-            sliderTime.addOnSliderTouchListener(new Slider.OnSliderTouchListener() {
-                @Override
-                public void onStartTrackingTouch(@NonNull Slider slider) {
-                }
-
-                @Override
-                public void onStopTrackingTouch(@NonNull Slider slider) {
-                }
-            });
-
-            // 滑动时仅做本地 UI 反馈 (可选，也可以通过 LiveData)
-            sliderTime.addOnChangeListener((slider, value, fromUser) -> {
-                sliderTime.setValue(value);
-            });
-        }
-        if (btnStart != null) {
-            btnStart.setOnClickListener(v -> {
-                String power = "高火"; // 默认为高火，或者从 chipGroupPower 获取
-                if (chipGroupPower != null && chipGroupPower.getCheckedChipId() != View.NO_ID) {
-                    Chip c = view.findViewById(chipGroupPower.getCheckedChipId());
-                    power = c.getText().toString();
-                }
-                mViewModel.startMicrowave(currentSeconds[0], power);
-            });
-        }
-
-    }
-
-    // ====================== 通用 ========================
-
 
     @Override
     public void onDestroyView() {

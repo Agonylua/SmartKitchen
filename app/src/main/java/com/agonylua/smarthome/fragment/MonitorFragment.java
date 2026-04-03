@@ -51,9 +51,12 @@ public class MonitorFragment extends Fragment {
         binding.setLifecycleOwner(getViewLifecycleOwner());
         binding.setViewModel(monitorViewModel);
 
-        monitorViewModel.getDevicePowerData();
+        monitorViewModel.refreshData();
         observeChartData();
         setupChart();
+        binding.refreshLayout.setOnRefreshListener(refreshLayout -> {
+            monitorViewModel.refreshData();
+        });
     }
 
     private void observeChartData() {
@@ -63,6 +66,11 @@ public class MonitorFragment extends Fragment {
         });
 
         monitorViewModel.getPowerData().observe(getViewLifecycleOwner(), this::setMockChartData);
+
+        monitorViewModel.refreshResult.observe(getViewLifecycleOwner(), success -> {
+            binding.refreshLayout.finishRefresh(success);
+        });
+
     }
 
     private void setupChart() {

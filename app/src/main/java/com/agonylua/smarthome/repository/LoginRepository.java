@@ -22,17 +22,29 @@ import retrofit2.Response;
 
 // LoginRepository.java
 public class LoginRepository {
-    private final String TAG = "callback";
+    private static volatile LoginRepository instance;
+    private final String TAG = "poserCallback";
     private NetworkMonitor networkMonitor;
     private RetrofitClient retrofit;
     private UserManager userManager;
     private HomeDao homeDao;
 
-    public LoginRepository(Application application) {
+    private LoginRepository(Application application) {
         retrofit = RetrofitClient.getInstance(application);
         userManager = UserManager.getInstance(application);
         homeDao = AppDatabase.getInstance(application).homeDao();
         networkMonitor = NetworkMonitor.getInstance(application);
+    }
+
+    public static LoginRepository getInstance(Application application) {
+        if (instance == null) {
+            synchronized (LoginRepository.class) {
+                if (instance == null) {
+                    instance = new LoginRepository(application);
+                }
+            }
+        }
+        return instance;
     }
 
     public void login(String username, String password, final LoginCallback callback) {

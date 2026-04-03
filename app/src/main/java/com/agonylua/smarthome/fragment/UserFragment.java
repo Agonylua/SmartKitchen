@@ -1,16 +1,20 @@
 package com.agonylua.smarthome.fragment;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.agonylua.smarthome.R;
@@ -19,6 +23,9 @@ import com.agonylua.smarthome.model.User;
 import com.agonylua.smarthome.utils.UserManager;
 import com.agonylua.smarthome.viewModel.UserViewModel;
 import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 public class UserFragment extends Fragment {
     private TextView btn_settings;
@@ -41,11 +48,86 @@ public class UserFragment extends Fragment {
         obServeViewModel();
         userViewModel.loadUserData();
 
-        binding.btHomeManager.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.homeManageFragment));
-        binding.btUserInfo.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.userProfileFragment));
-        binding.btAbout.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.aboutFragment));
         userManager = UserManager.getInstance(requireActivity().getApplication());
         binding.setLifecycleOwner(getViewLifecycleOwner());
+        binding.btHomeManager.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireParentFragment().requireView());
+            navController.navigate(R.id.action_main_to_homeManage);
+        });
+        binding.btUserInfo.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireParentFragment().requireView());
+            navController.navigate(R.id.action_main_to_userProfile);
+        });
+        binding.btAbout.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireParentFragment().requireView());
+        });
+        binding.refreshLayout.setOnRefreshListener(refreshLayout -> userViewModel.refreshUserData());
+        binding.btJoinHome.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_join_home, null);
+            builder.setView(dialogView);
+
+            AlertDialog dialog = builder.create();
+
+            // 【关键黑科技】使用 GradientDrawable 设置背景色及各个角的圆角弧度
+            if (dialog.getWindow() != null) {
+                android.graphics.drawable.GradientDrawable bgShape = new android.graphics.drawable.GradientDrawable();
+                bgShape.setColor(android.graphics.Color.WHITE);
+                bgShape.setCornerRadii(new float[]{40f, 40f, 40f, 40f, 40f, 40f, 40f, 40f});
+                dialog.getWindow().setBackgroundDrawable(bgShape);
+                dialogView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+            }
+            // 获取内部控件并绑定事件
+            MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+            MaterialButton btnConfirm = dialogView.findViewById(R.id.btn_confirm);
+            TextInputLayout textInputLayout = dialogView.findViewById(R.id.et_home_code);
+            TextInputEditText etHomeId = (TextInputEditText) textInputLayout.getEditText();
+
+            btnCancel.setOnClickListener(v1 -> {
+                dialog.dismiss();
+            });
+            btnConfirm.setOnClickListener(v2 -> {
+                String homeId = etHomeId != null ? etHomeId.getText().toString() : "";
+                userViewModel.joinHome(homeId);
+                dialog.dismiss();
+            });
+            dialog.show();
+        });
+        binding.btnLogout.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_custom_confirm, null);
+            builder.setView(dialogView);
+
+            AlertDialog dialog = builder.create();
+
+            // 【关键黑科技】必须将 Dialog 窗口背景设为透明，否则圆角四个角会有白色方块底色
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            }
+
+            // 获取内部控件并绑定事件
+            MaterialButton btnNegative = dialogView.findViewById(R.id.btn_dialog_negative);
+            MaterialButton btnPositive = dialogView.findViewById(R.id.btn_dialog_positive);
+            ImageView ivIcon = dialogView.findViewById(R.id.iv_dialog_icon);
+            TextView tvTitle = dialogView.findViewById(R.id.tv_dialog_title);
+            TextView tvMessage = dialogView.findViewById(R.id.tv_dialog_message);
+            btnNegative.setText("取消");
+            btnPositive.setText("确认");
+            ivIcon.setImageResource(R.drawable.ic_warning);
+            tvTitle.setText("确认退出登录吗？");
+            tvMessage.setText("");
+            // 点击“继续编辑”（灰色按钮）：直接关闭弹窗即可
+            btnNegative.setOnClickListener(v1 -> dialog.dismiss());
+
+            // 点击“放弃并退出”（红色按钮）：关闭弹窗并返回上一页
+            btnPositive.setOnClickListener(v2 -> {
+                userViewModel.logout();
+                dialog.dismiss();
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+                navController.navigate(R.id.action_global_to_login);
+            });
+            dialog.show();
+        });
     }
 
     private void obServeViewModel() {
@@ -61,6 +143,9 @@ public class UserFragment extends Fragment {
                     .circleCrop()                    // 再次确保图片内容被裁剪为圆形
                     .into(binding.ivAvatar);          // 渲染到控件上
 
+        });
+        userViewModel.refreshResult.observe(getViewLifecycleOwner(), result -> {
+            binding.refreshLayout.finishRefresh(result);
         });
     }
 

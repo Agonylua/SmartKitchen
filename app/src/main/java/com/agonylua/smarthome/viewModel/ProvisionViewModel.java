@@ -56,7 +56,7 @@ public class ProvisionViewModel extends AndroidViewModel {
         super(application);
         provisioningHelper = EspProvisioningHelper.getInstance(application);
         EventBus.getDefault().register(this);
-        repository = new AddDeviceRepository(application);
+        repository = AddDeviceRepository.getInstance(application);
         userManager = UserManager.getInstance(application);
     }
 

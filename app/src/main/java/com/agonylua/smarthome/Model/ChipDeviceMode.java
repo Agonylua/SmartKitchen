@@ -1,4 +1,4 @@
-package com.agonylua.smarthome.adapter;
+package com.agonylua.smarthome.model;
 
 import java.util.ArrayList;
 

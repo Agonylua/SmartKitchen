@@ -45,6 +45,7 @@ public class SmartViewModel extends ViewModel {
     private final MutableLiveData<List<String>> condStateList = new MutableLiveData<>();
     private final MutableLiveData<List<String>> actionCommandList = new MutableLiveData<>();
     private LiveData<List<Rules>> rulesList = new MutableLiveData<>();
+    public MutableLiveData<Boolean> refreshResult = new MutableLiveData<>();
     private SmartRepository repository;
 
     public void init(SmartRepository repository) {
@@ -57,10 +58,12 @@ public class SmartViewModel extends ViewModel {
         repository.getRules(new SmartRepository.SmartCallback() {
             @Override
             public void onSuccess() {
+                refreshResult.postValue(true);
             }
 
             @Override
             public void onError(String errorMessage) {
+                refreshResult.postValue(false);
             }
         });
     }

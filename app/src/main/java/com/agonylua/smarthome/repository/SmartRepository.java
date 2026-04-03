@@ -27,16 +27,28 @@ import retrofit2.Response;
 public class SmartRepository {
 
     private static final String TAG = "SmartRepository";
+    private static volatile SmartRepository instance;
     private RetrofitClient retrofit;
     private DeviceDao deviceDao;
     private RulesDao rulesDao;
     private UserManager userManager;
 
-    public SmartRepository(Application application) {
+    private SmartRepository(Application application) {
         retrofit = RetrofitClient.getInstance(application);
         deviceDao = AppDatabase.getInstance(application).deviceDao();
         rulesDao = AppDatabase.getInstance(application).rulesDao();
         userManager = UserManager.getInstance(application);
+    }
+
+    public static SmartRepository getInstance(Application application) {
+        if (instance == null) {
+            synchronized (SmartRepository.class) {
+                if (instance == null) {
+                    instance = new SmartRepository(application);
+                }
+            }
+        }
+        return instance;
     }
 
     public UserManager getUserManager() {

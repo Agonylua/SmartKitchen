@@ -72,7 +72,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
-        // 适配重构后的 DeviceAdapter
         adapter = new DeviceAdapter();
         binding.rvDevices.setLayoutManager(new GridLayoutManager(getContext(), 2));
         binding.rvDevices.setAdapter(adapter);
@@ -81,11 +80,36 @@ public class HomeFragment extends Fragment {
         adapter.setOnItemClickListener(new DeviceAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Device device) {
+                adapter.clearDeleteMode(); // 点击时如果有在删除确认状态的卡片，要清除
                 NavController navController = NavHostFragment.findNavController(HomeFragment.this);
-                MainFragmentDirections.ActionMainFragmentToDeviceFragment2 action =
-                        MainFragmentDirections.actionMainFragmentToDeviceFragment2(device);
+                MainFragmentDirections.ActionMainToDevice action =
+                        MainFragmentDirections.actionMainToDevice(device);
                 navController.navigate(action);
             }
+        });
+
+        // 适配长按删除事件监听器
+        adapter.setOnItemLongClickListener(new DeviceAdapter.OnItemLongClickListener() {
+            @Override
+            public void onItemLongClick(Device device) {
+                homeViewModel.deleteDevice(device.getDeviceSn(), homeId);
+            }
+        });
+
+        // 为外层容器添加点击监听器，如果点击空白区域也能清除卡片的删除遮罩
+        binding.refreshLayout.setOnClickListener(v -> {
+            if (adapter != null) {
+                adapter.clearDeleteMode();
+            }
+        });
+
+        binding.rvDevices.setOnTouchListener((v, event) -> {
+            if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                if (adapter != null) {
+                    adapter.clearDeleteMode();
+                }
+            }
+            return false;
         });
     }
 
@@ -127,3 +151,4 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 }
+

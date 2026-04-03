@@ -39,6 +39,7 @@ public class UserViewModel extends AndroidViewModel {
     private MediatorLiveData<Boolean> isSaveEnabled = new MediatorLiveData<>(false);
     private MutableLiveData<Boolean> isPasswordConsistency = new MutableLiveData<>();
     private MutableLiveData<Boolean> isUserInfoResult = new MutableLiveData<>(false);
+    public MutableLiveData<Boolean> refreshResult = new MutableLiveData<>();
     private MutableLiveData<ArrayList<HomeMemberAdapter.HomeMember>> memberList = new MutableLiveData<>();
     private LiveData<Home> home = new MutableLiveData<>();
     private UserRepository repository;
@@ -46,7 +47,7 @@ public class UserViewModel extends AndroidViewModel {
 
     public UserViewModel(@NonNull Application application) {
         super(application);
-        repository = new UserRepository(application);
+        repository = UserRepository.getInstance(application);
         userManager = UserManager.getInstance(getApplication());
         observeChanges();
     }
@@ -95,6 +96,22 @@ public class UserViewModel extends AndroidViewModel {
         isLogin.setValue(userManager.isLogIn());
     }
 
+    public void refreshUserData() {
+        repository.getUserInfo(new UserRepository.infoCallback() {
+            @Override
+            public void onSuccess() {
+                loadUserData();
+                refreshResult.postValue(true);
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(getApplication(), "用户信息刷新失败: " + message, Toast.LENGTH_SHORT).show();
+                refreshResult.postValue(false);
+            }
+        });
+    }
+
     public void refreshHomeData(Home currentHome) {
         if (currentHome == null) return;
         btnExitHome.setValue(!currentHome.getOwnerId().equals(userManager.getUserId()));
@@ -104,7 +121,7 @@ public class UserViewModel extends AndroidViewModel {
         ArrayList<HomeMemberAdapter.HomeMember> list = new ArrayList<>();
 
         // 成员
-        repository.getUsersInfo(new UserRepository.usersInfoCallback() {
+        repository.getUserListInfo(new UserRepository.usersInfoCallback() {
             @Override
             public void onSuccess(List<UserDTO> users) {
                 Log.d(TAG, "onSuccess: 获取用户信息成功: " + users.toString());
@@ -154,6 +171,20 @@ public class UserViewModel extends AndroidViewModel {
             @Override
             public void onError(String message) {
                 Toast.makeText(getApplication(), "成员移除失败: " + message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void joinHome(String homeId) {
+        repository.joinHome(homeId, new UserRepository.joinCallback() {
+            @Override
+            public void onSuccess(String refresh) {
+                Toast.makeText(getApplication(), refresh, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(getApplication(), "申请失败: " + message, Toast.LENGTH_SHORT).show();
             }
         });
     }

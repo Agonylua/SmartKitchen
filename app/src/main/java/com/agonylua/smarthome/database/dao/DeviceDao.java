@@ -58,5 +58,8 @@ public interface DeviceDao {
     // 删：清空缓存 (可选)
     @Query("DELETE FROM devices")
     void clearAll();
-}
 
+    // 删：根据设备 SN 删除单个设备 (乐观 UI 更新使用)
+    @Query("DELETE FROM devices WHERE deviceSn = :deviceSn")
+    void deleteByDeviceSn(String deviceSn);
+}

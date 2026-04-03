@@ -1,22 +1,35 @@
 package com.agonylua.smarthome.fragment;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smarthome.R;
 import com.agonylua.smarthome.repository.MainRepository;
+import com.agonylua.smarthome.utils.JsonUtils;
+import com.agonylua.smarthome.utils.UserManager;
+import com.agonylua.smarthome.utils.WebSocketManager;
+import com.agonylua.smarthome.viewModel.MainViewModel;
+import com.google.android.material.button.MaterialButton;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+
+import java.util.Map;
+import java.util.Objects;
 
 public class MainFragment extends Fragment {
 
@@ -24,6 +37,7 @@ public class MainFragment extends Fragment {
     private ViewPager2 mViewPager2;
     private RadioGroup mRadioGroup;
     private MainRepository mainRepository;
+    private MainViewModel mainViewModel;
     private int currentPosition = 0;
     private long mExitTime = 0;
 
@@ -39,17 +53,13 @@ public class MainFragment extends Fragment {
 
         mViewPager2 = view.findViewById(R.id.viewPager);
         mRadioGroup = view.findViewById(R.id.radioGroup);
-//        refreshLayout = view.findViewById(R.id.refreshLayout);
+        mainRepository = MainRepository.getInstance(requireActivity().getApplication());
+        mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        mainViewModel.init(mainRepository);
+        WebSocketManager.getInstance().setNotificationListener(this::showJoinRequestDialog);
 
-        // 下拉刷新监听
-//        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
-//            @Override
-//            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-//                if (getContext() != null) {
-//                new HomeViewModel((Application) getContext()).syncServiceData(UserManager.getInstance(getContext()).getHomeId());
-//                }
-//            }
-//        });
+        String userId = UserManager.getInstance(requireActivity().getApplication()).getUserId();
+        WebSocketManager.getInstance().connect(userId);
 
         // 注册返回键监听回调
         registerBackPressedCallback();
@@ -167,6 +177,54 @@ public class MainFragment extends Fragment {
     }
 
     /**
+     * 弹窗提示用户
+     */
+    private void showJoinRequestDialog(String message) {
+        Map<String, Object> megMap = JsonUtils.toMap(message);
+        if (megMap == null || !megMap.containsKey("type")) {
+            return;
+        }
+        if (!Objects.equals(megMap.get("type"), "JOIN_REQUEST")) {
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_custom_confirm, null);
+        builder.setView(dialogView);
+
+        AlertDialog dialog = builder.create();
+
+        // 【关键黑科技】必须将 Dialog 窗口背景设为透明，否则圆角四个角会有白色方块底色
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        // 获取内部控件并绑定事件
+        MaterialButton btnNegative = dialogView.findViewById(R.id.btn_dialog_negative);
+        MaterialButton btnPositive = dialogView.findViewById(R.id.btn_dialog_positive);
+        TextView tvTitle = dialogView.findViewById(R.id.tv_dialog_title);
+        TextView tvMessage = dialogView.findViewById(R.id.tv_dialog_message);
+        ImageView ivIcon = dialogView.findViewById(R.id.iv_dialog_icon);
+        ivIcon.setImageResource(R.drawable.ic_remind);
+        btnNegative.setText("拒绝");
+        btnPositive.setText("允许加入");
+        tvTitle.setText("家庭加入请求");
+        String memberId = megMap.get("memberId").toString();
+        String meg = "用户" + memberId + "请求加入您的家庭，是否允许？";
+        tvMessage.setText(meg);
+        btnNegative.setOnClickListener(v -> {
+            mainViewModel.joinHomeApproval(false, memberId);
+            dialog.dismiss();
+        });
+
+        btnPositive.setOnClickListener(v -> {
+            mainViewModel.joinHomeApproval(true, memberId);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    /**
      * 系统会在 Fragment 销毁 View 时调用此方法保存数据
      */
     @Override
@@ -174,6 +232,8 @@ public class MainFragment extends Fragment {
         super.onSaveInstanceState(outState);
         // 保存当前的 Tab 索引
         outState.putInt("saved_tab_index", currentPosition);
+        WebSocketManager.getInstance().disconnect();
+        WebSocketManager.getInstance().setNotificationListener(null);
     }
 
 }

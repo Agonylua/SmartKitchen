@@ -27,14 +27,26 @@ import retrofit2.Response;
 
 public class UserRepository {
     private static final String TAG = "UserRepository";
+    private static volatile UserRepository instance;
     private final UserManager userManager;
     private RetrofitClient retrofit;
     private HomeDao homeDao;
 
-    public UserRepository(Application application) {
+    private UserRepository(Application application) {
         this.userManager = UserManager.getInstance(application);
         retrofit = RetrofitClient.getInstance(application);
         homeDao = AppDatabase.getInstance(application).homeDao();
+    }
+
+    public static UserRepository getInstance(Application application) {
+        if (instance == null) {
+            synchronized (UserRepository.class) {
+                if (instance == null) {
+                    instance = new UserRepository(application);
+                }
+            }
+        }
+        return instance;
     }
 
     public LiveData<Home> getHome() {
@@ -114,9 +126,37 @@ public class UserRepository {
         });
     }
 
-    public void getUsersInfo(usersInfoCallback callback) {
+    public void getUserInfo(infoCallback callback) {
         // 1. 发起网络请求
-        retrofit.getApi().getUsersInfo(userManager.getHomeId()).enqueue(new Callback<ApiResponse<List<UserDTO>>>() {
+        retrofit.getApi().getUserInfo(userManager.getUserId()).enqueue(new Callback<ApiResponse<UserDTO>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<UserDTO>> call, @NonNull Response<ApiResponse<UserDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<UserDTO> apiResponse = response.body();
+                    if (apiResponse.getCode() == 200) {
+                        userManager.saveUser(
+                                apiResponse.getData().getNickname(),
+                                apiResponse.getData().getAvatarUrl()
+                        );
+                        callback.onSuccess();
+                    } else {
+                        callback.onError(apiResponse.getMessage());
+                    }
+                } else {
+                    callback.onError("服务器错误: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<UserDTO>> call, @NonNull Throwable t) {
+                callback.onError("网络连接失败: " + t.getMessage());
+            }
+        });
+    }
+
+    public void getUserListInfo(usersInfoCallback callback) {
+        // 1. 发起网络请求
+        retrofit.getApi().getUserListInfo(userManager.getHomeId()).enqueue(new Callback<ApiResponse<List<UserDTO>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<UserDTO>>> call, @NonNull Response<ApiResponse<List<UserDTO>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -167,11 +207,33 @@ public class UserRepository {
         });
     }
 
+    public void joinHome(String homeId, joinCallback callback) {
+        retrofit.getApi().joinHome(homeId).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<String> apiResponse = response.body();
+                    if (apiResponse.getCode() == 200) {
+                        callback.onSuccess(apiResponse.getData());
+                    } else {
+                        callback.onError(apiResponse.getMessage());
+                    }
+                } else {
+                    callback.onError("服务器错误: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
+                callback.onError("网络连接失败: " + t.getMessage());
+            }
+        });
+    }
+
     public void exitHome(infoCallback callback) {
         String homeId = userManager.getHomeId();
-        String userId = userManager.getUserId();
         // 1. 发起网络请求
-        retrofit.getApi().exitHome(homeId, userId).enqueue(new Callback<ApiResponse<UserDTO>>() {
+        retrofit.getApi().exitHome(homeId).enqueue(new Callback<ApiResponse<UserDTO>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<UserDTO>> call, @NonNull Response<ApiResponse<UserDTO>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -235,6 +297,12 @@ public class UserRepository {
 
     public interface usersInfoCallback {
         void onSuccess(List<UserDTO> userList);
+
+        void onError(String message);
+    }
+
+    public interface joinCallback {
+        void onSuccess(String refresh);
 
         void onError(String message);
     }

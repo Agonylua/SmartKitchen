@@ -11,7 +11,6 @@ import com.agonylua.smarthome.database.AppDatabase;
 import com.agonylua.smarthome.database.dao.DeviceDao;
 import com.agonylua.smarthome.database.entity.Device;
 import com.agonylua.smarthome.repository.HomeRepository;
-import com.agonylua.smarthome.utils.NetworkMonitor;
 import com.agonylua.smarthome.utils.ThreadPoolUtils;
 import com.agonylua.smarthome.utils.UserManager;
 
@@ -32,7 +31,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
-        repository = new HomeRepository(getApplication());
+        repository = HomeRepository.getInstance(getApplication());
         deviceDao = AppDatabase.getInstance(getApplication()).deviceDao();
     }
 
@@ -47,12 +46,6 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public void syncServiceData(String homeId) {
-        Log.d(TAG, "syncServiceData: 开始同步设备数据");
-        if (!NetworkMonitor.getInstance(getApplication()).isInternetReachable()) {
-            errorMessage.setValue("无网络，请检查网络连接");
-            isRefresh.postValue(false);
-            return;
-        }
         repository.getDevices(getApplication(), homeId, new HomeRepository.DeviceListCallback() {
             @Override
             public void onSuccess(List<Device> devices) {
@@ -61,10 +54,26 @@ public class HomeViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(String error) {
-                loadDevices();
-                errorMessage.setValue("网络异常" + error);
-                isRefresh.postValue(false);
+            public void onFailure(String errorMessage) {
+                isRefresh.setValue(false);
+                HomeViewModel.this.errorMessage.setValue(errorMessage);
+            }
+        });
+    }
+
+    public void deleteDevice(String deviceSn, String homeId) {
+        repository.deleteDevice(getApplication(), deviceSn, new HomeRepository.DeleteDeviceCallback() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "设备删除成功，准备拉取最新设备列表");
+                syncServiceData(homeId);
+            }
+
+            @Override
+            public void onFailure(String errorMsg) {
+                Log.e(TAG, "设备删除失败，回滚拉取最新设备列表: " + errorMsg);
+                errorMessage.setValue(errorMsg);
+                syncServiceData(homeId);
             }
         });
     }

@@ -1,12 +1,20 @@
 package com.agonylua.smarthome.common;
 
-public class DeviceBindRequest {
+public class DeviceRequest {
     private String deviceSn; // 设备 SN 码
     private String homeId; // (可选) 设备名称
+    private String userId; // (可选) 设备类型
 
-    public DeviceBindRequest(String deviceSn, String homeId) {
+    public DeviceRequest(String deviceSn, String homeId) {
         this.deviceSn = deviceSn;
         this.homeId = homeId;
+        this.userId = userId;
+    }
+
+    public DeviceRequest(String deviceSn, String homeId, String userId) {
+        this.deviceSn = deviceSn;
+        this.homeId = homeId;
+        this.userId = userId;
     }
 
     public String getDeviceSn() {
@@ -24,5 +32,12 @@ public class DeviceBindRequest {
     public void setHomeId(String homeId) {
         this.homeId = homeId;
     }
-    // Getter & Setter
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

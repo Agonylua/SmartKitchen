@@ -38,7 +38,7 @@ public class SplashFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(LoginViewModel.class);
-        repository = new LoginRepository(requireActivity().getApplication());
+        repository = LoginRepository.getInstance(requireActivity().getApplication());
 
         playEntryAnimation();
         viewModel.init(repository);

@@ -23,17 +23,36 @@ public class MonitorViewModel extends AndroidViewModel {
     private LiveData<List<Device>> onlineDevices;
     private LiveData<Integer> onlineCount;
     private final MutableLiveData<List<DevicePowerDTO>> PowerData = new MutableLiveData<>();
+    public MutableLiveData<Boolean> refreshResult = new MutableLiveData<>();
+    private UserManager userManager;
 
     public MonitorViewModel(@NonNull Application application) {
         super(application);
-        repository = new MonitorRepository(application);
+        repository = MonitorRepository.getInstance(application);
         onlineCount = repository.getOnlineCount();
         onlineDevices = repository.getOnlineDevices();
+        userManager = UserManager.getInstance(application);
+    }
+
+    public void refreshData() {
+        getDevicePowerData();
+        repository.getDevices(userManager.getHomeId(), new MonitorRepository.DeviceListCallback() {
+            @Override
+            public void onSuccess() {
+                refreshResult.postValue(true);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.d(TAG, "refreshData onFailure: " + error);
+                refreshResult.postValue(false);
+            }
+        });
     }
 
     public void getDevicePowerData() {
         String homeId = UserManager.getInstance(getApplication()).getHomeId();
-        repository.getDevicePowerData(homeId, getApplication(), new MonitorRepository.callback() {
+        repository.getDevicePowerData(homeId, getApplication(), new MonitorRepository.poserCallback() {
             @Override
             public void onSuccess(List<DevicePowerDTO> data) {
                 PowerData.postValue(data);

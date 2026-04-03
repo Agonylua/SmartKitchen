@@ -1,5 +1,7 @@
 package com.agonylua.smarthome.model;
 
+import android.util.Log;
+
 public enum DeviceMode {
     IDLE("待机"),
     //--- Refrigerator Modes ---
@@ -29,6 +31,7 @@ public enum DeviceMode {
     DRY("烘干"),
 
     //--- Sterilizer Modes ---
+    AUTO("自动"),
     HIGH_TEMP("高温"),
     UVB("UVB"),
     STERILIZER_DRY("烘干"),
@@ -36,6 +39,7 @@ public enum DeviceMode {
     //--- Other ---
     UNKNOWN("未知");
 
+    private static final String TAG = "DeviceMode";
     private final String label;
 
     DeviceMode(String label) {
@@ -52,6 +56,7 @@ public enum DeviceMode {
     }
 
     public static String toLabel(String mode) {
+        Log.d(TAG, "toLabel: mode = " + mode);
         for (DeviceMode deviceMode : DeviceMode.values()) {
             if (deviceMode.name().equals(mode)) {
                 return deviceMode.label;
