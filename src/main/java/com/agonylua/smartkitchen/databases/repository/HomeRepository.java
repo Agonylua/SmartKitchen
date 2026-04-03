@@ -19,4 +19,6 @@ public interface HomeRepository extends JpaRepository<Home, String> {
 
     @Query(value = "SELECT * FROM home WHERE owner_id = :userId OR member_ids LIKE CONCAT('%', :userId, '%')", nativeQuery = true)
     Optional<Home> findByOwnerIdOrMemberIds(@Param("userId") String userId);
+
+    void deleteByOwnerId(String ownerId);
 }

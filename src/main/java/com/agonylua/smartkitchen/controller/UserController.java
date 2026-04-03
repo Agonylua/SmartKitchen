@@ -8,6 +8,7 @@ import com.agonylua.smartkitchen.databases.repository.UserRepository;
 import com.agonylua.smartkitchen.dto.UserDTO;
 import com.agonylua.smartkitchen.service.HomeService;
 import com.agonylua.smartkitchen.service.UserService;
+import com.agonylua.smartkitchen.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -60,14 +61,24 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public ApiResponse<List<UserDTO>> getUserInfo(@RequestParam("homeId") String homeId) {
+    public ApiResponse<UserDTO> getUserInfo(@RequestParam("userId") String userId) {
+        UserDTO dot = userRepository.findByUserId(userId)
+                .map(UserDTO::fromEntity)
+                .orElse(null);
+        log.info("▶️ [用户控制器] 获取用户信息: userId={}, result={}", userId, dot);
+        return ApiResponse.success(dot);
+    }
+
+    @GetMapping("/list")
+    public ApiResponse<List<UserDTO>> getUserListInfo(@RequestParam("homeId") String homeId) {
         List<UserDTO> dot = userService.findAllByHomeId(homeId);
         log.info("▶️ [用户控制器] 获取用户信息: homeId={}, result={}", homeId, dot);
         return ApiResponse.success(dot);
     }
 
     @PostMapping("/exitHome")
-    public ApiResponse<UserDTO> exitHome(@RequestParam("homeId") String homeId, @RequestParam("userId") String userId) {
+    public ApiResponse<UserDTO> exitHome(@RequestParam("homeId") String homeId) {
+        String userId = SecurityUtils.getCurrentUserId();
         UserDTO result = userService.exitHome(homeId, userId);
         log.info("▶️ [用户控制器] 用户退出家庭请求: {}", result);
         return ApiResponse.success(result);

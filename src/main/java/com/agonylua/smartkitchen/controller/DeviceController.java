@@ -74,6 +74,11 @@ public class DeviceController {
         return ApiResponse.success(result);
     }
 
+    @PostMapping("/unBind")
+    public ApiResponse<Boolean> unBindDevice(@RequestBody DeviceBindReq req) {
+        return ApiResponse.success(deviceService.unBindDevice(req.getDeviceSn(), req.getHomeId(), req.getUserId()));
+    }
+
     /**
      * 获取家庭下所有设备的近7天功耗数据
      *

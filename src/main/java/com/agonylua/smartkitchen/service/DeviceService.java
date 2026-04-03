@@ -1,9 +1,9 @@
 package com.agonylua.smartkitchen.service;
 
-import com.agonylua.smartkitchen.databases.entity.Device;
-import com.agonylua.smartkitchen.databases.entity.DeviceStatus;
-import com.agonylua.smartkitchen.databases.entity.DeviceType;
+import com.agonylua.smartkitchen.databases.entity.*;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
+import com.agonylua.smartkitchen.databases.repository.HomeRepository;
+import com.agonylua.smartkitchen.databases.repository.UserRepository;
 import com.agonylua.smartkitchen.service.mqtt.MqttService;
 import com.agonylua.smartkitchen.utils.IdUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,13 @@ public class DeviceService {
     @Autowired
     private DeviceRepository deviceRepository;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private HomeRepository homeRepository;
+    @Autowired
     private MqttService mqttService;
+    @Autowired
+    private UserService userService;
 
     public void addDevice(String homeId, String customName, String typeStr) {
         Device device = new Device();
@@ -85,5 +91,36 @@ public class DeviceService {
         });
 
         return 1; // 立即返回验证结构
+    }
+
+    public Boolean unBindDevice(String deviceSn, String homeId, String userId) {
+        log.info("开始验证设备解绑请求: 设备 {} , 用户 {}", deviceSn, userId);
+        Device device = deviceRepository.findByDeviceSn(deviceSn).orElse(null);
+        User user = userRepository.findByUserId(userId).orElse(null);
+        if (device == null) {
+            log.warn("解绑验证失败，设备不存在: {}", deviceSn);
+            return false;
+        }
+        if (user == null) {
+            log.warn("解绑验证失败，用户不存在: {}", userId);
+            return false;
+        }
+        Home home = homeRepository.findByHomeId(homeId).orElse(null);
+        if (home == null) {
+            log.warn("解绑验证失败，家庭不存在: {}", homeId);
+            return false;
+        }
+        if (!home.getOwnerId().equals(userId)) {
+            log.warn("解绑验证失败，用户 {} 不是家庭 {} 的户主，无权解绑设备", userId, home.getHomeId());
+            return false;
+        }
+        if (mqttService.isConnected()) {
+            mqttService.sendUnBind(home.getHomeId(), deviceSn);
+            return false;
+        }
+        device.setHomeId(null);
+        deviceRepository.save(device);
+
+        return true;
     }
 }

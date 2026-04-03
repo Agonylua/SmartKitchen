@@ -4,6 +4,7 @@ import com.agonylua.smartkitchen.common.ApiResponse;
 import com.agonylua.smartkitchen.databases.repository.HomeRepository;
 import com.agonylua.smartkitchen.dto.HomeDTO;
 import com.agonylua.smartkitchen.service.HomeService;
+import com.agonylua.smartkitchen.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -36,5 +37,19 @@ public class HomeController {
             return ApiResponse.error("移除失败，家庭不存在或用户不在家庭中");
         }
         return ApiResponse.success(result);
+    }
+
+    @PostMapping("/joinHome")
+    public ApiResponse<String> joinHome(@RequestParam("homeId") String homeId) {
+        String userId = SecurityUtils.getCurrentUserId();
+        String message = homeService.joinHome(homeId, userId);
+        return ApiResponse.success(message);
+    }
+
+    @PostMapping("/joinHomeApproval")
+    public ApiResponse<String> joinHomeApproval(@RequestParam("result") Boolean result, @RequestParam("ownerId") String ownerId, @RequestParam("memberId") String memberId) {
+        log.info("▶️ [家庭控制器] 收到家庭加入审批结果: result={}, ownerId={}, memberId={}", result, ownerId, memberId);
+        homeService.joinHomeApproval(result, ownerId, memberId);
+        return ApiResponse.success("处理完成");
     }
 }

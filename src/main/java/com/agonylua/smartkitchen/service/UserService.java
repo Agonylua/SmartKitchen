@@ -145,8 +145,6 @@ public class UserService {
             // 6. 拼接文件的网络访问 URL 并返回给客户端
             String fileUrl = accessUrl + newFileName;
 
-            // TODO: 如果有 userId，可以在这里将 fileUrl 更新到数据库的用户表中
-
             // 返回成功响应及图片的 URL
             userRepository.findByUserId(userId).ifPresent(user -> {
                 user.setAvatarUrl(fileUrl);
