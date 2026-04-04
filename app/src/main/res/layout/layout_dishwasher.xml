@@ -4,11 +4,11 @@
 
     <data>
 
-        <import type="com.agonylua.smarthome.R" />
+        <import type="com.agonylua.smartKitchen.R" />
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.DeviceViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.DeviceViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

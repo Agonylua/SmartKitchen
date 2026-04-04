@@ -6,11 +6,11 @@
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.UserViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.UserViewModel" />
 
         <variable
             name="user"
-            type="com.agonylua.smarthome.model.User" />
+            type="com.agonylua.smartKitchen.model.User" />
 
         <import type="android.view.View" />
     </data>

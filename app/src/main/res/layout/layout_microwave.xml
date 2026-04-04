@@ -6,11 +6,11 @@
 
         <variable
             name="device"
-            type="com.agonylua.smarthome.database.entity.Device" />
+            type="com.agonylua.smartKitchen.database.entity.Device" />
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.DeviceViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.DeviceViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

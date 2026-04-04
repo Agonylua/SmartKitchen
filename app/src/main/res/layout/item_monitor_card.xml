@@ -6,7 +6,7 @@
 
         <variable
             name="device"
-            type="com.agonylua.smarthome.database.entity.Device" />
+            type="com.agonylua.smartKitchen.database.entity.Device" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

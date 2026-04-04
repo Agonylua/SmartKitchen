@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.MonitorViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.MonitorViewModel" />
 
         <variable
             name="hasRunningDevice"

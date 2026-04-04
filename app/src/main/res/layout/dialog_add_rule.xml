@@ -8,7 +8,7 @@
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.SmartViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.SmartViewModel" />
     </data>
 
     <androidx.core.widget.NestedScrollView

@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.SmartViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.SmartViewModel" />
     </data>
 
     <com.scwang.smart.refresh.layout.SmartRefreshLayout

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.LoginViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.LoginViewModel" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#F4F6F8"> <!-- 与应用整体风格一致的浅灰背景 -->
@@ -84,6 +84,22 @@
                 android:layout_height="24dp"
                 android:layout_marginBottom="16dp"
                 android:indeterminateTint="#14B8A6" />
+
+            <ImageView
+                android:id="@+id/tv_error_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_warning"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_error_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="无网络连接"
+                android:textColor="@color/text_secondary"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"

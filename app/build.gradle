@@ -3,16 +3,17 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.androidx.navigation.safeargs)
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
-    namespace 'com.agonylua.smarthome'
+    namespace 'com.agonylua.smartKitchen'
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId "com.agonylua.smarthome"
+        applicationId "com.agonylua.smartKitchen"
         minSdk 30
         targetSdk 36
         versionCode 1
@@ -104,4 +105,10 @@ dependencies {
     implementation 'com.github.yalantis:ucrop:2.2.8'
     // Luban for image compression
     implementation 'top.zibin:Luban:1.1.8'
+    // Hilt DI
+    implementation 'com.google.dagger:hilt-android:2.50'
+    annotationProcessor 'com.google.dagger:hilt-android-compiler:2.50'
+    // Hilt WorkManager integration
+    implementation "androidx.hilt:hilt-work:1.0.0"
+    annotationProcessor "androidx.hilt:hilt-compiler:1.0.0"
 }

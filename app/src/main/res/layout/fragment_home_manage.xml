@@ -9,11 +9,11 @@
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.UserViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.UserViewModel" />
 
         <variable
             name="home"
-            type="com.agonylua.smarthome.database.entity.Home" />
+            type="com.agonylua.smartKitchen.database.entity.Home" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

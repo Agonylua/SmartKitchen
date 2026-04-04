@@ -7,11 +7,11 @@
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.HomeViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.HomeViewModel" />
 
         <variable
             name="userManager"
-            type="com.agonylua.smarthome.utils.UserManager" />
+            type="com.agonylua.smartKitchen.utils.UserManager" />
     </data>
 
     <!-- 沉浸式背景底色 -->

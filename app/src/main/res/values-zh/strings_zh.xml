@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartHome</string>
+    <string name="app_name">SmartKitchen</string>
     <string name="title_activity_home">homeActivity</string>
     <string name="bottom_bar_home">首页</string>
     <string name="bottom_bar_smart">智能</string>

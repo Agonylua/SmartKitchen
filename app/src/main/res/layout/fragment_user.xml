@@ -7,11 +7,11 @@
 
         <variable
             name="viewModel"
-            type="com.agonylua.smarthome.viewModel.UserViewModel" />
+            type="com.agonylua.smartKitchen.viewModel.UserViewModel" />
 
         <variable
             name="user"
-            type="com.agonylua.smarthome.model.User" />
+            type="com.agonylua.smartKitchen.model.User" />
 
         <!-- 可以通过导入 View 控制不同登录状态下的 UI 显示 -->
         <import type="android.view.View" />
