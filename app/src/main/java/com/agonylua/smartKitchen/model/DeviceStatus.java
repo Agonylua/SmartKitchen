@@ -3,6 +3,7 @@ package com.agonylua.smartKitchen.model;
 public enum DeviceStatus {
     ONLINE("在线"),
     OFFLINE("离线"),
+    RUNNING("运行中"),
     UNKNOWN("未知");
 
     private final String state;

@@ -2,7 +2,6 @@ package com.agonylua.smartKitchen.viewModel;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
@@ -10,7 +9,6 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.agonylua.smartKitchen.R;
 import com.agonylua.smartKitchen.database.entity.Device;
 import com.agonylua.smartKitchen.model.ChipDeviceMode;
 import com.agonylua.smartKitchen.model.DeviceMode;
@@ -19,6 +17,7 @@ import com.agonylua.smartKitchen.model.DeviceType;
 import com.agonylua.smartKitchen.repository.DeviceRepository;
 import com.agonylua.smartKitchen.utils.DeviceDataManager;
 import com.agonylua.smartKitchen.utils.JsonUtils;
+import com.agonylua.smartKitchen.utils.ThreadPoolUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,41 +35,44 @@ public class DeviceViewModel extends ViewModel {
     //----------------- LiveData 定义 -----------------
     // 设备公共部分
     public final MutableLiveData<String> status = new MutableLiveData<>();// 设备状态数据
-    public final MutableLiveData<Integer> statusColor = new MutableLiveData<>();// 设备状态颜色数据
+    public final MutableLiveData<Boolean> statusColor = new MutableLiveData<>();// 设备状态颜色数据
     public final MutableLiveData<Drawable> deviceImage = new MutableLiveData<>();// 设备图片数据
     public final MutableLiveData<String> deviceName = new MutableLiveData<>();// 设备名称数据
     public final MutableLiveData<String> deviceMode = new MutableLiveData<>();// 设备模式数据
     public final MutableLiveData<List<String>> modeTags = new MutableLiveData<>(); // 模式标签数据
-    public final MutableLiveData<String> selectedMode = new MutableLiveData<>(); // 选中模式标签数据
-    public final MutableLiveData<Integer> statusLoading = new MutableLiveData<>(View.GONE);// 加载状态数据
+    public final MutableLiveData<Boolean> statusLoading = new MutableLiveData<>();// 加载状态数据
     public final MutableLiveData<Boolean> subTaskLoading = new MutableLiveData<>(false);// 加载状态数据
     // ================== 冰箱专用 ==================
+    public final MutableLiveData<String> refrigeratorSelectedMode = new MutableLiveData<>(); // 冰箱选中模式标签数据
     public final MutableLiveData<Float> fridgeTemp = new MutableLiveData<>();// 冰箱温度数据
     public final MutableLiveData<Float> freezeTemp = new MutableLiveData<>();// 冰箱湿度数据
     public final MutableLiveData<Float> setFridgeTemp = new MutableLiveData<>();// 冰箱温度数据
     public final MutableLiveData<Float> setFreezeTemp = new MutableLiveData<>();// 冰箱湿度数据
     // ================== 微波炉专用 ==================
+    public final MutableLiveData<String> microwaveSelectedMode = new MutableLiveData<>(); // 微波炉选中模式标签数据
     public final MutableLiveData<Float> setMicrowaveTime = new MutableLiveData<>(20.0f); // 默认 1分30秒
     public final MutableLiveData<Float> setMicrowaveTemp = new MutableLiveData<>(100.0f); // 默认 100℃
     public final MutableLiveData<String> microwaveTimeDisplay = new MutableLiveData<>("--:--");
     public final MutableLiveData<Integer> microwaveTime = new MutableLiveData<>();
     public final MutableLiveData<Integer> microwaveTotalTime = new MutableLiveData<>();
-    public final MutableLiveData<String> microwaveMode = new MutableLiveData<>("加热模式");
+    public final MutableLiveData<Integer> microwaveProgress = new MutableLiveData<>(0);
     // ================= 洗碗机专用 ==================
+    public final MutableLiveData<String> dishwasherSelectedMode = new MutableLiveData<>(); // 洗碗机选中模式标签数据
     public final MutableLiveData<Boolean> dishwasherSalt = new MutableLiveData<>(); // 洗碗机盐状态数据
     public final MutableLiveData<String> dishwasherStatus = new MutableLiveData<>(); // 洗碗机状态数据
     public final MutableLiveData<Boolean> dishwasherRinseAid = new MutableLiveData<>(); // 漂洗剂状态数据
     public final MutableLiveData<Boolean> dishwasherKeepFresh = new MutableLiveData<>(false); // 保鲜状态数据
     // ================= 电饭煲专用 ==================
-    public final MutableLiveData<String> riceCookerTexture = new MutableLiveData<>("适中");// 口感调节数据
+    public final MutableLiveData<String> riceCookerSelectedMode = new MutableLiveData<>(); // 电饭煲选中模式标签数据
+    public final MutableLiveData<Integer> riceCookerTexture = new MutableLiveData<>(2);// 口感调节数据
     public final MutableLiveData<Boolean> riceCookerInsulation = new MutableLiveData<>();// 保温状态数据
     public final MutableLiveData<String> riceCookerTime = new MutableLiveData<>();// 电饭煲时间数据
     public final MutableLiveData<String> riceCookerStatus = new MutableLiveData<>();// 电饭煲时间数据
     public final MutableLiveData<Integer> riceCookerProgress = new MutableLiveData<>(0);// 电饭煲进度数据
     public final MutableLiveData<Integer> riceCookerTotalTime = new MutableLiveData<>();// 电饭煲总时间数据
     // ================= 消毒柜专用 ==================
+    public final MutableLiveData<String> sterilizerSelectedMode = new MutableLiveData<>(); // 电饭煲选中模式标签数据
     public final MutableLiveData<String> sterilizerStatus = new MutableLiveData<>("待机");
-    public final MutableLiveData<Integer> sterilizerTimeMinutes = new MutableLiveData<>(90);
     public final MutableLiveData<Integer> sterilizerTimeDisplay = new MutableLiveData<>();
     public final MutableLiveData<Integer> sterilizerTemp = new MutableLiveData<>(25);
     public final MutableLiveData<Integer> sterilizerProgress = new MutableLiveData<>(0);
@@ -92,45 +94,35 @@ public class DeviceViewModel extends ViewModel {
         this.deviceRepository = deviceRepository;
 //        autoSaverData.addSource(fridgeTemp, value -> autoSaverData.setValue(true));
 //        autoSaverData.addSource(freezeTemp, value -> autoSaverData.setValue(true));
-        autoSaverSetup.addSource(selectedMode, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(refrigeratorSelectedMode, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(microwaveSelectedMode, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(dishwasherSelectedMode, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(riceCookerSelectedMode, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(sterilizerSelectedMode, value -> autoSaverSetup.setValue(true));
         autoSaverSetup.addSource(setFridgeTemp, value -> autoSaverSetup.setValue(true));
         autoSaverSetup.addSource(setFreezeTemp, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(setMicrowaveTemp, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(setMicrowaveTime, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(dishwasherKeepFresh, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(riceCookerTexture, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(riceCookerInsulation, value -> autoSaverSetup.setValue(true));
+        autoSaverSetup.addSource(sterilizerUvLight, value -> autoSaverSetup.setValue(true));
     }
 
     // ================== 冰箱业务逻辑 ==================
 
     public void getFridgeData() {
-        if (device.getDeviceData() == null) {
-            fridgeTemp.setValue(null);
-            freezeTemp.setValue(null);
-            return;
-        }
         fridgeTemp.setValue(Float.valueOf(device.getDeviceData().get("fridgeTemp")));
         freezeTemp.setValue(Float.valueOf(device.getDeviceData().get("freezeTemp")));
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
         setFridgeTemp.setValue(deviceDataManager.getFridgeTemp());
         setFreezeTemp.setValue(deviceDataManager.getFreezeTemp());
-        if (deviceDataManager.getDeviceMode() == null) {
-            selectedMode.setValue("标准");
-        } else {
-            selectedMode.setValue(deviceDataManager.getDeviceMode());
-        }
+        refrigeratorSelectedMode.setValue(deviceDataManager.getFridgeMode());
     }
 
 
     // ================== 微波炉业务逻辑 ==================
     public void getMicrowaveData() {
-        if (device.getDeviceData() == null) {
-            microwaveTimeDisplay.setValue(null);
-            setMicrowaveTime.setValue(10.0f);
-            setMicrowaveTemp.setValue(30.0f);
-            if (deviceDataManager.getDeviceMode() == null) {
-                selectedMode.setValue("加热");
-            } else {
-                selectedMode.setValue(deviceDataManager.getDeviceMode());
-            }
-            return;
-        }
         int minutes = Integer.parseInt(device.getDeviceData().get("microwaveTime")) / 60;
         int seconds = Integer.parseInt(device.getDeviceData().get("microwaveTime")) % 60;
         microwaveTimeDisplay.setValue(String.format("%02d:%02d", minutes, seconds));
@@ -138,132 +130,61 @@ public class DeviceViewModel extends ViewModel {
         microwaveTime.setValue(Integer.parseInt(device.getDeviceData().get("microwaveTime")));
         setMicrowaveTime.setValue(deviceDataManager.getMicrowaveTime());
         setMicrowaveTemp.setValue(deviceDataManager.getMicrowaveTemp());
-        if (deviceDataManager.getDeviceMode() == null) {
-            selectedMode.setValue("加热");
-        } else {
-            selectedMode.setValue(deviceDataManager.getDeviceMode());
-        }
+        microwaveSelectedMode.setValue(deviceDataManager.getMicrowaveMode());
+        microwaveProgress.setValue(Integer.parseInt(device.getDeviceData().get("progress")));
 
-        switch (device.getDeviceMode()) {
-            case "HEAT":
-                microwaveTotalTime.setValue(90);
-                break;
-            case "GRILL":
-                microwaveTotalTime.setValue(120);
-                break;
-            case "DEFROST":
-                microwaveTotalTime.setValue(60);
-                break;
-            case "STEAM":
-                microwaveTotalTime.setValue(150);
-                break;
-        }
     }
 
-    // 处理 "+30s" 按钮的逻辑
-    public void addMicrowaveTime(float addSeconds) {
-        float currentTime = microwaveTotalTime.getValue() != null ? microwaveTotalTime.getValue() : 0.0f;
-        float newTime = currentTime + addSeconds;
-        setMicrowaveTime.setValue(newTime);
-        int minutes = (int) newTime / 60;
-        int seconds = (int) newTime % 60;
-        microwaveTime.setValue((int) newTime);
-        microwaveTimeDisplay.setValue(String.format("%02d:%02d", minutes, seconds));
+    public String formatMicrowaveTime(float totalSeconds) {
+        int minutes = (int) totalSeconds / 60;
+        int seconds = (int) totalSeconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
     }
 
 
     // ================== 电饭煲业务逻辑 ==================
     public void getRiceCookerData() {
-        if (device.getDeviceData() == null) {
-            riceCookerTexture.setValue("适中");
-            riceCookerStatus.setValue("--");
-            riceCookerProgress.setValue(0);
-            if (deviceDataManager.getDeviceMode() == null) {
-                selectedMode.setValue("精煮饭");
-            } else {
-                selectedMode.setValue(deviceDataManager.getDeviceMode());
-            }
-            return;
-        }
-        changeRiceCookerMode(deviceMode.getValue());
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
         riceCookerTime.setValue(device.getDeviceData().get("remainTime"));
         riceCookerTexture.setValue(deviceDataManager.getRiceCookerTexture());
         riceCookerInsulation.setValue(deviceDataManager.getRiceCookerInsulation());
-        riceCookerStatus.setValue(riceCookerInsulation.getValue() ? "保温中" : "烹饪中");
-        if (deviceDataManager.getDeviceMode() == null) {
-            selectedMode.setValue("精煮饭");
-        } else {
-            selectedMode.setValue(deviceDataManager.getDeviceMode());
-        }
-    }
-
-    public void setRiceCookerTexture(String texture) {
-        riceCookerTexture.setValue(texture);
-    }
-
-    public void changeRiceCookerMode(String mode) {
-        int time = 0; // 默认
-        if (DeviceMode.COOK_RICE.name().equals(mode)) time = 25;
-        else if (DeviceMode.STEAM_COOK.name().equals(mode)) time = 45;
-        else if (DeviceMode.PORRIDGE.name().equals(mode)) time = 60;
-        else if (DeviceMode.CAKE.name().equals(mode)) time = 30;
-
-        riceCookerTotalTime.setValue(time);
+        riceCookerSelectedMode.setValue(deviceDataManager.getRiceCookerMode());
         riceCookerProgress.setValue(Integer.parseInt(device.getDeviceData().get("progress")));
+    }
+
+    public void setRiceCookerTexture(int texture) {
+        riceCookerTexture.setValue(texture);
     }
 
     // ================== 消毒柜业务逻辑 ==================
     public void getSterilizerData() {
-        if (device.getDeviceData() == null) return;
 
-        if (device.getDeviceData().containsKey("temp")) {
-            sterilizerTemp.setValue(Integer.parseInt(device.getDeviceData().get("temp")));
-        }
-        if (device.getDeviceData().containsKey("time")) {
-            sterilizerTimeDisplay.setValue(Integer.parseInt(device.getDeviceData().get("time")));
-        }
-        if (device.getDeviceData().containsKey("progress")) {
-            sterilizerProgress.setValue(Integer.parseInt(device.getDeviceData().get("progress")));
-        }
+        sterilizerTemp.setValue(Integer.parseInt(device.getDeviceData().get("temp")));
+        sterilizerTimeDisplay.setValue(Integer.parseInt(device.getDeviceData().get("time")));
+        sterilizerProgress.setValue(Integer.parseInt(device.getDeviceData().get("progress")));
 
         sterilizerStatus.setValue(device.getDeviceStatus());
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
         sterilizerUvLight.setValue(deviceDataManager.getSterilizerUVLight());
-        selectedMode.setValue(deviceDataManager.getDeviceMode() != null ? deviceDataManager.getDeviceMode() : "自动");
+        sterilizerSelectedMode.setValue(deviceDataManager.getSterilizerMode());
     }
 
-    /**
-     * 切换模式，并自动设置对应的默认时长
-     */
     public void setSterilizerMode(String mode) {
-        selectedMode.setValue(mode);
-        int time = 0;
-        if (DeviceMode.UVB.name().equals(mode)) time = 60;
-        else if (DeviceMode.DRY.name().equals(mode)) time = 45;
-        else if (DeviceMode.AUTO.name().equals(mode)) time = 90;
-        else if (DeviceMode.HIGH_TEMP.name().equals(mode)) time = 120;
-
-        sterilizerTotalTime.setValue(time);
+        sterilizerSelectedMode.setValue(mode);
     }
 
     // ================== 洗碗机业务逻辑 ==================
     public void getDishwasherData() {
-        if (device.getDeviceData() == null) return;
 
-        if (device.getDeviceData().containsKey("salt")) {
-            dishwasherSalt.setValue(Objects.equals(device.getDeviceData().get("salt"), "true"));
-        }
-        if (device.getDeviceData().containsKey("rinseAid")) {
-            dishwasherRinseAid.setValue(Objects.equals(device.getDeviceData().get("rinseAid"), "true"));
-        }
+        dishwasherSalt.setValue(Objects.equals(device.getDeviceData().get("salt"), "true"));
+        dishwasherRinseAid.setValue(Objects.equals(device.getDeviceData().get("rinseAid"), "true"));
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
         dishwasherKeepFresh.setValue(deviceDataManager.getDishwasherKeepFresh());
-        selectedMode.setValue(deviceDataManager.getDeviceMode());
+        dishwasherSelectedMode.setValue(deviceDataManager.getDishwasherMode());
     }
 
     public void setDishwasherMode(String mode) {
-        selectedMode.setValue(mode);
+        dishwasherSelectedMode.setValue(mode);
     }
 
     // ================== 设备通用业务逻辑 ==================
@@ -275,7 +196,13 @@ public class DeviceViewModel extends ViewModel {
         this.device = device;
         deviceDataManager = DeviceDataManager.Instance((android.app.Application) context.getApplicationContext(), device.getDeviceSn());
         setDeviceImage(this.device.getDeviceStatus(), this.device.getDeviceType(), this.device.getDeviceName());
-        setDeviceState(this.device.getDeviceStatus());
+        if (device.getDeviceStatus().equals("OFFLINE")) {
+            status.setValue("离线");
+            statusColor.setValue(false);
+        } else {
+            status.setValue("在线");
+            statusColor.setValue(true);
+        }
         setChipDeviceMode(this.device.getDeviceType());
         switch (this.device.getDeviceType()) {
             case "REFRIGERATOR": // 冰箱
@@ -305,25 +232,6 @@ public class DeviceViewModel extends ViewModel {
         }
     }
 
-    public void setDeviceState(String deviceState) {
-        if (deviceState != null) {
-            switch (deviceState) {
-                case "ONLINE":
-                    status.setValue("在线");
-                    statusColor.setValue(R.color.state_info);
-                    break;
-                case "OFFLINE":
-                    status.setValue("离线");
-                    statusColor.setValue(R.color.state_disabled);
-                    break;
-                default:
-                    status.setValue("未知");
-                    statusColor.setValue(R.color.state_error);
-                    break;
-            }
-        }
-    }
-
     public void setChipDeviceMode(String deviceType) {
         if (deviceType.equals(DeviceType.REFRIGERATOR.name())) {
             modeTags.setValue(ChipDeviceMode.REFRIGERATOR_MODES);
@@ -343,28 +251,49 @@ public class DeviceViewModel extends ViewModel {
             setFridgeTemp.setValue(deviceDataManager.getFridgeTemp());
             setFreezeTemp.setValue(deviceDataManager.getFreezeTemp());
         } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
+            setMicrowaveTime.setValue(deviceDataManager.getMicrowaveTime());
+            setMicrowaveTemp.setValue(deviceDataManager.getMicrowaveTemp());
         } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
+            dishwasherKeepFresh.setValue(deviceDataManager.getDishwasherKeepFresh());
         } else if (Objects.equals(device.getDeviceType(), "RICE_COOKER")) {
             riceCookerTexture.setValue(deviceDataManager.getRiceCookerTexture());
         }
     }
 
+    public MutableLiveData<String> getSelectedModeLiveData() {
+        if (device == null || device.getDeviceType() == null) {
+            return new MutableLiveData<>("");
+        }
+        if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
+            return refrigeratorSelectedMode;
+        } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
+            return microwaveSelectedMode;
+        } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
+            return dishwasherSelectedMode;
+        } else if (Objects.equals(device.getDeviceType(), "RICE_COOKER")) {
+            return riceCookerSelectedMode;
+        } else if (Objects.equals(device.getDeviceType(), "STERILIZER")) {
+            return sterilizerSelectedMode;
+        }
+        return new MutableLiveData<>("");
+    }
+
     public void saveDataGeneral() {
         if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
-            deviceDataManager.setDeviceMode(selectedMode.getValue());
+            deviceDataManager.setFridgeMode(refrigeratorSelectedMode.getValue());
             deviceDataManager.saveFridgeSet(setFridgeTemp.getValue(), setFreezeTemp.getValue());
         } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
-            deviceDataManager.setDeviceMode(selectedMode.getValue());
+            deviceDataManager.setMicrowaveMode(microwaveSelectedMode.getValue());
             deviceDataManager.saveMicrowaveSet(setMicrowaveTime.getValue(), setMicrowaveTemp.getValue());
         } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
-            deviceDataManager.setDeviceMode(selectedMode.getValue());
+            deviceDataManager.setDishwasherMode(dishwasherSelectedMode.getValue());
             deviceDataManager.saveDishwasherKeepFresh(dishwasherKeepFresh.getValue());
         } else if (Objects.equals(device.getDeviceType(), "RICE_COOKER")) {
-            deviceDataManager.setDeviceMode(selectedMode.getValue());
+            deviceDataManager.setRiceCookerMode(riceCookerSelectedMode.getValue());
             deviceDataManager.saveRiceCookerSet(riceCookerTexture.getValue());
             deviceDataManager.saveRiceCookerInsulation(riceCookerInsulation.getValue());
         } else if (Objects.equals(device.getDeviceType(), "STERILIZER")) {
-            deviceDataManager.setDeviceMode(selectedMode.getValue());
+            deviceDataManager.setSterilizerMode(sterilizerSelectedMode.getValue());
             deviceDataManager.saveSterilizerUVLight(sterilizerUvLight.getValue());
         }
     }
@@ -375,29 +304,60 @@ public class DeviceViewModel extends ViewModel {
         Map<String, String> data = new HashMap<>();
         Map<String, String> payload = new HashMap<>();
         payload.put("deviceSn", device.getDeviceSn());
-        payload.put("mode", DeviceMode.toMode(selectedMode.getValue()));
+        payload.put("mode", DeviceMode.toMode(getSelectedModeLiveData().getValue()));
         if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
             data.put("fridgeTempThreshold", String.valueOf(setFridgeTemp.getValue()));
             data.put("freezeTempThreshold", String.valueOf(setFreezeTemp.getValue()));
         } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
             data.put("microwaveTime", String.valueOf(setMicrowaveTime.getValue()));
             data.put("microwaveTemp", String.valueOf(setMicrowaveTemp.getValue()));
+        } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
+            data.put("keepFresh", String.valueOf(dishwasherKeepFresh.getValue()));
         } else if (Objects.equals(device.getDeviceType(), "RICE_COOKER")) {
-            data.put("riceCookerTexture", riceCookerTexture.getValue());
+            data.put("riceCookerTexture", String.valueOf(riceCookerTexture.getValue()));
+            data.put("riceCookerInsulation", String.valueOf(riceCookerInsulation.getValue()));
         } else if (Objects.equals(device.getDeviceType(), "STERILIZER")) {
+            data.put("uvLight", String.valueOf(sterilizerUvLight.getValue()));
         }
         payload.put("data", JsonUtils.toJson(data));
-        deviceRepository.sendControlCmd(context, payload, new DeviceRepository.callback() {
-            @Override
-            public void onSuccess(String message) {
-                subTaskLoading.postValue(false);
-            }
+        ThreadPoolUtils.getInstance().executeDelay(() -> {
+            deviceRepository.sendControlCmd(payload, new DeviceRepository.callback() {
+                @Override
+                public void onSuccess(String message) {
+                    subTaskLoading.postValue(false);
+                }
 
-            @Override
-            public void onFailure(String errorMessage) {
-                subTaskLoading.postValue(false);
-                toastMessage.postValue("指令下发 错误");
-            }
-        });
+                @Override
+                public void onFailure(String errorMessage) {
+                    subTaskLoading.postValue(false);
+                    toastMessage.postValue("指令下发 错误");
+                }
+            });
+        }, 2000);
+    }
+
+    public void updateDeviceStatus(String deviceSn) {
+        ThreadPoolUtils.getInstance().executeDelay(() -> {
+            deviceRepository.updateDeviceStatus(deviceSn, new DeviceRepository.callback() {
+                @Override
+                public void onSuccess(String message) {
+                    toastMessage.postValue(message);
+                    statusLoading.postValue(false);
+                    if (Objects.equals(status.getValue(), "离线")) {
+                        status.postValue("在线");
+                        statusColor.postValue(true);
+                    } else {
+                        status.postValue("离线");
+                        statusColor.postValue(false);
+                    }
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    toastMessage.postValue(errorMessage);
+                    statusLoading.postValue(false);
+                }
+            });
+        }, 2000);
     }
 }

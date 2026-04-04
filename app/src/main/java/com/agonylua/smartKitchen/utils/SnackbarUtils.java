@@ -3,6 +3,7 @@ package com.agonylua.smartKitchen.utils;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -27,34 +28,40 @@ public class SnackbarUtils {
         Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
         View snackbarView = snackbar.getView();
 
-        // 1. 设置悬浮和外边距 (Floating 效果)
+        // 1. 设置宽度自适应、底部居中、悬浮边距
         ViewGroup.LayoutParams params = snackbarView.getLayoutParams();
         if (params instanceof FrameLayout.LayoutParams) {
             FrameLayout.LayoutParams flp = (FrameLayout.LayoutParams) params;
-            flp.setMargins(48, 0, 48, 80); // 左右留白，底部抬高避开底部导航栏
+            // 核心修改 1：宽度改为根据内容自适应
+            flp.width = FrameLayout.LayoutParams.WRAP_CONTENT;
+            flp.height = FrameLayout.LayoutParams.WRAP_CONTENT;
+            // 核心修改 2：设置对齐方式为水平居中 + 底部对齐
+            flp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+            // 保留边距：底部抬高 80 避开导航栏；左右保留 48 防止极端情况下长文本贴边
+            flp.setMargins(48, 0, 48, 160);
             snackbarView.setLayoutParams(flp);
         }
 
-        // 2. 动态生成胶囊圆角背景 (Pill shape)
+        // 2. 动态生成胶囊圆角背景 (保持不变)
         GradientDrawable background = new GradientDrawable();
-        background.setCornerRadius(100f); // 极大的圆角半径形成胶囊形
-
-//        // 3. 根据类型配置颜色和图标
-//        int backgroundColor = Color.parseColor("#323232"); // 默认深灰
-//        int iconResId = R.drawable.ic_network; // 默认图标，可替换为 info icon
+        background.setCornerRadius(100f);
+//
+//        // 3. 根据类型配置颜色和图标 (保持不变)
+//        int backgroundColor = Color.parseColor("#323232");
+//        int iconResId = R.drawable.ic_network;
 //
 //        switch (type) {
 //            case SUCCESS:
-//                backgroundColor = Color.parseColor("#00897B"); // Teal 600
-//                iconResId = R.drawable.ic_add; // 请替换为项目中实际的 success_icon，例如勾号
+//                backgroundColor = Color.parseColor("#00897B");
+//                iconResId = R.drawable.ic_add;
 //                break;
 //            case WARNING:
-//                backgroundColor = Color.parseColor("#F57C00"); // Orange 700
-//                iconResId = R.drawable.ic_settings; // 请替换为实际的 warning_icon
+//                backgroundColor = Color.parseColor("#F57C00");
+//                iconResId = R.drawable.ic_settings;
 //                break;
 //            case ERROR:
-//                backgroundColor = Color.parseColor("#E53935"); // Red 600
-//                iconResId = R.drawable.ic_left_arrow; // 请替换为实际的 error_icon
+//                backgroundColor = Color.parseColor("#E53935");
+//                iconResId = R.drawable.ic_left_arrow;
 //                break;
 //            case INFO:
 //            default:
@@ -63,17 +70,18 @@ public class SnackbarUtils {
 //
 //        background.setColor(backgroundColor);
         snackbarView.setBackground(background);
-        snackbarView.setElevation(8f); // 增加阴影体现层次
+        snackbarView.setElevation(8f);
 
-        // 4. 配置文字和左侧图标
+        // 4. 配置文字和图标
         TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
         if (textView != null) {
             textView.setTextColor(Color.WHITE);
             textView.setTextSize(14f);
             textView.setMaxLines(2);
-            // 设置左侧图标
+            // 确保文本居中显示，让自适应宽度的胶囊看起来更匀称
+//            textView.setGravity(Gravity.CENTER_VERTICAL);
 //            textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
-//            textView.setCompoundDrawablePadding(24); // 图标与文字的间距
+//            textView.setCompoundDrawablePadding(24);
         }
 
         snackbar.show();

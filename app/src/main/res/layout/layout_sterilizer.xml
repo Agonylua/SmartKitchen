@@ -43,8 +43,8 @@
                 android:layout_width="240dp"
                 android:layout_height="240dp"
                 android:indeterminate="false"
-                android:max="@{viewModel.sterilizerTotalTime}"
-                android:progress="@{viewModel.sterilizerTimeDisplay}"
+                android:max="100"
+                android:progress="@{viewModel.sterilizerProgress}"
                 android:progressDrawable="@drawable/circle_progress_teal"
                 android:rotation="-90"
                 app:layout_constraintBottom_toBottomOf="@+id/circle_bg"
@@ -142,27 +142,30 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:alpha="@{viewModel.selectedMode.equals(`自动`) ? 1.0f : 0.5f}"
+                    android:alpha="@{viewModel.sterilizerSelectedMode.equals(`自动`) ? 1.0f : 0.5f}"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
                     android:onClick="@{() -> viewModel.setSterilizerMode(`自动`)}"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="8dp"
+                    android:selected="@{viewModel.sterilizerSelectedMode.equals(`自动`)}">
 
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@drawable/ic_launcher_foreground"
-                        app:tint="@{viewModel.selectedMode.equals(`自动`) ? @color/primary : @color/text_secondary}" />
+                        android:duplicateParentState="true"
+                        app:tint="@color/selector_mode_color" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="自动"
-                        android:textColor="@{viewModel.selectedMode.equals(`自动`) ? @color/primary : @color/text_secondary}"
+                        android:duplicateParentState="true"
+                        android:textColor="@color/selector_mode_color"
                         android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -171,27 +174,30 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:alpha="@{viewModel.selectedMode.equals(`消毒`) ? 1.0f : 0.5f}"
+                    android:alpha="@{viewModel.sterilizerSelectedMode.equals(`消毒`) ? 1.0f : 0.5f}"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
                     android:onClick="@{() -> viewModel.setSterilizerMode(`消毒`)}"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="8dp"
+                    android:selected="@{viewModel.sterilizerSelectedMode.equals(`消毒`)}">
 
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@drawable/ic_launcher_foreground"
-                        app:tint="@{viewModel.selectedMode.equals(`消毒`) ? @color/primary : @color/text_secondary}" />
+                        android:duplicateParentState="true"
+                        app:tint="@color/selector_mode_color" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="消毒"
-                        android:textColor="@{viewModel.selectedMode.equals(`消毒`) ? @color/primary : @color/text_secondary}"
+                        android:duplicateParentState="true"
+                        android:textColor="@color/selector_mode_color"
                         android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -200,27 +206,30 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:alpha="@{viewModel.selectedMode.equals(`烘干`) ? 1.0f : 0.5f}"
+                    android:alpha="@{viewModel.sterilizerSelectedMode.equals(`烘干`) ? 1.0f : 0.5f}"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
                     android:onClick="@{() -> viewModel.setSterilizerMode(`烘干`)}"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="8dp"
+                    android:selected="@{viewModel.sterilizerSelectedMode.equals(`烘干`)}">
 
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@drawable/ic_launcher_foreground"
-                        app:tint="@{viewModel.selectedMode.equals(`烘干`) ? @color/primary : @color/text_secondary}" />
+                        android:duplicateParentState="true"
+                        app:tint="@color/selector_mode_color" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="烘干"
-                        android:textColor="@{viewModel.selectedMode.equals(`烘干`) ? @color/primary : @color/text_secondary}"
+                        android:duplicateParentState="true"
+                        android:textColor="@color/selector_mode_color"
                         android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -229,27 +238,30 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:alpha="@{viewModel.selectedMode.equals(`保洁`) ? 1.0f : 0.5f}"
+                    android:alpha="@{viewModel.sterilizerSelectedMode.equals(`保洁`) ? 1.0f : 0.5f}"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
                     android:onClick="@{() -> viewModel.setSterilizerMode(`保洁`)}"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="8dp"
+                    android:selected="@{viewModel.sterilizerSelectedMode.equals(`保洁`)}">
 
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@drawable/ic_launcher_foreground"
-                        app:tint="@{viewModel.selectedMode.equals(`保洁`) ? @color/primary : @color/text_secondary}" />
+                        android:duplicateParentState="true"
+                        app:tint="@color/selector_mode_color" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="保洁"
-                        android:textColor="@{viewModel.selectedMode.equals(`保洁`) ? @color/primary : @color/text_secondary}"
+                        android:duplicateParentState="true"
+                        android:textColor="@color/selector_mode_color"
                         android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -319,10 +331,10 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="32dp"
-            android:text="@{viewModel.sterilizerStatus.equals(`工作中`) ? `停止运行` : `开始工作`}"
+            android:enabled="@{device.deviceStatus != `ONLINE` || device.deviceStatus != `RUNNING`}"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:backgroundTintList="@{context.getColorStateList(viewModel.sterilizerStatus.equals(`工作中`) ? R.color.state_error : R.color.primary)}"
+            android:text="@{device.deviceStatus.equals(`RUNING`) ? `停止运行` : `开始工作`}"
             app:cornerRadius="30dp"
             app:iconGravity="textStart"
             app:iconPadding="8dp"

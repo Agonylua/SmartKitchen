@@ -9,6 +9,10 @@
         <variable
             name="viewModel"
             type="com.agonylua.smartKitchen.viewModel.DeviceViewModel" />
+
+        <variable
+            name="device"
+            type="com.agonylua.smartKitchen.database.entity.Device" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -260,13 +264,13 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="32dp"
-            android:text="@{viewModel.dishwasherStatus.equals(`洗涤中`) ? `停止洗涤` : `开始洗涤`}"
+            android:enabled="@{device.deviceStatus != `ONLINE` || device.deviceStatus != `RUNNING`}"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:backgroundTintList="@{context.getColorStateList(viewModel.dishwasherStatus.equals(`洗涤中`) ? R.color.state_error : R.color.primary)}"
             app:cornerRadius="30dp"
             app:iconGravity="textStart"
             app:iconPadding="8dp"
+            android:text="@{device.deviceStatus.equals(`RUNING`) ? `停止洗涤` : `开始洗涤`}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/card_options" />
 

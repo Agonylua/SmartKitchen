@@ -189,9 +189,9 @@
                             android:value="@={viewModel.setFridgeTemp}"
                             android:valueFrom="2"
                             android:valueTo="8"
-                            android:enabled="@{viewModel.selectedMode == `标准`}"
-                            app:thumbColor="@{viewModel.selectedMode == `标准` ? @color/primary : @color/primary_variant}"
-                            app:trackColorActive="@{viewModel.selectedMode == `标准` ? @color/primary : @color/primary_variant}"
+                            android:enabled="@{viewModel.refrigeratorSelectedMode == `标准`}"
+                            app:thumbColor="@{viewModel.refrigeratorSelectedMode == `标准` ? @color/primary : @color/primary_variant}"
+                            app:trackColorActive="@{viewModel.refrigeratorSelectedMode == `标准` ? @color/primary : @color/primary_variant}"
                             app:trackColorInactive="#E0E0E0" />
 
                         <TextView
@@ -224,9 +224,9 @@
                             android:value="@={viewModel.setFreezeTemp}"
                             android:valueFrom="-24"
                             android:valueTo="-18"
-                            android:enabled="@{viewModel.selectedMode == `标准`}"
-                            app:thumbColor="@{viewModel.selectedMode == `标准` ? @color/secondary : @color/secondary_variant}"
-                            app:trackColorActive="@{viewModel.selectedMode == `标准` ? @color/secondary : @color/secondary_variant}"
+                            android:enabled="@{viewModel.refrigeratorSelectedMode == `标准`}"
+                            app:thumbColor="@{viewModel.refrigeratorSelectedMode == `标准` ? @color/secondary : @color/secondary_variant}"
+                            app:trackColorActive="@{viewModel.refrigeratorSelectedMode == `标准` ? @color/secondary : @color/secondary_variant}"
                             app:trackColorInactive="#E0E0E0" />
 
                         <TextView

@@ -21,6 +21,7 @@ import com.agonylua.smartKitchen.databinding.LayoutMicrowaveBinding;
 import com.agonylua.smartKitchen.databinding.LayoutRefrigeratorBinding;
 import com.agonylua.smartKitchen.databinding.LayoutRiceCookerBinding;
 import com.agonylua.smartKitchen.databinding.LayoutSterilizerBinding;
+import com.agonylua.smartKitchen.utils.SnackbarUtils;
 import com.agonylua.smartKitchen.viewModel.DeviceViewModel;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -60,6 +61,7 @@ public class DeviceFragment extends Fragment {
             this.mDeviceType = device.getDeviceType();
             this.mDeviceName = device.getDeviceName();
             this.mDeviceState = device.getDeviceStatus();
+            binding.deviceSn.setText(device.getDeviceSn());
         }
         if (getActivity() != null) {
             binding.toolbar.setNavigationOnClickListener(v -> {
@@ -67,6 +69,11 @@ public class DeviceFragment extends Fragment {
                 navController.popBackStack();
             });
         }
+
+        binding.deviceStatus.setOnClickListener(v -> {
+            mViewModel.statusLoading.setValue(true);
+            mViewModel.updateDeviceStatus(device.getDeviceSn());
+        });
         setupDynamicContent(mDeviceType);
         observeViewModel();
         binding.setLifecycleOwner(getViewLifecycleOwner());
@@ -81,6 +88,11 @@ public class DeviceFragment extends Fragment {
             if (updatedDevice != null) {
                 this.device = updatedDevice;
                 mViewModel.initDevice(this.device);
+            }
+        });
+        mViewModel.toastMessage.observe(getViewLifecycleOwner(), message -> {
+            if (message != null) {
+                SnackbarUtils.show(requireView(), message);
             }
         });
     }
@@ -113,11 +125,6 @@ public class DeviceFragment extends Fragment {
                 Log.d(TAG, "setupDynamicContent: " + device.getDeviceMode());
                 mViewModel.initDevice(device);
 
-                // 4. "+30s" 快捷按钮
-                microwaveBinding.btnAdd30s.setOnClickListener(v -> {
-                    mViewModel.addMicrowaveTime(30);
-                });
-
                 // 5. 开始加热按钮
                 microwaveBinding.btnStart.setOnClickListener(v -> {
                     mViewModel.submitTask();
@@ -130,6 +137,9 @@ public class DeviceFragment extends Fragment {
                 LayoutDishwasherBinding dishwasherBinding = LayoutDishwasherBinding.inflate(inflater, container, false);
                 dishwasherBinding.setViewModel(mViewModel);
                 mViewModel.initDevice(device);
+                dishwasherBinding.btnStart.setOnClickListener(v -> {
+                    mViewModel.submitTask();
+                });
 
                 dishwasherBinding.setLifecycleOwner(getViewLifecycleOwner());
                 container.addView(dishwasherBinding.getRoot());
@@ -150,6 +160,9 @@ public class DeviceFragment extends Fragment {
                 LayoutSterilizerBinding sterilizerBinding = LayoutSterilizerBinding.inflate(inflater, container, false);
                 sterilizerBinding.setViewModel(mViewModel);
                 mViewModel.initDevice(device);
+                sterilizerBinding.btnStart.setOnClickListener(v -> {
+                    mViewModel.submitTask();
+                });
 
                 sterilizerBinding.setLifecycleOwner(getViewLifecycleOwner());
                 container.addView(sterilizerBinding.getRoot());

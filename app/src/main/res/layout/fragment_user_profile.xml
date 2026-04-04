@@ -242,6 +242,7 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="textPersonName"
                                     android:maxLines="1"
+                                    android:maxLength="12"
                                     android:text="@={viewModel.etNickname}"
                                     android:textColor="#1F2937" />
                             </com.google.android.material.textfield.TextInputLayout>
@@ -333,6 +334,7 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="textPassword"
                                     android:maxLines="1"
+                                    android:maxLength="12"
                                     android:text="@={viewModel.etOldPwd}" />
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -354,6 +356,7 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="textPassword"
                                     android:maxLines="1"
+                                    android:maxLength="12"
                                     android:text="@={viewModel.etNewPwd}" />
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -375,6 +378,7 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="textPassword"
                                     android:maxLines="1"
+                                    android:maxLength="12"
                                     android:text="@={viewModel.etConfirmPwd}" />
                             </com.google.android.material.textfield.TextInputLayout>
 

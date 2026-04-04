@@ -1,7 +1,5 @@
 package com.agonylua.smartKitchen.model;
 
-import android.util.Log;
-
 public enum DeviceMode {
     IDLE("待机"),
     //--- Refrigerator Modes ---
@@ -56,7 +54,6 @@ public enum DeviceMode {
     }
 
     public static String toLabel(String mode) {
-        Log.d(TAG, "toLabel: mode = " + mode);
         for (DeviceMode deviceMode : DeviceMode.values()) {
             if (deviceMode.name().equals(mode)) {
                 return deviceMode.label;

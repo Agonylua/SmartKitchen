@@ -4,12 +4,18 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.agonylua.smartKitchen.model.DeviceMode;
+
 public class DeviceDataManager {
     private static final String TAG = "DeviceDataManager";
     private static DeviceDataManager Instance;
     private final SharedPreferences sp;
     private final SharedPreferences.Editor editor;
-    private final String DEVICE_MODE = "device_mode";
+    private final String FRIDGE_MODE = "fridge_mode";
+    private final String MICROWAVE_MODE = "microwave_mode";
+    private final String DISHWASHER_MODE = "dishwasher_mode";
+    private final String RICE_COOKER_MODE = "rice_cooker_mode";
+    private final String STERILIZER_MODE = "sterilizer_mode";
     private final String FRIDGE_TEMP = "fridge_temp";
     private final String FREEZE_TEMP = "freeze_temp";
     private final String MICROWAVE_TIME = "microwave_time";
@@ -36,16 +42,17 @@ public class DeviceDataManager {
     }
 
     //------------------------------- Device Methods -------------------------------//
-    public String getDeviceMode() {
-        return sp.getString(DEVICE_MODE, null);
+
+    //------------------------------- Fridge Methods -------------------------------//
+    public String getFridgeMode() {
+        return sp.getString(FRIDGE_MODE, DeviceMode.STANDARD.name());
     }
 
-    public void setDeviceMode(String mode) {
-        editor.putString(DEVICE_MODE, mode);
+    public void setFridgeMode(String mode) {
+        editor.putString(FRIDGE_MODE, mode);
         editor.apply();
     }
 
-    //------------------------------- Fridge Methods -------------------------------//
     public void saveFridgeSet(float temperature, float humidity) {
         editor.putFloat(FRIDGE_TEMP, temperature);
         editor.putFloat(FREEZE_TEMP, humidity);
@@ -71,6 +78,15 @@ public class DeviceDataManager {
     }
 
     //-------------------------------- Microwave Methods -------------------------------//
+    public String getMicrowaveMode() {
+        return sp.getString(MICROWAVE_MODE, DeviceMode.HEAT.name());
+    }
+
+    public void setMicrowaveMode(String mode) {
+        editor.putString(MICROWAVE_MODE, mode);
+        editor.apply();
+    }
+
     public void saveMicrowaveSet(float time, float temp) {
         editor.putFloat(MICROWAVE_TIME, time);
         editor.putFloat(MICROWAVE_TEMP, temp);
@@ -91,8 +107,17 @@ public class DeviceDataManager {
     }
 
     //-------------------------------- Rice Cooker Methods -------------------------------//
-    public void saveRiceCookerSet(String texture) {
-        editor.putString(RICE_COOKER_TEXTURE, texture);
+    public String getRiceCookerMode() {
+        return sp.getString(RICE_COOKER_MODE, DeviceMode.COOK_RICE.name());
+    }
+
+    public void setRiceCookerMode(String mode) {
+        editor.putString(RICE_COOKER_MODE, mode);
+        editor.apply();
+    }
+
+    public void saveRiceCookerSet(Integer texture) {
+        editor.putInt(RICE_COOKER_TEXTURE, texture);
         editor.apply();
     }
 
@@ -101,8 +126,8 @@ public class DeviceDataManager {
         editor.apply();
     }
 
-    public String getRiceCookerTexture() {
-        return sp.getString(RICE_COOKER_TEXTURE, "适中");
+    public Integer getRiceCookerTexture() {
+        return sp.getInt(RICE_COOKER_TEXTURE, 2);
     }
 
     public Boolean getRiceCookerInsulation() {
@@ -110,6 +135,15 @@ public class DeviceDataManager {
     }
 
     //-------------------------------- Dishwasher Methods -------------------------------//
+    public String getDishwasherMode() {
+        return sp.getString(DISHWASHER_MODE, DeviceMode.STANDARD_WASH.name());
+    }
+
+    public void setDishwasherMode(String mode) {
+        editor.putString(DISHWASHER_MODE, mode);
+        editor.apply();
+    }
+
     public void saveDishwasherKeepFresh(Boolean keepFresh) {
         editor.putBoolean(DISHWASHER_KEEPFRESH, keepFresh);
         editor.apply();
@@ -120,6 +154,15 @@ public class DeviceDataManager {
     }
 
     //-------------------------------- Sterilizer Methods -------------------------------//
+    public String getSterilizerMode() {
+        return sp.getString(STERILIZER_MODE, DeviceMode.AUTO.name());
+    }
+
+    public void setSterilizerMode(String mode) {
+        editor.putString(STERILIZER_MODE, mode);
+        editor.apply();
+    }
+
     public void saveSterilizerUVLight(Boolean uvLight) {
         editor.putBoolean(STERILIZER_UVLIGHT, uvLight);
         editor.apply();

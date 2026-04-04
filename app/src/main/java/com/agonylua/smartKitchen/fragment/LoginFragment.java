@@ -118,8 +118,12 @@ public class LoginFragment extends Fragment {
                 // 登录成功后跳转到主页 MainFragment (即包含底部导航栏的宿主)
                 if (getView() != null) {
                     NavController navController = Navigation.findNavController(requireView());
-                    navController.navigate(R.id.action_splash_to_main);
+                    navController.navigate(R.id.action_login_to_main);
+                    loginViewModel.clearLoginResult();
                 }
+            } else if (isSuccess != null && !isSuccess) {
+                // 如果需要处理失败
+                loginViewModel.clearLoginResult();
             }
         });
 

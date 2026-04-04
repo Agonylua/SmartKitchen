@@ -1,22 +1,29 @@
 package com.agonylua.smartKitchen.network;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
+import com.agonylua.smartKitchen.utils.UserManager;
+
 import java.io.IOException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
+@Singleton
 public class AuthInterceptor implements Interceptor {
 
     private Context context;
+    @Inject
+    public UserManager userManager;
 
     public AuthInterceptor(Context context) {
         this.context = context;
@@ -45,7 +52,7 @@ public class AuthInterceptor implements Interceptor {
 
         if (response.code() == 401) {
             new Handler(Looper.getMainLooper()).post(() -> {
-                context.sendBroadcast(new Intent("com.agonylua.smartKitchen.ACTION_LOGOUT"));
+                userManager.triggerTokenExpired();
             });
         }
 

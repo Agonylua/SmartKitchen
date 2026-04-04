@@ -24,27 +24,30 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:alpha="@{viewModel.selectedMode.equals(modeName) ? 1.0f : 0.5f}"
+        android:alpha="@{viewModel.dishwasherSelectedMode.equals(modeName) ? 1.0f : 0.5f}"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
         android:onClick="@{() -> viewModel.setDishwasherMode(modeName)}"
         android:orientation="vertical"
-        android:paddingVertical="12dp">
+        android:paddingVertical="12dp"
+        android:selected="@{viewModel.dishwasherSelectedMode.equals(modeName)}">
 
         <ImageView
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/ic_launcher_foreground"
-            app:tint="@{viewModel.selectedMode.equals(modeName) ? @color/primary : @color/text_secondary}" />
+            android:duplicateParentState="true"
+            app:tint="@color/selector_mode_color" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@{modeName}"
-            android:textColor="@{viewModel.selectedMode.equals(modeName) ? @color/primary : @color/text_secondary}"
+            android:duplicateParentState="true"
+            android:textColor="@color/selector_mode_color"
             android:textSize="14sp"
             android:textStyle="bold" />
 

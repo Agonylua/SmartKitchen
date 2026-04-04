@@ -287,9 +287,11 @@ public class UserRepository {
 
     public void logout() {
         userManager.clear();
-        homeDao.clearAll();
-        deviceDao.clearAll();
-        rulesDao.clearAll();
+        ThreadPoolUtils.getInstance().execute(() -> {
+            homeDao.clearAll();
+            deviceDao.clearAll();
+            rulesDao.clearAll();
+        });
     }
 
     // 回调接口：通知 ViewModel 结果

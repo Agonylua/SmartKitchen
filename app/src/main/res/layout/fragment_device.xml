@@ -4,6 +4,7 @@
 
     <data>
 
+        <import type="android.view.View" />
         <variable
             name="device"
             type="com.agonylua.smartKitchen.database.entity.Device" />
@@ -65,14 +66,21 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/device_status"
+                        android:id="@+id/device_sn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="@id/device_image"
+                        app:layout_constraintStart_toStartOf="@id/device_image"
+                        app:layout_constraintTop_toBottomOf="@id/device_image" />
+
+                    <TextView
+                        android:id="@+id/device_status"
+                        android:layout_width="72dp"
+                        android:layout_height="wrap_content"
                         android:background="@drawable/bg_status_capsule"
-                        android:paddingHorizontal="16dp"
                         android:paddingVertical="6dp"
-                        android:text="@{viewModel.status}"
-                        android:textColor="@{viewModel.statusColor}"
+                        android:text="@{viewModel.statusLoading ? `` : viewModel.status}"
+                        android:textColor="@{viewModel.statusColor ? @color/device_online : @color/device_offline}"
                         android:textSize="16sp"
                         android:gravity="center"
                         app:layout_constraintBottom_toTopOf="@+id/device_mode"
@@ -85,7 +93,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:indeterminateTint="#2196F3"
-                        android:visibility="@{viewModel.statusLoading}"
+                        android:visibility="@{viewModel.statusLoading ? View.VISIBLE : View.GONE}"
                         app:layout_constraintBottom_toBottomOf="@+id/device_status"
                         app:layout_constraintEnd_toEndOf="@+id/device_status"
                         app:layout_constraintStart_toStartOf="@id/device_status"

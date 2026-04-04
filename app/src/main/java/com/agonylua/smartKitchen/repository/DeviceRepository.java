@@ -1,7 +1,5 @@
 package com.agonylua.smartKitchen.repository;
 
-import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
@@ -51,7 +49,7 @@ public class DeviceRepository {
         mqttManager.publish(deviceSn, JsonUtils.toJson(payload));
     }
 
-    public void sendControlCmd(Context context, Map<String, String> payload, callback callback) {
+    public void sendControlCmd(Map<String, String> payload, callback callback) {
 
         //调用 Retrofit 发送控制命令到服务器进行验证
         retrofitClient.getApi().controlDevice(payload).enqueue(new Callback<ApiResponse<Void>>() {
@@ -67,6 +65,25 @@ public class DeviceRepository {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 callback.onFailure(t.getMessage());
+            }
+        });
+    }
+
+    public void updateDeviceStatus(String deviceSn, callback callback) {
+
+        retrofitClient.getApi().updateDeviceStatus(deviceSn).enqueue(new Callback<ApiResponse<String>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
+                if (response.body() != null && response.body().getCode() == 200) {
+                    callback.onSuccess(response.body().getData());
+                } else {
+                    callback.onFailure("连接错误");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
+                callback.onFailure("网络错误");
             }
         });
     }

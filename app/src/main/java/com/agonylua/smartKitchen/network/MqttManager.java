@@ -29,7 +29,7 @@ public class MqttManager {
 
     private static final String TAG = "MqttManager";
     // ================= 配置参数 =================
-    private static final String BROKER_URL = "tcp://192.168.250.52:1883";
+    private static final String BROKER_URL = "tcp://192.168.83.96:1883";
     private static final String CLIENT_ID = "Android_App";
     private static final String USERNAME = "smartKitchen";
     private static final String PASSWORD = "wei.liu-liu";

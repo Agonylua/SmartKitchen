@@ -41,7 +41,7 @@
                 android:layout_width="220dp"
                 android:layout_height="220dp"
                 android:indeterminate="false"
-                android:max="@{viewModel.riceCookerTotalTime}"
+                android:max="100"
                 android:progress="@{viewModel.riceCookerProgress}"
                 android:progressDrawable="@drawable/circle_progress_teal"
                 android:rotation="-90"
@@ -92,7 +92,7 @@
                     android:background="@drawable/bg_capsule_teal_light"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
-                    android:text="@{viewModel.riceCookerStatus}"
+                    android:text="@{device.deviceStatus}"
                     android:textColor="@color/primary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -150,12 +150,12 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:alpha="@{viewModel.riceCookerTexture.equals(`软糯`) ? 1.0f : 0.5f}"
+                        android:alpha="@{viewModel.riceCookerTexture.equals(0) ? 1.0f : 0.5f}"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center"
-                        android:onClick="@{() -> viewModel.setRiceCookerTexture(`软糯`)}"
+                        android:onClick="@{() -> viewModel.setRiceCookerTexture(0)}"
                         android:orientation="vertical"
                         android:padding="8dp">
 
@@ -163,14 +163,14 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:src="@drawable/ic_launcher_foreground"
-                            app:tint="@{viewModel.riceCookerTexture.equals(`软糯`) ? @color/primary : @color/text_secondary}" />
+                            app:tint="@{viewModel.riceCookerTexture.equals(0) ? @color/primary : @color/text_secondary}" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="软糯"
-                            android:textColor="@{viewModel.riceCookerTexture.equals(`软糯`) ? @color/primary : @color/text_secondary}"
+                            android:textColor="@{viewModel.riceCookerTexture.equals(0) ? @color/primary : @color/text_secondary}"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -179,12 +179,12 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:alpha="@{viewModel.riceCookerTexture.equals(`适中`) ? 1.0f : 0.5f}"
+                        android:alpha="@{viewModel.riceCookerTexture.equals(1) ? 1.0f : 0.5f}"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center"
-                        android:onClick="@{() -> viewModel.setRiceCookerTexture(`适中`)}"
+                        android:onClick="@{() -> viewModel.setRiceCookerTexture(1)}"
                         android:orientation="vertical"
                         android:padding="8dp">
 
@@ -192,14 +192,14 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:src="@drawable/ic_launcher_foreground"
-                            app:tint="@{viewModel.riceCookerTexture.equals(`适中`) ? @color/primary : @color/text_secondary}" />
+                            app:tint="@{viewModel.riceCookerTexture.equals(1) ? @color/primary : @color/text_secondary}" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="适中"
-                            android:textColor="@{viewModel.riceCookerTexture.equals(`适中`) ? @color/primary : @color/text_secondary}"
+                            android:textColor="@{viewModel.riceCookerTexture.equals(1) ? @color/primary : @color/text_secondary}"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -208,12 +208,12 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:alpha="@{viewModel.riceCookerTexture.equals(`劲道`) ? 1.0f : 0.5f}"
+                        android:alpha="@{viewModel.riceCookerTexture.equals(2) ? 1.0f : 0.5f}"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center"
-                        android:onClick="@{() -> viewModel.setRiceCookerTexture(`劲道`)}"
+                        android:onClick="@{() -> viewModel.setRiceCookerTexture(2)}"
                         android:orientation="vertical"
                         android:padding="8dp">
 
@@ -221,14 +221,14 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:src="@drawable/ic_launcher_foreground"
-                            app:tint="@{viewModel.riceCookerTexture.equals(`劲道`) ? @color/primary : @color/text_secondary}" />
+                            app:tint="@{viewModel.riceCookerTexture.equals(2) ? @color/primary : @color/text_secondary}" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="劲道"
-                            android:textColor="@{viewModel.riceCookerTexture.equals(`劲道`) ? @color/primary : @color/text_secondary}"
+                            android:textColor="@{viewModel.riceCookerTexture.equals(2) ? @color/primary : @color/text_secondary}"
                             android:textSize="14sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -272,12 +272,13 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="32dp"
-            android:text="开始煮饭"
+            android:enabled="@{device.deviceStatus != `ONLINE` || device.deviceStatus != `RUNNING`}"
             android:textSize="18sp"
             android:textStyle="bold"
             app:backgroundTint="@color/primary"
             app:cornerRadius="30dp"
             app:iconGravity="textStart"
+            android:text="@{device.deviceStatus.equals(`RUNING`) ? `停止煮饭` : `开始煮饭`}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/card_taste" />
 

@@ -56,9 +56,11 @@ public class SplashFragment extends Fragment {
                     if (valid) {
                         Log.d(TAG, "observeViewModel: Token valid, navigating to main");
                         navController.navigate(R.id.action_splash_to_main);
+                        viewModel.clearLoginResult();
                     } else {
                         Log.d(TAG, "observeViewModel: " + "Token invalid or not exist, navigating to login");
                         navController.navigate(R.id.action_splash_to_login);
+                        viewModel.clearLoginResult();
                     }
                 }
             });

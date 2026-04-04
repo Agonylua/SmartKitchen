@@ -41,8 +41,8 @@
                 android:layout_width="220dp"
                 android:layout_height="220dp"
                 android:indeterminate="false"
-                android:max="@{viewModel.microwaveTotalTime}"
-                android:progress="@{viewModel.microwaveTime}"
+                android:max="100"
+                android:progress="@{viewModel.microwaveProgress}"
                 android:progressDrawable="@drawable/circle_progress_orange"
                 android:rotation="-90"
                 app:layout_constraintBottom_toBottomOf="@+id/circle_bg"
@@ -80,24 +80,11 @@
                     android:id="@+id/tv_power_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{viewModel.microwaveMode}"
+                    android:text="@{viewModel.microwaveSelectedMode}"
                     android:textColor="@color/secondary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_add_30s"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="+30s"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                app:backgroundTint="@color/secondary"
-                app:cornerRadius="20dp"
-                app:layout_constraintEnd_toEndOf="@+id/circle_bg"
-                app:layout_constraintStart_toStartOf="@+id/circle_bg"
-                app:layout_constraintTop_toBottomOf="@+id/circle_bg" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -157,7 +144,7 @@
                         android:id="@+id/tv_slider_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{viewModel.setMicrowaveTime.toString()}"
+                        android:text="@{viewModel.formatMicrowaveTime(viewModel.setMicrowaveTime)}"
                         android:textColor="@color/secondary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -168,10 +155,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:stepSize="10"
-                    android:enabled="@{viewModel.selectedMode == `加热` || viewModel.deviceMode == `IDLE`}"
+                    android:enabled="@{viewModel.microwaveSelectedMode == `加热`}"
                     android:valueFrom="10"
                     android:value="@={viewModel.setMicrowaveTime}"
-                    android:valueTo="100"
+                    android:valueTo="5940"
                     app:thumbColor="@color/secondary"
                     app:tickVisible="false"
                     app:trackColorActive="@color/secondary"
@@ -207,7 +194,7 @@
                         android:id="@+id/tv_slider_temp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{String.valueOf(viewModel.setMicrowaveTemp) + `℃`}"
+                        android:text="@{String.valueOf((int)viewModel.setMicrowaveTemp) + `℃`}"
                         android:textColor="@color/secondary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -218,7 +205,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:stepSize="10"
-                    android:enabled="@{viewModel.selectedMode == `加热` || viewModel.selectedMode == `待机`}"
+                    android:enabled="@{viewModel.microwaveSelectedMode != `加热`}"
                     android:value="@={viewModel.setMicrowaveTemp}"
                     android:valueFrom="30"
                     android:valueTo="230"
@@ -236,13 +223,14 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="32dp"
-            android:text="开始加热"
+            android:enabled="@{device.deviceStatus != `ONLINE` || device.deviceStatus != `RUNNING`}"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:backgroundTint="@color/secondary"
+            android:text="@{device.deviceStatus.equals(`RUNING`) ? `停止加热` : `开始加热`}"
             app:cornerRadius="30dp"
             app:iconGravity="textStart"
             app:iconPadding="8dp"
+            app:backgroundTint="@color/primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/card_controls" />
 

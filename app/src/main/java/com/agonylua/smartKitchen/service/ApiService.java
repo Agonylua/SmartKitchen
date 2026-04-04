@@ -140,6 +140,9 @@ public interface ApiService {
     @GET("/device/power")
     Call<ApiResponse<List<DevicePowerDTO>>> getDevicesPower(@Query("homeId") String homeId);
 
+    @POST("/device/updateStatus")
+    Call<ApiResponse<String>> updateDeviceStatus(@Query("deviceSn") String deviceSn);
+
     //------------------------------ 家庭相关接口 ---------------------------------
 
     /**

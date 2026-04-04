@@ -3,6 +3,9 @@ package com.agonylua.smartKitchen.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -12,6 +15,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @Singleton
 public class UserManager {
+    private MutableLiveData<Boolean> tokenExpiredEvent = new MutableLiveData<>();
     private static final String PREF_NAME = "SmartKitchenApp";
     private static final String KEY_TOKEN = "jwt_token";
     private static final String KEY_USER_ID = "user_id";
@@ -29,6 +33,20 @@ public class UserManager {
         editor = sp.edit();
     }
 
+
+    public LiveData<Boolean> getTokenExpiredEvent() {
+        return tokenExpiredEvent;
+    }
+
+    public void triggerTokenExpired() {
+        clearToken();
+        tokenExpiredEvent.postValue(true);
+    }
+
+    public void clearToken() {
+        editor.remove(KEY_TOKEN);
+        editor.apply();
+    }
 
     // 保存登录用户信息
     public void saveUserInfo(String id, String homeId, String username, String nickname, String avatarUrl, String token) {

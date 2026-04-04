@@ -71,6 +71,10 @@ public class LoginViewModel extends ViewModel {
         errorMessage.setValue(null);
     }
 
+    public void clearLoginResult() {
+        loginResult.setValue(null);
+    }
+
     // Getters for LiveData
     public MutableLiveData<Boolean> getLoginResult() {
         return loginResult;

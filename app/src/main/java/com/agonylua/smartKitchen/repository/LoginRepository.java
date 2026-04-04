@@ -85,7 +85,7 @@ public class LoginRepository {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<UserDTO>> call, @NonNull Throwable t) {
                 String msg = t.getMessage() != null ? t.getMessage() : "未知错误";
-                callback.onError("网络错误: " + msg);
+                callback.onError("服务器连接错误");
                 Log.e(TAG, "onFailure: " + msg);
             }
         });
@@ -125,7 +125,7 @@ public class LoginRepository {
             public void onFailure(@NonNull Call call, @NonNull Throwable t) {
                 String msg = t.getMessage() != null ? t.getMessage() : "未知错误";
                 Log.e(TAG, "onFailure: " + msg);
-                callback.onFailure(msg);
+                callback.onFailure("服务器连接失败");
             }
         });
     }

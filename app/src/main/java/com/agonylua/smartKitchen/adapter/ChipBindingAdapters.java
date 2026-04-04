@@ -27,7 +27,7 @@ public class ChipBindingAdapters {
         if (items == null) return;
         chipGroup.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(chipGroup.getContext());
-        String currentSelection = viewModel.selectedMode.getValue();
+        String currentSelection = viewModel.getSelectedModeLiveData().getValue();
 
         for (String itemText : items) {
             Chip chip = (Chip) inflater.inflate(R.layout.item_chip, chipGroup, false);
@@ -40,7 +40,7 @@ public class ChipBindingAdapters {
 
             chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
-                    viewModel.selectedMode.setValue(itemText);
+                    viewModel.getSelectedModeLiveData().setValue(itemText);
                 }
             });
 
