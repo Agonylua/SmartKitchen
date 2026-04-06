@@ -127,7 +127,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            app:mockPowerText="@{device.deviceData.get(`realTimePower`)}"
+                            app:mockPowerText="@{device.deviceData.get(`power`)}"
                             android:textColor="#1F2937"
                             android:textSize="15sp"
                             android:textStyle="bold" />

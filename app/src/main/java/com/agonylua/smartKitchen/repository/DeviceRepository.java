@@ -55,7 +55,7 @@ public class DeviceRepository {
         retrofitClient.getApi().controlDevice(payload).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
-                if (response.body() != null && response.body().getCode() == 200) {
+                if (response.code() == 200) {
                     callback.onSuccess("Control command sent successfully");
                 } else {
                     callback.onFailure("error code: " + response.code());

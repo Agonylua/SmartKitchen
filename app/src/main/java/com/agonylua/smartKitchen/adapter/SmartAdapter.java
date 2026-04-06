@@ -76,51 +76,14 @@ public class SmartAdapter extends RecyclerView.Adapter<SmartAdapter.SceneViewHol
         holder.clDeleteOverlay.setVisibility(isDeleting ? View.VISIBLE : View.GONE);
 
         // 自定义长按逻辑
-        holder.itemView.setOnTouchListener((v, event) -> {
-            switch (event.getAction()) {
-                case android.view.MotionEvent.ACTION_DOWN:
-                    // 如果点击的不是当前正在显示遮罩的卡片，清除其他的遮罩状态
-                    if (currentDeletingRuleId != null && !rule.getRuleId().equals(currentDeletingRuleId)) {
-                        clearDeleteMode();
-                    }
-
-                    if (holder.longPressRunnable != null) {
-                        v.removeCallbacks(holder.longPressRunnable);
-                    }
-                    holder.longPressRunnable = () -> {
-                        String oldDeletingId = currentDeletingRuleId;
-                        currentDeletingRuleId = rule.getRuleId();
-                        // 刷新旧的打开项将其关闭
-                        if (oldDeletingId != null && !oldDeletingId.equals(currentDeletingRuleId)) {
-                            for (int i = 0; i < sceneList.size(); i++) {
-                                String rId = sceneList.get(i).getRuleId();
-                                if (rId != null && rId.equals(oldDeletingId)) {
-                                    notifyItemChanged(i);
-                                    break;
-                                }
-                            }
-                        }
-                        // 刷新当前项以显示遮罩
-                        notifyItemChanged(holder.getAdapterPosition());
-                        // 可选用震动提醒长按成功
-                        // v.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
-                    };
-                    v.postDelayed(holder.longPressRunnable, 1000); // 3秒长按
-                    break;
-                case android.view.MotionEvent.ACTION_UP:
-                case android.view.MotionEvent.ACTION_CANCEL:
-                case android.view.MotionEvent.ACTION_MOVE:
-                    // 手指抬起、移动过大或被取消时，若没到1秒则取消显示
-                    if (event.getAction() != android.view.MotionEvent.ACTION_MOVE ||
-                            (event.getAction() == android.view.MotionEvent.ACTION_MOVE && event.getHistorySize() > 0)) {
-                        if (holder.longPressRunnable != null) {
-                            v.removeCallbacks(holder.longPressRunnable);
-                        }
-                    }
-                    break;
+        holder.itemView.setOnLongClickListener(v -> {
+            // 如果点击的不是当前正在显示遮罩的卡片，清除其他的遮罩状态
+            if (currentDeletingRuleId != null && !rule.getRuleId().equals(currentDeletingRuleId)) {
+                clearDeleteMode();
             }
-            // 不消费触摸事件，继续向下传递给点击事件
-            return false;
+            currentDeletingRuleId = rule.getRuleId();
+            notifyItemChanged(holder.getAdapterPosition());
+            return true; // 返回 true 表示长按事件被消费
         });
 
         // 遮罩存在拦截点击，使得点击卡片其他地方取消删除

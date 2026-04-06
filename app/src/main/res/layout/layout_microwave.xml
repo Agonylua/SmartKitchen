@@ -74,13 +74,13 @@
                     android:fontFamily="sans-serif-medium"
                     android:text="@{viewModel.microwaveTimeDisplay == null ? `--:--` : viewModel.microwaveTimeDisplay}"
                     android:textColor="@color/text_primary"
-                    android:textSize="54sp" />
+                    android:textSize="46sp" />
 
                 <TextView
                     android:id="@+id/tv_power_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{viewModel.microwaveSelectedMode}"
+                    android:text="@{viewModel.deviceMode}"
                     android:textColor="@color/secondary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -205,7 +205,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:stepSize="10"
-                    android:enabled="@{viewModel.microwaveSelectedMode != `加热`}"
+                    android:enabled="@{viewModel.microwaveSelectedMode == `加热`}"
                     android:value="@={viewModel.setMicrowaveTemp}"
                     android:valueFrom="30"
                     android:valueTo="230"

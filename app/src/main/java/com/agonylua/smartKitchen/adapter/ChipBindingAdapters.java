@@ -28,7 +28,6 @@ public class ChipBindingAdapters {
         chipGroup.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(chipGroup.getContext());
         String currentSelection = viewModel.getSelectedModeLiveData().getValue();
-
         for (String itemText : items) {
             Chip chip = (Chip) inflater.inflate(R.layout.item_chip, chipGroup, false);
             chip.setId(View.generateViewId());

@@ -16,6 +16,7 @@ import com.agonylua.smartKitchen.database.entity.Device;
 import com.agonylua.smartKitchen.repository.AddDeviceRepository;
 import com.agonylua.smartKitchen.repository.HomeRepository;
 import com.agonylua.smartKitchen.utils.EspProvisioningHelper;
+import com.agonylua.smartKitchen.utils.ThreadPoolUtils;
 import com.agonylua.smartKitchen.utils.UserManager;
 import com.espressif.provisioning.DeviceConnectionEvent;
 import com.espressif.provisioning.ESPConstants;
@@ -60,7 +61,7 @@ public class ProvisionViewModel extends ViewModel {
     private UserManager userManager;
     private Context context;
     private String deviceSn = null;
-    private String targetDeviceName = null;
+    private String targetDeviceId = null;
     private String targetPop = null;
 
     @Inject
@@ -80,9 +81,8 @@ public class ProvisionViewModel extends ViewModel {
         try {
             JSONObject json = new JSONObject(qrData);
 
-            if (json.has("name")) targetDeviceName = json.getString("name");
+            if (json.has("id")) targetDeviceId = json.getString("id");
             if (json.has("pop")) targetPop = json.getString("pop");
-            if (json.has("sn")) deviceSn = json.getString("sn");
 
             String transport = json.optString("transport", "ble");
             if (!"ble".equalsIgnoreCase(transport) && !"softap".equalsIgnoreCase(transport)) {
@@ -90,35 +90,37 @@ public class ProvisionViewModel extends ViewModel {
                 return;
             }
 
-            Log.d(TAG, "QR Parsed: Name=" + targetDeviceName + ", POP=" + targetPop);
+            Log.d(TAG, "QR Parsed: Name=" + targetDeviceId + ", POP=" + targetPop);
             scanStatus.postValue("正在向服务器验证设备...");
             isScanError.postValue(false); // 初始重置为非错误状态
 
             // 调用后端接口绑定设备
-            repository.bindDevice(deviceSn, userManager.getHomeId(), new AddDeviceRepository.callback() {
-                @Override
-                public void onSuccess(int code) {
-                    if (code == 1) {
-                        bindResultMsg.postValue("设备验证成功！准备配置网络。");
-                        scanStatus.postValue("设备验证成功，正在搜索蓝牙...");
-                        qrCodeParsed.postValue(true); // 放行：允许蓝牙扫描
-                    } else if (code == 0) {
-                        setErrorState(true, "设备已被绑定！将继续配置本地网络。");
-                        qrCodeParsed.postValue(false);
-                    } else {
-                        // code == -1 或其他未知状态，拦截并报错
-                        setErrorState(true, "设备验证失败：该设备在云端不存在或无效。");
-                        qrCodeParsed.postValue(false); // 拦截：不进行蓝牙扫描
+            ThreadPoolUtils.getInstance().executeDelay(() -> {
+                repository.bindDevice(targetDeviceId, userManager.getHomeId(), new AddDeviceRepository.callback() {
+                    @Override
+                    public void onSuccess(int code) {
+                        if (code == 1) {
+                            bindResultMsg.postValue("设备验证成功！准备配置网络。");
+                            scanStatus.postValue("设备验证成功，正在搜索蓝牙...");
+                            qrCodeParsed.postValue(true); // 放行：允许蓝牙扫描
+                        } else if (code == 0) {
+                            setErrorState(true, "设备已被绑定！将继续配置本地网络。");
+                            qrCodeParsed.postValue(false);
+                        } else {
+                            // code == -1 或其他未知状态，拦截并报错
+                            setErrorState(true, "设备验证失败：该设备在云端不存在或无效。");
+                            qrCodeParsed.postValue(false); // 拦截：不进行蓝牙扫描
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(String errorMsg) {
-                    // 网络请求失败，拦截并报错
-                    setErrorState(true, "服务器连接失败：" + errorMsg + "\n请检查网络后重新扫码。");
-                    qrCodeParsed.postValue(false); // 拦截
-                }
-            });
+                    @Override
+                    public void onFailure(String errorMsg) {
+                        // 网络请求失败，拦截并报错
+                        setErrorState(true, "服务器连接失败：" + errorMsg + "\n请检查网络后重新扫码。");
+                        qrCodeParsed.postValue(false); // 拦截
+                    }
+                });
+            }, 2000); // 模拟网络请求延迟
 
         } catch (Exception e) {
             Log.e(TAG, "QR Parse Error", e);
@@ -129,11 +131,11 @@ public class ProvisionViewModel extends ViewModel {
     }
 
     public void startBleScan() {
-        if (targetDeviceName == null) {
+        if (targetDeviceId == null) {
             setErrorState(true, "未获取到设备蓝牙名称，无法配网。");
             return;
         }
-        scanStatus.postValue("正在搜索蓝牙设备: " + targetDeviceName);
+        scanStatus.postValue("正在搜索蓝牙设备: " + targetDeviceId);
 
         bleScanner = new BleScanner(context, new BleScanListener() {
             @Override
@@ -146,7 +148,7 @@ public class ProvisionViewModel extends ViewModel {
                 if (!hasBluetoothPermission()) return;
 
                 String name = device.getName();
-                if (name != null && name.equals(targetDeviceName)) {
+                if (name != null && name.equals(targetDeviceId)) {
                     Log.d(TAG, "Found target device: " + name);
                     stopScan();
                     scanStatus.postValue("已找到设备，正在连接...");
@@ -167,6 +169,7 @@ public class ProvisionViewModel extends ViewModel {
             @Override
             public void scanCompleted() {
                 Log.d(TAG, "scanCompleted: " + "扫描完成，未找到设备");
+                bleScanner.startScan();
             }
 
             @Override
@@ -289,7 +292,7 @@ public class ProvisionViewModel extends ViewModel {
         isScanError.setValue(false);
         errorMessage.setValue("");
         bindResultMsg.setValue(null);
-        targetDeviceName = null;
+        targetDeviceId = null;
         targetPop = null;
         deviceSn = null;
         stopScan();

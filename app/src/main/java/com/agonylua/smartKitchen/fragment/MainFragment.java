@@ -17,10 +17,10 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smartKitchen.R;
+import com.agonylua.smartKitchen.network.WebSocketManager;
 import com.agonylua.smartKitchen.utils.JsonUtils;
 import com.agonylua.smartKitchen.utils.SnackbarUtils;
 import com.agonylua.smartKitchen.utils.UserManager;
-import com.agonylua.smartKitchen.utils.WebSocketManager;
 import com.agonylua.smartKitchen.utils.WorkManagerHelper;
 import com.agonylua.smartKitchen.viewModel.MainViewModel;
 import com.google.android.material.button.MaterialButton;
@@ -236,6 +236,12 @@ public class MainFragment extends Fragment {
         super.onSaveInstanceState(outState);
         // 保存当前的 Tab 索引
         outState.putInt("saved_tab_index", currentPosition);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mViewPager2 = null;
         WebSocketManager.getInstance().disconnect();
         WebSocketManager.getInstance().setNotificationListener(null);
         WorkManagerHelper.stopPeriodicDataSync(requireContext());

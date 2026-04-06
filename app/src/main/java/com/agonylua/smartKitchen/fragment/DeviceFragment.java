@@ -173,7 +173,6 @@ public class DeviceFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        //mViewModel.saveDataGeneral(mDeviceType, mDeviceName);
         binding = null;
     }
 }

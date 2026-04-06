@@ -47,8 +47,8 @@
             app:destination="@id/deviceFragment" />
 
         <action
-            android:id="@+id/action_main_to_provision"
-            app:destination="@id/provisionFragment" />
+            android:id="@+id/action_main_to_scanQr"
+            app:destination="@id/scanQrFragment" />
 
         <action
             android:id="@+id/action_main_to_homeManage"
@@ -77,8 +77,16 @@
         android:name="com.agonylua.smartKitchen.fragment.ProvisionFragment"
         android:label="ProvisionFragment">
         <action
-            android:id="@+id/action_provision_to_scanQr"
-            app:destination="@id/scanQrFragment" />
+            android:id="@+id/action_provision_to_main"
+            app:destination="@id/mainFragment"
+            app:popUpTo="@id/mainFragment"
+            app:popUpToInclusive="false" />
+
+        <action
+            android:id="@+id/action_provision_to_scanQr_retry"
+            app:destination="@id/scanQrFragment"
+            app:popUpTo="@id/scanQrFragment"
+            app:popUpToInclusive="false" />
     </fragment>
 
     <fragment
@@ -86,10 +94,8 @@
         android:name="com.agonylua.smartKitchen.fragment.ScanQrFragment"
         android:label="ScanQrFragment">
         <action
-            android:id="@+id/action_scanQr_to_main"
-            app:destination="@id/mainFragment"
-            app:popUpTo="@id/mainFragment"
-            app:popUpToInclusive="false" />
+            android:id="@+id/action_scanQr_to_provision"
+            app:destination="@id/provisionFragment" />
     </fragment>
 
     <fragment

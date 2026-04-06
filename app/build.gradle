@@ -111,4 +111,5 @@ dependencies {
     // Hilt WorkManager integration
     implementation "androidx.hilt:hilt-work:1.0.0"
     annotationProcessor "androidx.hilt:hilt-compiler:1.0.0"
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
 }

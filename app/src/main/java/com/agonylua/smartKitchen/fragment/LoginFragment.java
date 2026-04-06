@@ -175,6 +175,6 @@ public class LoginFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null; // 释放 binding 避免内存泄漏
+        binding = null;
     }
 }

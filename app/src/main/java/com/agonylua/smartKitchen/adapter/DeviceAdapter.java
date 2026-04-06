@@ -126,34 +126,13 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
             clDeleteOverlay.setVisibility(isDeleting ? View.VISIBLE : View.GONE);
 
             // 自定义长按逻辑
-            itemView.setOnTouchListener((v, event) -> {
-                switch (event.getAction()) {
-                    case android.view.MotionEvent.ACTION_DOWN:
-                        if (adapter.getCurrentDeletingDeviceSn() != null && !device.getDeviceSn().equals(adapter.getCurrentDeletingDeviceSn())) {
-                            adapter.clearDeleteMode();
-                        }
-
-                        if (longPressRunnable != null) {
-                            v.removeCallbacks(longPressRunnable);
-                        }
-                        longPressRunnable = () -> {
-                            adapter.setCurrentDeletingDeviceSn(device.getDeviceSn());
-                            adapter.notifyItemChanged(getAdapterPosition());
-                        };
-                        v.postDelayed(longPressRunnable, 1000);
-                        break;
-                    case android.view.MotionEvent.ACTION_UP:
-                    case android.view.MotionEvent.ACTION_CANCEL:
-                    case android.view.MotionEvent.ACTION_MOVE:
-                        if (event.getAction() != android.view.MotionEvent.ACTION_MOVE ||
-                                (event.getAction() == android.view.MotionEvent.ACTION_MOVE && event.getHistorySize() > 0)) {
-                            if (longPressRunnable != null) {
-                                v.removeCallbacks(longPressRunnable);
-                            }
-                        }
-                        break;
+            itemView.setOnLongClickListener(v -> {
+                if (adapter.getCurrentDeletingDeviceSn() != null && !device.getDeviceSn().equals(adapter.getCurrentDeletingDeviceSn())) {
+                    adapter.clearDeleteMode();
                 }
-                return false;
+                adapter.setCurrentDeletingDeviceSn(device.getDeviceSn());
+                adapter.notifyItemChanged(getAdapterPosition());
+                return true; // 返回 true 表示消耗了长按事件，不再触发点击
             });
 
             // 遮罩存在拦截点击，使得点击卡片其他地方取消删除

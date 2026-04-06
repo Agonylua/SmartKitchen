@@ -77,7 +77,7 @@ public class ScanQrFragment extends Fragment {
                     viewModel.parseQrCode(qrData);
 
                     NavController navController = Navigation.findNavController(requireView());
-                    navController.navigate(R.id.action_scanQr_to_main);
+                    navController.navigate(R.id.action_scanQr_to_provision);
                 });
             }
         });

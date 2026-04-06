@@ -100,13 +100,13 @@ public class ProvisionFragment extends Fragment {
     private void initListeners() {
         binding.ivBack.setOnClickListener(view -> {
             NavController navController = Navigation.findNavController(getView());
-            navController.popBackStack();
+            navController.navigate(R.id.action_provision_to_main);
         });
 
         binding.btnRescan.setOnClickListener(v -> {
             viewModel.resetState();
             NavController navController = Navigation.findNavController(getView());
-            navController.navigate(R.id.action_provision_to_scanQr);
+            navController.popBackStack();
         });
 
         binding.btnStartProvision.setOnClickListener(v -> {
@@ -166,7 +166,7 @@ public class ProvisionFragment extends Fragment {
                 SnackbarUtils.show(requireView(), "设备配网成功！");
                 binding.getRoot().postDelayed(() -> {
                     NavController navController = Navigation.findNavController(getView());
-                    navController.popBackStack();
+                    navController.navigate(R.id.action_provision_to_main);
                 }, 2000); // 2秒后返回上一页
             } else if (status != null && (status.contains("失败") || status.contains("异常"))) {
                 SnackbarUtils.show(requireView(), "设备配网失败，请重试");
@@ -279,7 +279,7 @@ public class ProvisionFragment extends Fragment {
                 })
                 .setNegativeButton("退出", (dialog, which) -> {
                     NavController navController = Navigation.findNavController(getView());
-                    navController.popBackStack();
+                    navController.navigate(R.id.action_provision_to_main);
                 })
                 .setCancelable(false)
                 .show();
@@ -295,7 +295,7 @@ public class ProvisionFragment extends Fragment {
                 })
                 .setNegativeButton("退出", (dialog, which) -> {
                     NavController navController = Navigation.findNavController(getView());
-                    navController.popBackStack();
+                    navController.navigate(R.id.action_provision_to_main);
                 })
                 .setCancelable(false)
                 .show();

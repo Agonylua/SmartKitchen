@@ -1,4 +1,4 @@
-package com.agonylua.smartKitchen.utils;
+package com.agonylua.smartKitchen.network;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -16,7 +16,7 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 
 public class WebSocketManager {
-    private static final String BASE_URL = "ws://192.168.83.96:1234";
+    private static final String BASE_URL = "ws://192.168.116.113:1234";
     private static final String TAG = "WebSocketManager";
     private static WebSocketManager instance;
     // 重连逻辑相关

@@ -12,12 +12,9 @@ import androidx.core.app.ActivityCompat;
 import com.espressif.provisioning.ESPConstants;
 import com.espressif.provisioning.ESPDevice;
 import com.espressif.provisioning.listeners.ProvisionListener;
-import com.espressif.provisioning.listeners.ResponseListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.nio.charset.StandardCharsets;
 
 public class EspProvisioningHelper {
     private static final String TAG = "EspProvisioningHelper";
@@ -91,38 +88,6 @@ public class EspProvisioningHelper {
     public void disconnectDevice() {
         if (espDevice != null) {
             espDevice.disconnectDevice();
-        }
-    }
-
-    /**
-     * 发送 homeId 到 ESP32 的自定义端点 (Custom Endpoint)
-     *
-     * @param homeId   当前要绑定的家庭ID
-     * @param listener 成功或失败的回调
-     */
-    public void sendHomeId(String homeId, ResponseListener listener) {
-        if (espDevice == null) {
-            Log.e(TAG, "Device not initialized");
-            if (listener != null) {
-                listener.onFailure(new Exception("Device not initialized"));
-            }
-            return;
-        }
-
-        try {
-            // 将 homeId 包装成 JSON 格式发送，方便硬件端扩展解析
-            JSONObject json = new JSONObject();
-            json.put("homeId", homeId);
-            byte[] data = json.toString().getBytes(StandardCharsets.UTF_8);
-
-            espDevice.sendDataToCustomEndPoint("bind-homeId", data, listener);
-            Log.d(TAG, "Sending homeId to device: " + json);
-
-        } catch (JSONException e) {
-            Log.e(TAG, "Failed to create JSON for homeId", e);
-            if (listener != null) {
-                listener.onFailure(e);
-            }
         }
     }
 

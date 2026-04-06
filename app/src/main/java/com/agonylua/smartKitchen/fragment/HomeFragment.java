@@ -43,7 +43,6 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // 使用 DataBinding/ViewBinding 渲染布局
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -72,7 +71,7 @@ public class HomeFragment extends Fragment {
 
         binding.ivAddDevice.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-            navController.navigate(R.id.action_main_to_provision);
+            navController.navigate(R.id.action_main_to_scanQr);
         });
     }
 
@@ -85,7 +84,7 @@ public class HomeFragment extends Fragment {
         adapter.setOnItemClickListener(new DeviceAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Device device) {
-                adapter.clearDeleteMode(); // 鐐瑰嚮鏃跺鏋滄湁鍦ㄥ垹闄ょ‘璁ょ姸鎬佺殑鍗＄墖锛岃娓呴櫎
+                adapter.clearDeleteMode();
                 NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
                 navController.navigate(MainFragmentDirections.actionMainToDevice(device));
             }
@@ -133,7 +132,7 @@ public class HomeFragment extends Fragment {
         // 观察错误信息
         homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isEmpty()) {
-                SnackbarUtils.show(requireView(), msg);
+                SnackbarUtils.show(requireActivity().findViewById(android.R.id.content), msg);
             }
             binding.refreshLayout.finishRefresh(false);
         });

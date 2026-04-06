@@ -145,7 +145,8 @@ public class DeviceViewModel extends ViewModel {
     // ================== 电饭煲业务逻辑 ==================
     public void getRiceCookerData() {
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
-        riceCookerTime.setValue(device.getDeviceData().get("remainTime"));
+        int time = Integer.parseInt(device.getDeviceData().get("remainTime"));
+        riceCookerTime.setValue(String.valueOf(time / 60));
         riceCookerTexture.setValue(deviceDataManager.getRiceCookerTexture());
         riceCookerInsulation.setValue(deviceDataManager.getRiceCookerInsulation());
         riceCookerSelectedMode.setValue(deviceDataManager.getRiceCookerMode());
@@ -159,10 +160,9 @@ public class DeviceViewModel extends ViewModel {
     // ================== 消毒柜业务逻辑 ==================
     public void getSterilizerData() {
 
-        sterilizerTemp.setValue(Integer.parseInt(device.getDeviceData().get("temp")));
-        sterilizerTimeDisplay.setValue(Integer.parseInt(device.getDeviceData().get("time")));
+        sterilizerTemp.setValue(Integer.parseInt(device.getDeviceData().get("sterilizerTemp")));
+        sterilizerTimeDisplay.setValue(Integer.parseInt(device.getDeviceData().get("sterilizerTime")) / 60);
         sterilizerProgress.setValue(Integer.parseInt(device.getDeviceData().get("progress")));
-
         sterilizerStatus.setValue(device.getDeviceStatus());
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
         sterilizerUvLight.setValue(deviceDataManager.getSterilizerUVLight());
@@ -176,8 +176,8 @@ public class DeviceViewModel extends ViewModel {
     // ================== 洗碗机业务逻辑 ==================
     public void getDishwasherData() {
 
-        dishwasherSalt.setValue(Objects.equals(device.getDeviceData().get("salt"), "true"));
-        dishwasherRinseAid.setValue(Objects.equals(device.getDeviceData().get("rinseAid"), "true"));
+        dishwasherSalt.setValue(Objects.equals(device.getDeviceData().get("dishwasherSalt"), "true"));
+        dishwasherRinseAid.setValue(Objects.equals(device.getDeviceData().get("dishwasherRinseAid"), "true"));
         deviceMode.setValue(DeviceMode.toLabel(device.getDeviceMode()));
         dishwasherKeepFresh.setValue(deviceDataManager.getDishwasherKeepFresh());
         dishwasherSelectedMode.setValue(deviceDataManager.getDishwasherMode());
@@ -195,7 +195,7 @@ public class DeviceViewModel extends ViewModel {
     public void initDevice(Device device) {
         this.device = device;
         deviceDataManager = DeviceDataManager.Instance((android.app.Application) context.getApplicationContext(), device.getDeviceSn());
-        setDeviceImage(this.device.getDeviceStatus(), this.device.getDeviceType(), this.device.getDeviceName());
+        setDeviceImage();
         if (device.getDeviceStatus().equals("OFFLINE")) {
             status.setValue("离线");
             statusColor.setValue(false);
@@ -223,12 +223,12 @@ public class DeviceViewModel extends ViewModel {
         }
     }
 
-    public void setDeviceImage(String deviceState, String deviceType, String deviceName) {
-        this.deviceName.setValue(deviceName);
-        if (deviceState != null && deviceState.equals("OFFLINE")) {
-            deviceImage.setValue(ContextCompat.getDrawable(context, Objects.requireNonNull(DeviceType.fromName(deviceType)).getOffline()));
+    public void setDeviceImage() {
+        this.deviceName.setValue(device.getDeviceName());
+        if (device.getDeviceStatus() != null && device.getDeviceStatus().equals("OFFLINE")) {
+            deviceImage.setValue(ContextCompat.getDrawable(context, Objects.requireNonNull(DeviceType.fromName(device.getDeviceType())).getOffline()));
         } else {
-            deviceImage.setValue(ContextCompat.getDrawable(context, Objects.requireNonNull(DeviceType.fromName(deviceType)).getOnline()));
+            deviceImage.setValue(ContextCompat.getDrawable(context, Objects.requireNonNull(DeviceType.fromName(device.getDeviceType())).getOnline()));
         }
     }
 
@@ -330,7 +330,6 @@ public class DeviceViewModel extends ViewModel {
                 @Override
                 public void onFailure(String errorMessage) {
                     subTaskLoading.postValue(false);
-                    toastMessage.postValue("指令下发 错误");
                 }
             });
         }, 2000);
@@ -343,6 +342,7 @@ public class DeviceViewModel extends ViewModel {
                 public void onSuccess(String message) {
                     toastMessage.postValue(message);
                     statusLoading.postValue(false);
+                    setDeviceImage();
                     if (Objects.equals(status.getValue(), "离线")) {
                         status.postValue("在线");
                         statusColor.postValue(true);
