@@ -181,23 +181,22 @@ public class MqttService {
         scheduler.schedule(() -> {
             if (bindCallbackMap.remove(deviceSn) != null) {
                 log.warn("⏳ 设备 {} 配网绑定等待超时，清理回调缓存", deviceSn);
+                sendReset(deviceSn);
             }
-        }, 3, TimeUnit.MINUTES);
+        }, 5, TimeUnit.MINUTES);
     }
 
     // 发送消息
     public void sendBind(String homeId, String deviceSn) {
-        String topic = bindTopic + deviceSn + "/bindHomeId";
+        String topic = bindTopic + deviceSn + "/bind";
         if (homeId != null && !homeId.isEmpty()) {
             toPayload(homeId, topic, bindQos);
         }
     }
 
-    public void sendUnBind(String homeId, String deviceSn) {
-        String topic = bindTopic + deviceSn + "/bindHomeId";
-        if (homeId != null && !homeId.isEmpty()) {
-            toPayload(homeId, topic, bindQos);
-        }
+    public void sendUnBind(String deviceSn) {
+        String topic = bindTopic + deviceSn + "/unBind";
+        toPayload("", topic, bindQos);
     }
 
     public void sendCmdMessage(Map<String, String> payload) {
@@ -207,19 +206,22 @@ public class MqttService {
         toPayload(JsonUtil.mapToJson(payload), topic, publishQos);
     }
 
+    public void sendReset(String deviceSn) {
+        String topic = publishTopic + deviceSn + "/reset";
+        toPayload("", topic, publishQos);
+    }
+
     private void toPayload(String payload, String topic, String publishQos) {
         Message<String> message = null;
-        if (payload != null) {
-            try {
-                int qos = Integer.parseInt(publishQos);
-                message = MessageBuilder
-                        .withPayload(payload)
-                        .setHeader(MqttHeaders.TOPIC, topic)
-                        .setHeader(MqttHeaders.QOS, qos)
-                        .build();
-            } catch (NumberFormatException e) {
-                log.error("Invalid QoS value: {}", publishQos, e);
-            }
+        try {
+            int qos = Integer.parseInt(publishQos);
+            message = MessageBuilder
+                    .withPayload(payload)
+                    .setHeader(MqttHeaders.TOPIC, topic)
+                    .setHeader(MqttHeaders.QOS, qos)
+                    .build();
+        } catch (NumberFormatException e) {
+            log.error("Invalid QoS value: {}", publishQos, e);
         }
         if (message != null) {
             try {

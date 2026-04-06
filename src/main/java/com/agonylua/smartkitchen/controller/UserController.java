@@ -61,18 +61,20 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public ApiResponse<UserDTO> getUserInfo(@RequestParam("userId") String userId) {
+    public ApiResponse<UserDTO> getUserInfo() {
+        String userId = SecurityUtils.getCurrentUserId();
+        log.info("▶️ [用户控制器] 获取用户信息请求: userId={}", userId);
         UserDTO dot = userRepository.findByUserId(userId)
                 .map(UserDTO::fromEntity)
                 .orElse(null);
-        log.info("▶️ [用户控制器] 获取用户信息: userId={}, result={}", userId, dot);
+        log.info("▶️ [用户控制器] 获取用户信息: userId={}, UserDTO={}", userId, dot);
         return ApiResponse.success(dot);
     }
 
     @GetMapping("/list")
     public ApiResponse<List<UserDTO>> getUserListInfo(@RequestParam("homeId") String homeId) {
         List<UserDTO> dot = userService.findAllByHomeId(homeId);
-        log.info("▶️ [用户控制器] 获取用户信息: homeId={}, result={}", homeId, dot);
+        log.info("▶️ [用户控制器] 获取用户信息: homeId={}, UserDTO={}", homeId, dot);
         return ApiResponse.success(dot);
     }
 

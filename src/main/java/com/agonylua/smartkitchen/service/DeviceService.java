@@ -83,7 +83,7 @@ public class DeviceService {
                     device.setDeviceStatus(DeviceStatus.ONLINE);
                     deviceRepository.save(device);
                 } else {
-                    mqttService.sendUnBind(homeId, deviceSn);
+                    mqttService.sendUnBind(deviceSn);
                 }
             } catch (Exception e) {
                 log.error("执行设备 {} 绑定回调时发生数据解析异常", deviceSn, e);
@@ -115,12 +115,24 @@ public class DeviceService {
             return false;
         }
         if (mqttService.isConnected()) {
-            mqttService.sendUnBind(home.getHomeId(), deviceSn);
+            mqttService.sendUnBind(deviceSn);
             return false;
         }
         device.setHomeId(null);
         deviceRepository.save(device);
-
         return true;
+    }
+
+    public void updateDeviceStatus(String deviceSn) {
+        deviceRepository.findByDeviceSn(deviceSn)
+                .ifPresent(device -> {
+                    if (device.getDeviceStatus() == DeviceStatus.OFFLINE) {
+
+                        device.setDeviceStatus(DeviceStatus.ONLINE);
+                    } else {
+                        device.setDeviceStatus(DeviceStatus.OFFLINE);
+                    }
+                    deviceRepository.save(device);
+                });
     }
 }

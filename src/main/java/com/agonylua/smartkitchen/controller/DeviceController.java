@@ -124,4 +124,10 @@ public class DeviceController {
         return ApiResponse.success(resultList);
     }
 
+    @PostMapping("/updateStatus")
+    public ApiResponse<String> updateStatus(@RequestParam String deviceSn) {
+        deviceService.updateDeviceStatus(deviceSn);
+        return ApiResponse.success("更新成功");
+    }
+
 }
