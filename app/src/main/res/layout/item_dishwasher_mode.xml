@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.agonylua.smartKitchen.viewModel.DeviceViewModel" />
+
+        <variable
+            name="device"
+            type="com.agonylua.smartKitchen.database.entity.Device" />
+
+        <variable
+            name="modeName"
+            type="String" />
+
+        <variable
+            name="modeTime"
+            type="String" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="@{viewModel.dishwasherSelectedMode.equals(modeName) ? 1.0f : 0.5f}"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:onClick="@{() -> viewModel.setDishwasherMode(modeName)}"
+        android:orientation="vertical"
+        android:paddingVertical="12dp"
+        android:selected="@{viewModel.dishwasherSelectedMode.equals(modeName)}">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:duplicateParentState="true"
+            app:tint="@color/selector_mode_color" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@{modeName}"
+            android:duplicateParentState="true"
+            android:textColor="@color/selector_mode_color"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@{modeTime}"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+    </LinearLayout>
+</layout>

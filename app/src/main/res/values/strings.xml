@@ -1,8 +1,27 @@
 <resources>
-    <string name="app_name">SmartHome</string>
+    <string name="app_name">SmartKitchen</string>
     <string name="title_activity_home">homeActivity</string>
-    <string name="bottom_bar_home">首页</string>
-    <string name="bottom_bar_smart">智能</string>
-    <string name="bottom_bar_monitor">监控</string>
-    <string name="bottom_bar_user">我的</string>
+    <string name="bottom_bar_home">Home</string>
+    <string name="bottom_bar_smart">Smart</string>
+    <string name="bottom_bar_monitor">Monitor</string>
+    <string name="bottom_bar_user">User</string>
+    <string name="login_title">SMART KITCHEN</string>
+    <string name="login">Login</string>
+    <string name="register">Registered</string>
+    <string name="user_name_hint">Username/UserID</string>
+    <string name="user_password_hint">Password</string>
+    <string name="forget_password">forget password?</string>
+
+    <string name="smart_header">Smart Scenes</string>
+    <string name="tap_to_run_title">Tap to run</string>
+    <string name="emoji_cook">🍳</string>
+    <string name="emoji_leave">🛡️</string>
+    <string name="emoji_clean">🍽️️</string>
+    <string name="cook_mode">Meal preparation</string>
+    <string name="leave_mode">Safe from home</string>
+    <string name="clean_mode">Clean after meals</string>
+    <string name="automation_title">Automation</string>
+    <string name="high_temp_vent">High Temp Auto Vent</string>
+    <string name="condition_high_temp">Temp &gt; 32°C</string>
+    <string name="action_turn_on_fan">Turn On Fan</string>
 </resources>

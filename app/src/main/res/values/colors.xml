@@ -1,16 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="aqua">#00FFFF</color>
+    <!-- Base colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="red">#F44336</color>
+
+    <!-- Primary colors -->
+    <color name="primary">#00897B</color>
+    <color name="primary_variant">#00695C</color>
+    <!-- Secondary colors -->
+    <color name="secondary">#FF7043</color>
+    <color name="secondary_variant">#D54B1E</color>
+    <!-- Background color -->
+    <color name="background_main">#F5F5F5</color>
+    <color name="background_card">#FFFFFF</color>
+    <!-- Functional colors -->
+    <color name="state_success">#4CAF50</color>
+    <color name="state_error">#D32F2F</color>
+    <color name="state_warning">#FFA000</color>
+    <color name="state_disabled">#BDBDBD</color>
+    <color name="state_info">#2196F3</color>
+    <color name="device_online">#00A0E9</color>
+    <color name="device_offline">#9E9E9E</color>
+
+    <!-- Typography colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
 
     <!-- Bottom bar -->
     <color name="bottom_bar_black">#FF000000</color>
     <color name="bottom_bar_gray">#FF888888</color>
     <color name="bottom_bar_white">#FFFFFFFF</color>
+    <!-- Gradient colors -->
+    <color name="gradient_start">#E0F2F1</color>
+    <color name="gradient_end">#F5F5F5</color>
 </resources>
