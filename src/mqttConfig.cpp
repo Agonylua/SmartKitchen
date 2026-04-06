@@ -62,6 +62,29 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
     String cmd = String(topic).substring(strlen(TOPIC_SUB));
     Serial.printf("[MQTT ←] 提取的命令: %s\n", cmd.c_str());
 
+    if (cmd.equals("bind"))
+    {
+        homeId = msg;
+        preferences.begin("deviceConfig", false);
+        preferences.putString("homeId", homeId);
+        preferences.end();
+
+        Serial.println("设备绑定成功，已保存 Home ID: " + homeId);
+        publishBindStatus(true);
+        ESP.restart();
+        return;
+    }
+    else if (cmd.equals("unBind"))
+    {
+        Serial.println("设备解绑，清除配置");
+        wifi.resetSettings();
+        preferences.begin("deviceConfig", false);
+        preferences.clear();
+        preferences.end();
+        ESP.restart();
+        return;
+    }
+
     // JSON 解析
     JsonDocument doc;
     DeserializationError error = deserializeJson(doc, msg);
@@ -77,18 +100,8 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
     {
         factoryReset();
     }
-    else if (cmd.equals("bindStatus"))
-    {
-        if (!String(msg).equals("1"))
-        {
-            wifi.resetSettings();
-            Serial.println("设备绑定无效，清除配置");
-            ESP.restart();
-        }
-    }
     else if (cmd.equals("control"))
     {
-        // 检查模式字段
         if (!doc["mode"].is<String>())
         {
             Serial.println("JSON 格式不匹配: 缺少 mode 字段");
@@ -96,18 +109,15 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
         }
         String mode = doc["mode"].as<String>();
 
-        // 解析 data 字段（可能是对象或字符串）
         JsonDocument dataDoc;
         JsonObject payloadObj;
 
         if (doc["data"].is<JsonObject>())
         {
-            // data 是对象
             payloadObj = doc["data"];
         }
         else if (doc["data"].is<String>())
         {
-            // data 是字符串，需要反序列化
             String dataStr = doc["data"].as<String>();
             Serial.printf("[DEBUG] data 是字符串，反序列化: %s\n", dataStr.c_str());
 
@@ -125,11 +135,10 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
             return;
         }
 
-        // 检查温度阈值字段（兼容两种命名）
         float fridgeTempThreshold = 0;
         float freezeTempThreshold = 0;
 
-        if (payloadObj.containsKey("fridgeTempThreshold") && payloadObj.containsKey("freezeTempThreshold"))
+        if (!payloadObj["fridgeTempThreshold"].isNull() && !payloadObj["freezeTempThreshold"].isNull())
         {
             fridgeTempThreshold = payloadObj["fridgeTempThreshold"].as<float>();
             freezeTempThreshold = payloadObj["freezeTempThreshold"].as<float>();
@@ -139,11 +148,10 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
             Serial.println("JSON 格式不匹配: 缺少温度阈值字段");
             return;
         }
-
+        currentMode = stringToDeviceMode(mode);
         Serial.println("当前模式: " + mode);
         Serial.printf("[DEBUG] 解析的温度阈值 - 冷藏: %.2f, 冷冻: %.2f\n", fridgeTempThreshold, freezeTempThreshold);
 
-        // 根据控制指令执行相应操作
         scenarioModeControl(mode, fridgeTempThreshold, freezeTempThreshold);
     }
 }
@@ -157,11 +165,11 @@ void mqttReconnect()
     bool ok;
     if (MQTT_USERNAME && MQTT_PASSWORD)
     {
-        ok = mqtt.connect(clientId.c_str(), MQTT_USERNAME, MQTT_PASSWORD, TOPIC_STATUS, 1, true, MSG_LWT, true);
+        ok = mqtt.connect(clientId.c_str(), MQTT_USERNAME, MQTT_PASSWORD, TOPIC_STATUS, 1, true, MSG_LWT, false);
     }
     else
     {
-        ok = mqtt.connect(clientId.c_str(), nullptr, nullptr, TOPIC_STATUS, 1, true, MSG_LWT, true);
+        ok = mqtt.connect(clientId.c_str(), nullptr, nullptr, TOPIC_STATUS, 1, true, MSG_LWT, false);
     }
 
     if (ok)
@@ -182,13 +190,13 @@ void mqttReconnect()
     }
 }
 
-void publishBindVerify()
+void publishUnBind()
 {
-    Serial.println("[publishBindVerify] 开始执行解绑消息发送...");
+    Serial.println("[publishUnBind] 开始执行解绑消息发送...");
 
     if (!mqtt.connected())
     {
-        Serial.println("[publishBindVerify] MQTT未连接，尝试重连...");
+        Serial.println("[publishUnBind] MQTT未连接，尝试重连...");
         mqttReconnect();
 
         // 等待连接建立
@@ -198,12 +206,12 @@ void publishBindVerify()
             delay(500);
             mqtt.loop();
             retry++;
-            Serial.printf("[publishBindVerify] 等待连接... %d/10\n", retry);
+            Serial.printf("[publishUnBind] 等待连接... %d/10\n", retry);
         }
 
         if (!mqtt.connected())
         {
-            Serial.println("[publishBindVerify] MQTT连接失败，无法发送解绑消息");
+            Serial.println("[publishUnBind] MQTT连接失败，无法发送解绑消息");
             return;
         }
     }
@@ -231,8 +239,8 @@ void publishSensorData()
     JsonObject root = doc.to<JsonObject>();
 
     root["mode"] = deviceModeToString(currentMode);
-
-    // 3. 创建嵌套对象 (sensor)
+    root["runTime"] = getRunTimeSeconds();
+    // 创建嵌套对象 (sensor)
     JsonObject sensor = root["data"].to<JsonObject>();
     sensor["fridgeTemp"] = fridgeTemp;
     sensor["freezeTemp"] = freezeTemp;
@@ -245,19 +253,17 @@ void publishSensorData()
     }
 }
 
-void publishBindHomeId()
+void publishBindStatus(boolean bindStatus)
 {
     if (!mqtt.connected())
     {
         return;
     }
-
-    JsonDocument doc;
-    JsonObject root = doc.to<JsonObject>();
-    root["homeId"] = homeId;
-    char payload[256];
-    serializeJson(doc, payload);
-    mqtt.publish(TOPIC_STATUS, payload, true);
+    String topic = String(TOPIC_PUB[0]) + "bind";
+    if (bindStatus)
+    {
+        mqtt.publish(topic.c_str(), "1", true);
+    }
 }
 
 // 将DeviceMode枚举转换为字符串
@@ -276,6 +282,18 @@ String deviceModeToString(DeviceMode mode)
     default:
         return "STANDARD";
     }
+}
+
+// 将字符串转换为DeviceMode枚举
+DeviceMode stringToDeviceMode(const String &modeStr)
+{
+    if (modeStr == "FAST_COOL")
+        return DeviceMode::FAST_COOL;
+    if (modeStr == "ENERGY_SAVING")
+        return DeviceMode::ENERGY_SAVING;
+    if (modeStr == "HOLIDAY")
+        return DeviceMode::HOLIDAY;
+    return DeviceMode::STANDARD;
 }
 
 // 检查MQTT连接状态

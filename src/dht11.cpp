@@ -10,7 +10,7 @@ void dht_begin(){
 }
 float readFridgeTemp()
 {
-    return dhtFridge.readTemperature()-12.0;
+    return dhtFridge.readTemperature()-18.0;
 }
 float readFreezeTemp(){
     return dhtFreeze.readTemperature()-30.0;

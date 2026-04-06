@@ -34,8 +34,8 @@ private:
     unsigned long lastRetryTime = 0;
 
     // 配网参数
-    const char *service_name = "SK_Refrigerator";
-    const char *pop = "smart123";
+    const char *service_name = "SK-R001";
+    const char *pop = "DYCMV7";
 
 public:
     Preferences preferences;

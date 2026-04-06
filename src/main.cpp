@@ -1,6 +1,8 @@
 #include "main.h"
+#include <esp_wifi.h>
 
 // 全局变量定义
+String homeId = "";
 DeviceMode currentMode = DeviceMode::STANDARD;
 DeviceStatus currentStatus = DeviceStatus::UNBOUND;
 const char *DEV_SN = "SK-156400423935CCBA9720B608";
@@ -8,7 +10,8 @@ Preferences preferences;
 unsigned long pressStartTime = 0;
 bool isPressing = false;
 bool isBind = false;
-const unsigned long RESET_TIME_MS = 20000; // 20秒
+const unsigned long RESET_TIME_MS = 5000; // 5秒
+unsigned long lastDisplayUpdate = 0;
 Ticker ticker;
 
 void setup()
@@ -17,6 +20,7 @@ void setup()
   delay(2000);
   // 初始化显示模块
   displayMgr.begin();
+  displayMgr.update(0);
   // 初始化WiFi
   wifi.begin();
   // 初始化MQTT
@@ -30,13 +34,43 @@ void setup()
 
   // 初始状态设定
   preferences.begin("deviceConfig", false);
-  // if (!preferences.getString("homeId", "").isEmpty())
-  // {
-  //   isBind = true;
-  //   // 温度监测
-  //   ticker.attach(10.0, publishSensorData);
-  // }
-  preferences.end();
+  String savedHomeId = preferences.getString("homeId", "");
+Serial.printf("[Setup] 从 NVS 读取的 homeId: %s\n", savedHomeId.c_str());
+  // 获取底层 WiFi 配置缓存
+  wifi_config_t conf;
+  bool hasWifiCache = false;
+  if (esp_wifi_get_config(WIFI_IF_STA, &conf) == ESP_OK)
+  {
+    if (strlen((const char *)conf.sta.ssid) > 0)
+    {
+      hasWifiCache = true;
+    }
+  }
+
+  if (!savedHomeId.isEmpty() && !savedHomeId.equals(""))
+  {
+    homeId = savedHomeId;
+    isBind = true;
+    // 温度监测
+    ticker.attach(5.0, publishSensorData);
+    Serial.println("设备已绑定");
+    preferences.end();
+  }
+  else
+  {
+    if (hasWifiCache)
+    {
+      Serial.println("[System] 没有绑定家庭 ID，但残留有网络缓存，执行清空并重启...");
+      preferences.clear();
+      preferences.end();
+      wifi.resetSettings();
+    }
+    else
+    {
+      Serial.println("[System] 暂未绑定或已为初始状态，等待配网无需重启...");
+      preferences.end();
+    }
+  }
 }
 
 void loop()
@@ -80,9 +114,21 @@ void loop()
     }
   }
 
-  // 刷新显示 (内部有状态判断，不会一直刷屏)
-  displayMgr.update(0);
-  delay(200);
+  // 刷新显示
+  if (millis() - lastDisplayUpdate > 200)
+  {
+    lastDisplayUpdate = millis();
+
+    int currentStatus = 0; // 0 代表正常工作界面
+
+    if (isPressing)
+    {
+      currentStatus = -1; // -1 代表处于配网或系统特殊状态
+    }
+
+    // 调用我们在 displayManager 中封装好的核心刷新函数
+    displayMgr.update(currentStatus);
+  }
 }
 
 // 工厂重置函数
@@ -90,28 +136,27 @@ void factoryReset()
 {
   Serial.println("\n[System] !!! FACTORY RESET TRIGGERED !!!");
 
-  // 1. 屏幕提示
+  // 屏幕提示
   displayMgr.update(-1);
   delay(500);
 
-  // 2. 发送MQTT解绑消息
-  publishBindVerify();
-  delay(2000);
-
-  // 3. 清除 WiFi 配置
-  Serial.println("[FactoryReset] 清除WiFi配置...");
-  wifi.resetSettings();
-
-  // 4. 清除设备绑定信息
-  Serial.println("[FactoryReset] 清除设备绑定信息...");
+  // 发送MQTT解绑消息
   preferences.begin("deviceConfig", false);
+  if (preferences.getString("homeId", "").isEmpty())
+  {
+    publishUnBind();
+    delay(2000);
+  }
+
+
+  // 清除设备绑定信息
+  Serial.println("[FactoryReset] 清除设备绑定信息...");
   preferences.clear();
   preferences.end();
 
-  // 5. 重启
-  Serial.println("[FactoryReset] 3秒后重启...");
-  delay(3000);
-  ESP.restart();
+  // 清除 WiFi 配置
+  Serial.println("[FactoryReset] 清除WiFi配置...");
+  wifi.resetSettings();
 }
 
 // 处理串口命令
@@ -158,10 +203,6 @@ void orderController()
           wifi.resetSettings();
           delay(500);
           ESP.restart();
-        }
-        else if (command == "time")
-        {
-          printCurrentTime();
         }
         else
         {

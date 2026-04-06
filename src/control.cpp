@@ -69,25 +69,21 @@ void scenarioModeControl(String mode, float fridgeTempThreshold, float freezeTem
 {
     if (mode == "STANDARD")
     {
-        currentMode = DeviceMode::STANDARD;
         targetFridgeTemp = fridgeTempThreshold;
         targetFreezeTemp = freezeTempThreshold;
     }
     else if (mode == "FAST_COOL")
     {
-        currentMode = DeviceMode::FAST_COOL;
         targetFridgeTemp = 2;
         targetFreezeTemp = -24;
     }
     else if (mode == "ENERGY_SAVING")
     {
-        currentMode = DeviceMode::ENERGY_SAVING;
         targetFridgeTemp = 7;
         targetFreezeTemp = -15;
     }
     else if (mode == "HOLIDAY")
     {
-        currentMode = DeviceMode::HOLIDAY;
         targetFridgeTemp = 17;
         targetFreezeTemp = -18;
     }

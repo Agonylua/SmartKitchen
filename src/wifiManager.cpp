@@ -26,7 +26,8 @@ void WiFiConnector::SysProvEvent(arduino_event_t *sys_event)
         if (instance)
         {
             instance->status = ConnectionStatus::DISCONNECTED;
-            instance->resetSettings();
+            // 移除断开连接立刻重启/清除配置的逻辑，改为仅修改内部状态
+            // instance->resetSettings();
         }
         break;
 

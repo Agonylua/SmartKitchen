@@ -17,7 +17,6 @@ void factoryReset();
 void publishBindVerify();
 void showHelp();
 // 全局变量声明
-extern DeviceMode currentMode;
 extern DeviceStatus currentStatus;
 extern const char *DEV_SN;
 extern Preferences preferences;
