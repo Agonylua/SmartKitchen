@@ -25,7 +25,15 @@ public class DeviceService {
     @Autowired
     private UserService userService;
 
+    /**
+     * 添加设备
+     *
+     * @param homeId     设备所属家庭ID
+     * @param customName 设备自定义名称
+     * @param typeStr    设备类型字符串（必须是 DeviceType 枚举中的值）
+     */
     public void addDevice(String homeId, String customName, String typeStr) {
+        log.info("[设备服务] 添加设备: 家庭 {} , 设备名称 {}, 设备类型 {}", homeId, customName, typeStr);
         Device device = new Device();
 
         // 生成 12位 SN
@@ -54,26 +62,26 @@ public class DeviceService {
      * @return -1: 验证失败, 0: 已绑定, 1: 验证通过等待硬件确认
      */
     public Integer bindDevice(String deviceSn, String homeId) {
-        log.info("开始验证设备绑定请求: 设备 {} , 家庭 {}", deviceSn, homeId);
+        log.info("[设备服务] 开始验证设备绑定请求: 设备 {} , 家庭 {}", deviceSn, homeId);
 
         if (homeId == null || homeId.trim().isEmpty()) {
-            log.warn("绑定验证失败，家庭ID无效: {}", homeId);
+            log.warn("[设备服务] 绑定验证失败，家庭ID无效: {}", homeId);
             return -1;
         }
 
         Device device = deviceRepository.findByDeviceSn(deviceSn).orElse(null);
         if (device == null) {
-            log.warn("绑定验证失败，设备不存在: {}", deviceSn);
+            log.warn("[设备服务] 绑定验证失败，设备不存在: {}", deviceSn);
             return -1;
         }
 
         if (device.getHomeId() != null && device.getHomeId().equals(homeId)) {
-            log.info("设备 {} 已经绑定到家庭 {}, 无需重复绑定", deviceSn, homeId);
+            log.info("[设备服务] 设备 {} 已经绑定到家庭 {}, 无需重复绑定", deviceSn, homeId);
             return 0;
         }
 
         // 核心：验证通过，注册异步回调，不再立即操作数据库
-        log.info("验证通过！正在等待设备 {} 硬件端联网确认...", deviceSn);
+        log.info("[设备服务] 验证通过！正在等待设备 {} 硬件端联网确认...", deviceSn);
 
         mqttService.sendBind(homeId, deviceSn);
         mqttService.registerBindCallback(deviceSn, (mqttPayload) -> {
@@ -86,7 +94,7 @@ public class DeviceService {
                     mqttService.sendUnBind(deviceSn);
                 }
             } catch (Exception e) {
-                log.error("执行设备 {} 绑定回调时发生数据解析异常", deviceSn, e);
+                log.error("[设备服务] 执行设备 {} 绑定回调时发生数据解析异常", deviceSn, e);
             }
         });
 
@@ -94,24 +102,24 @@ public class DeviceService {
     }
 
     public Boolean unBindDevice(String deviceSn, String homeId, String userId) {
-        log.info("开始验证设备解绑请求: 设备 {} , 用户 {}", deviceSn, userId);
+        log.info("[设备服务] 开始验证设备服务请求: 设备 {} , 用户 {}", deviceSn, userId);
         Device device = deviceRepository.findByDeviceSn(deviceSn).orElse(null);
         User user = userRepository.findByUserId(userId).orElse(null);
         if (device == null) {
-            log.warn("解绑验证失败，设备不存在: {}", deviceSn);
+            log.warn("[设备服务] 解绑验证失败，设备不存在: {}", deviceSn);
             return false;
         }
         if (user == null) {
-            log.warn("解绑验证失败，用户不存在: {}", userId);
+            log.warn("[设备服务] 解绑验证失败，用户不存在: {}", userId);
             return false;
         }
         Home home = homeRepository.findByHomeId(homeId).orElse(null);
         if (home == null) {
-            log.warn("解绑验证失败，家庭不存在: {}", homeId);
+            log.warn("[设备服务] 解绑验证失败，家庭不存在: {}", homeId);
             return false;
         }
         if (!home.getOwnerId().equals(userId)) {
-            log.warn("解绑验证失败，用户 {} 不是家庭 {} 的户主，无权解绑设备", userId, home.getHomeId());
+            log.warn("[设备服务] 解绑验证失败，用户 {} 不是家庭 {} 的户主，无权解绑设备", userId, home.getHomeId());
             return false;
         }
         if (mqttService.isConnected()) {
@@ -124,6 +132,7 @@ public class DeviceService {
     }
 
     public void updateDeviceStatus(String deviceSn) {
+        log.info("[设备服务] 更新设备状态: 设备 {}", deviceSn);
         deviceRepository.findByDeviceSn(deviceSn)
                 .ifPresent(device -> {
                     if (device.getDeviceStatus() == DeviceStatus.OFFLINE) {

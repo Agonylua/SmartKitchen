@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Autowired
-    private JwtTokenFilter jwtTokenFilter; // 1. 直接注入 Filter，不要自己 new
+    private JwtTokenFilter jwtTokenFilter; // 直接注入 Filter，不要自己 new
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

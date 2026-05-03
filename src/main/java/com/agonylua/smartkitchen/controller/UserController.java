@@ -33,9 +33,8 @@ public class UserController {
      */
     @PostMapping("/register")
     public ApiResponse<UserDTO> register(@RequestBody RegisterReq req) {
+        log.info("[用户控制器] 收到用户注册请求: userName={}", req.getUsername());
         User user = userService.register(req.getUsername(), req.getPassword(), req.getNickname());
-
-        // Entity 转 DTO 返回
         return ApiResponse.success(UserDTO.fromEntity(user));
     }
 
@@ -45,9 +44,9 @@ public class UserController {
      */
     @PostMapping("/login")
     public ApiResponse<UserDTO> login(@RequestBody UserReq req) {
-        log.info("▶️ [用户控制器] 收到登录请求: username={}", req.getUsername());
+        String userId = SecurityUtils.getCurrentUserId();
+        log.info("[用户控制器] 收到用户登录请求: {}", userId);
         UserDTO user = userService.login(req);
-        log.info("▶️ [用户控制器] 用户登录成功: {}", user.toString());
         return ApiResponse.success(user);
     }
 
@@ -57,43 +56,47 @@ public class UserController {
      */
     @PostMapping("/validateToken")
     public ApiResponse<Void> verifyToken() {
+        log.info("[用户控制器] 收到验证 token 请求");
         return ApiResponse.success(null);
     }
 
     @GetMapping("/info")
     public ApiResponse<UserDTO> getUserInfo() {
         String userId = SecurityUtils.getCurrentUserId();
-        log.info("▶️ [用户控制器] 获取用户信息请求: userId={}", userId);
+        log.info("[用户控制器] 收到用户信息获取请求: userId={}", userId);
         UserDTO dot = userRepository.findByUserId(userId)
                 .map(UserDTO::fromEntity)
                 .orElse(null);
-        log.info("▶️ [用户控制器] 获取用户信息: userId={}, UserDTO={}", userId, dot);
         return ApiResponse.success(dot);
     }
 
     @GetMapping("/list")
     public ApiResponse<List<UserDTO>> getUserListInfo(@RequestParam("homeId") String homeId) {
+        log.info("[用户控制器] 收到家庭用户信息获取请求: homeId={}", homeId);
         List<UserDTO> dot = userService.findAllByHomeId(homeId);
-        log.info("▶️ [用户控制器] 获取用户信息: homeId={}, UserDTO={}", homeId, dot);
         return ApiResponse.success(dot);
     }
 
     @PostMapping("/exitHome")
-    public ApiResponse<UserDTO> exitHome(@RequestParam("homeId") String homeId) {
+    public ApiResponse<String> exitHome(@RequestParam("homeId") String homeId) {
         String userId = SecurityUtils.getCurrentUserId();
-        UserDTO result = userService.exitHome(homeId, userId);
-        log.info("▶️ [用户控制器] 用户退出家庭请求: {}", result);
+        log.info("[用户控制器] 收到用户退出家庭请求: userId={}, oldHomeId={}", userId, homeId);
+        String result = userService.exitHome(homeId, userId);
         return ApiResponse.success(result);
     }
 
     @PostMapping("/updateAvatar")
-    public ApiResponse<String> updateAvatar(@RequestParam("userId") String userId, @RequestParam("file") MultipartFile avatarFile) {
+    public ApiResponse<String> updateAvatar(@RequestParam("file") MultipartFile avatarFile) {
+        String userId = SecurityUtils.getCurrentUserId();
+        log.info("[用户控制器] 收到更新用户头像请求: userId={}", userId);
         String avatarUrl = userService.uploadAvatarFile(userId, avatarFile);
         return ApiResponse.success(avatarUrl);
     }
 
     @PostMapping("/updateNickname")
-    public ApiResponse<String> updateNickname(@RequestParam("userId") String userId, @RequestParam("nickName") String newNickname) {
+    public ApiResponse<String> updateNickname(@RequestParam("nickName") String newNickname) {
+        String userId = SecurityUtils.getCurrentUserId();
+        log.info("[用户控制器] 收到更新昵称请求: userId={}, newNickname={}", userId, newNickname);
         return userRepository.findByUserId(userId)
                 .map(user -> {
                     user.setNickname(newNickname);
@@ -104,7 +107,9 @@ public class UserController {
     }
 
     @PostMapping("/resetPassword")
-    public ApiResponse<String> resetPassword(@RequestParam("userId") String userId, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
+    public ApiResponse<String> resetPassword(@RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
+        String userId = SecurityUtils.getCurrentUserId();
+        log.info("[用户控制器] 收到重置密码请求: userId={}", userId);
         userRepository.findByUserId(userId)
                 .ifPresentOrElse(user -> {
                     if (user.getPassword().equals(oldPassword)) {

@@ -11,7 +11,7 @@ public class HomeDTO {
     private String homeName;
     private String ownerId;
 
-    // 重点：前端看到的是数组 ["user1", "user2"]，而不是字符串 "[\"user1\"...]"
+    // 前端看到的是数组 ["user1", "user2"]，而不是字符串 "[\"user1\"...]"
     private List<String> memberIds;
 
     public static HomeDTO fromEntity(Home home) {

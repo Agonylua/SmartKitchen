@@ -50,7 +50,7 @@ public class DeviceController {
         List<DeviceDTO> dtoList = devices.stream()
                 .map(DeviceDTO::fromEntity)
                 .collect(Collectors.toList());
-        log.info("Device list for homeId {}: {}", homeId, dtoList);
+        log.info("[设备控制器] 收到设备列表获取请求，homeId={}, 设备数量={}", homeId, dtoList.size());
         return ApiResponse.success(dtoList);
     }
 
@@ -60,6 +60,7 @@ public class DeviceController {
      */
     @PostMapping("/control")
     public ApiResponse<String> controlDevice(@RequestBody Map<String, String> payload) {
+        log.info("[设备控制器] 收到控制指令下发请求，payload={}", payload);
         mqttService.sendCmdMessage(payload);
         return ApiResponse.success("指令已下发");
     }
@@ -70,12 +71,14 @@ public class DeviceController {
      */
     @PostMapping("/bind")
     public ApiResponse<Integer> bindDevice(@RequestBody DeviceBindReq req) {
+        log.info("[设备控制器] 收到绑定请求，deviceSn={}, homeId={}", req.getDeviceSn(), req.getHomeId());
         int result = deviceService.bindDevice(req.getDeviceSn(), req.getHomeId());
         return ApiResponse.success(result);
     }
 
     @PostMapping("/unBind")
     public ApiResponse<Boolean> unBindDevice(@RequestBody DeviceBindReq req) {
+        log.info("[设备控制器] 收到解绑请求，deviceSn={}, homeId={}, userId={}", req.getDeviceSn(), req.getHomeId(), req.getUserId());
         return ApiResponse.success(deviceService.unBindDevice(req.getDeviceSn(), req.getHomeId(), req.getUserId()));
     }
 
@@ -87,6 +90,7 @@ public class DeviceController {
      */
     @GetMapping("/power")
     public ApiResponse<List<Map<String, Object>>> getDevicesPower(@RequestParam String homeId) {
+        log.info("[设备控制器] 收到家庭功耗数据获取请求，homeId={}", homeId);
         List<Device> devices = deviceRepository.findByHomeId(homeId);
 
         // 用于汇总家庭所有设备的每日功耗，TreeMap 自动按日期排序
@@ -107,7 +111,7 @@ public class DeviceController {
                         homeAggregatedPower.merge(date, kwh, Double::sum);
                     });
                 } catch (Exception e) {
-                    // 忽略 JSON 格式不正确的脏数据
+                    // 忽略 JSON 格式不正确的数据
                 }
             }
         }
@@ -126,6 +130,7 @@ public class DeviceController {
 
     @PostMapping("/updateStatus")
     public ApiResponse<String> updateStatus(@RequestParam String deviceSn) {
+        log.info("[设备控制器] 收到状态更新请求，deviceSn={}", deviceSn);
         deviceService.updateDeviceStatus(deviceSn);
         return ApiResponse.success("更新成功");
     }

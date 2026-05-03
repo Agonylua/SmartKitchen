@@ -39,16 +39,16 @@ public class MqttConfig {
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
-        MqttConnectOptions options = new MqttConnectOptions();
-        options.setServerURIs(new String[]{brokerUrl});
-        options.setAutomaticReconnect(true);
-        options.setMaxReconnectDelay(30000);
-        options.setCleanSession(false);
-        options.setConnectionTimeout(10);
-        options.setKeepAliveInterval(20);
-        options.setUserName(username);
-        options.setPassword(password.toCharArray());
-        factory.setConnectionOptions(options);
+        MqttConnectOptions options = new MqttConnectOptions(); // 创建连接选项对象
+        options.setServerURIs(new String[]{brokerUrl}); // 设置 MQTT 服务器地址
+        options.setAutomaticReconnect(true); // 自动重连
+        options.setMaxReconnectDelay(30000); // 最大重连间隔 30 秒
+        options.setCleanSession(false); // 保持会话，重连后继续接收消息
+        options.setConnectionTimeout(10); // 连接超时 10 秒
+        options.setKeepAliveInterval(20); // 心跳间隔 20 秒
+        options.setUserName(username); // 设置认证用户名
+        options.setPassword(password.toCharArray()); // 设置认证密码
+        factory.setConnectionOptions(options); // 设置连接选项
         return factory;
     }
 
@@ -62,10 +62,10 @@ public class MqttConfig {
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(clientId_in, mqttClientFactory(),
                         subscribeTopics);
-        adapter.setCompletionTimeout(5000);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInputChannel());
+        adapter.setCompletionTimeout(5000); // 设置消息处理完成的超时时间为 5 秒
+        adapter.setConverter(new DefaultPahoMessageConverter()); // 使用默认的消息转换器，将 MQTT 消息转换为 Spring Integration 消息
+        adapter.setQos(1); // 设置 QoS 级别为 1，确保消息至少被处理一次
+        adapter.setOutputChannel(mqttInputChannel()); // 设置消息发送到 mqttInputChannel 进行处理
         return adapter;
     }
 
@@ -87,7 +87,7 @@ public class MqttConfig {
     public MessageHandler mqttOutbound() {
         MqttPahoMessageHandler messageHandler =
                 new MqttPahoMessageHandler(clientId_out, mqttClientFactory());
-        messageHandler.setAsync(true);
+        messageHandler.setAsync(true); // 异步发送消息，避免阻塞调用线程
         return messageHandler;
     }
 }

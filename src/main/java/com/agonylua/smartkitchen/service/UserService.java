@@ -38,10 +38,15 @@ public class UserService {
 
     @Transactional // 事务管理：用户和家庭必须同时创建成功
     public User register(String username, String password, String inputNickname) {
-
-        // 1. 校验用户名 (只能包含字母和数字)
+        log.info("[用户服务] 注册新用户");
+        // 校验用户名和用户密码
         if (!username.matches("^[a-zA-Z0-9]+$")) {
             throw new IllegalArgumentException("用户名只能包含字母和数字");
+        } else if (!password.matches("^[a-zA-Z]+$|^[0-9]+$|^[a-zA-Z0-9]+$")) {
+            throw new IllegalArgumentException("密码只能包含数字和字母");
+        }
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("用户名已存在");
         }
 
         // 2. 准备用户对象
@@ -77,6 +82,7 @@ public class UserService {
     }
 
     public UserDTO login(UserReq req) {
+        log.info("[用户服务] 用户登录: username={}", req.getUsername());
         User user = userRepository.findByUsername(req.getUsername())
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
         Home home = homeRepository.findByMemberId(user.getUserId())
@@ -103,46 +109,62 @@ public class UserService {
         return dto;
     }
 
-    public UserDTO exitHome(String homeId, String userId) {
+    public String exitHome(String homeId, String userId) {
+        log.info("[用户服务] 用户退出家庭: homeId={}, userId={}", homeId, userId);
         return userRepository.findByUserId(userId)
                 .map(user -> {
-                    if (user.getHomeId().equals(homeId)) return UserDTO.fromEntity(user);
+                    if (!homeId.equals(user.getHomeId())) {
+                        return user.getHomeId();
+                    }
                     String newHome = IdUtil.generateHomeId();
                     user.setHomeId(newHome);
                     userRepository.save(user);
-                    return UserDTO.fromEntity(user);
+                    homeRepository.findByHomeId(newHome)
+                            .ifPresent(home -> {
+                                home.getMemberIds().remove(user.getUserId());
+                                homeRepository.save(home);
+                            });
+                    Home home = new Home();
+                    home.setHomeId(newHome);
+                    home.setOwnerId(user.getUserId());
+                    home.setHomeName(user.getNickname() + "的家");
+                    home.getMemberIds().add(user.getUserId());
+                    homeRepository.save(home);
+
+                    return newHome;
                 })
-                .orElseThrow(() -> new IllegalArgumentException("未找到相关家庭信息"));
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
     }
 
     public String uploadAvatarFile(String userId, MultipartFile file) {
-        // 1. 校验文件是否为空
+        log.info("[用户服务] 上传头像文件: userId={}", userId);
+        // 校验文件是否为空
         if (file.isEmpty()) {
-            log.error("上传文件失败，文件为空");
+            log.error("[用户服务] 上传文件失败，文件为空");
         }
 
         try {
-            // 2. 获取原始文件名并提取后缀 (例如: .jpg, .png)
+            // 获取原始文件名并提取后缀 (例如: .jpg, .png)
             String originalFilename = file.getOriginalFilename();
             String suffix = "";
             if (originalFilename != null && originalFilename.contains(".")) {
                 suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
 
-            // 3. 生成全局唯一的崭新文件名，防止不同用户上传同名文件被覆盖
+            // 生成全局唯一的文件名，防止不同用户上传同名文件被覆盖
             String newFileName = UUID.randomUUID().toString().replace("-", "") + suffix;
 
-            // 4. 确保物理存储目录存在
+            // 确保物理存储目录存在
             File directory = new File(uploadDir);
             if (!directory.exists()) {
                 directory.mkdirs(); // 递归创建目录
             }
 
-            // 5. 将内存中的文件流写入到磁盘的目标文件中
+            // 将内存中的文件流写入到磁盘的目标文件中
             File destFile = new File(directory.getAbsolutePath(), newFileName);
             file.transferTo(destFile);
 
-            // 6. 拼接文件的网络访问 URL 并返回给客户端
+            // 拼接文件的网络访问 URL 并返回给客户端
             String fileUrl = accessUrl + newFileName;
 
             // 返回成功响应及图片的 URL
@@ -153,8 +175,8 @@ public class UserService {
             return fileUrl;
 
         } catch (Exception e) {
-            // 7. 捕获并处理可能发生的异常，例如文件写入失败等
-            log.error("上传文件时发生异常", e);
+            // 捕获并处理可能发生的异常，例如文件写入失败等
+            log.error("[用户服务] 上传文件时发生异常", e);
             return null; // 或者抛出自定义异常，视业务需求而定
         }
     }

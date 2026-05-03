@@ -26,29 +26,29 @@ public class AutomationRule {
 
     // === IF 条件 ===
     @Column(name = "condition_type")
-    private String conditionType; // 触发设备SN (如 esp32_01)
+    private String conditionType; // 触发设备SN
 
     @Column(name = "condition_device_sn")
-    private String conditionDeviceSn; // 触发设备SN (如 esp32_01)
+    private String conditionDeviceSn; // 触发设备SN
 
     @Column(name = "condition_property")
-    private String conditionProperty; // 监听属性 (如 temperature, status)
+    private String conditionProperty; // 监听属性
 
     @Column(name = "condition_operator")
     private String conditionOperator; // 运算符: >, <, ==
 
     @Column(name = "condition_value")
-    private String conditionValue;    // 阈值 (如 30.0, OFFLINE)
+    private String conditionValue;    // 阈值/比较值
 
     // === THEN 动作 ===
     @Column(name = "action_device_sn")
     private String actionDeviceSn;    // 目标设备SN
 
     @Column(name = "action_command")
-    private String actionCommand;     // 动作指令 (如 mode)
+    private String actionCommand;     // 动作指令
 
     @Column(name = "action_payload")
-    private String actionPayload;     // 指令参数 (如 auto)
+    private String actionPayload;     // 指令参数
 
     @Column(name = "created_at")
     private Date createdAt = new Date();

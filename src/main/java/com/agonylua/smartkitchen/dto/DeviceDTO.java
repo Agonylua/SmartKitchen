@@ -10,13 +10,13 @@ import java.util.Map;
 public class DeviceDTO {
     private String deviceSn;
     private String deviceName;
-    private String deviceType; // 返回中文或英文给前端
+    private String deviceType;
     private String deviceStatus;
     private String deviceMode;
     private String homeId;
     private String runTime;
 
-    // 重点：前端拿到的直接是对象 {"temp": -18, "mode": "eco"}
+    // 前端拿到的直接是对象 {"temp": -18, "mode": "eco"}
     private Map<String, Object> deviceData;
 
     public static DeviceDTO fromEntity(Device device) {

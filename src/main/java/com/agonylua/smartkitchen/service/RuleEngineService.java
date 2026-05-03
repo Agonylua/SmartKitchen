@@ -2,6 +2,7 @@ package com.agonylua.smartkitchen.service;
 
 import com.agonylua.smartkitchen.databases.entity.AutomationRule;
 import com.agonylua.smartkitchen.databases.repository.AutomationRuleRepository;
+import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
 import com.agonylua.smartkitchen.service.mqtt.MqttService;
 import lombok.extern.slf4j.Slf4j;
 import org.jeasy.rules.api.Facts;
@@ -30,15 +31,17 @@ public class RuleEngineService {
     private final RulesEngine rulesEngine = new DefaultRulesEngine();
     @Autowired
     private AutomationRuleRepository ruleRepository;
+    @Autowired
+    private DeviceRepository deviceRepository;
     @Lazy // 防止与 MqttService 产生循环依赖
     @Autowired
     private MqttService mqttService;
 
     /**
-     * 🚀 引擎 1：事件驱动入口 (由 MQTT 硬件上报瞬间触发)
+     * 事件驱动入口 (由 MQTT 硬件上报瞬间触发)
      */
     public void processDeviceEvent(String deviceSn, String property, String currentValue) {
-        log.debug("▶️ [事件驱动] 收到事件: Device={}, Property={}, Value={}", deviceSn, property, currentValue);
+        log.debug("[规则引擎] 收到事件: Device={}, Property={}, Value={}", deviceSn, property, currentValue);
 
         List<AutomationRule> dbRules = ruleRepository.findByConditionDeviceSn(deviceSn);
         if (dbRules.isEmpty()) return;
@@ -51,14 +54,14 @@ public class RuleEngineService {
     }
 
     /**
-     * ⏰ 引擎 2：时间驱动入口 (由 Spring 定时器每分钟的第 0 秒触发)
+     * 时间驱动入口 (由 Spring 定时器每分钟的第 0 秒触发)
      * cron表达式: "0 * * * * ?" 表示每分钟触发一次
      */
     @Scheduled(cron = "0 * * * * ?")
     public void processTimeEvent() {
         // 获取当前时间，格式化为 HH:mm (例如 "08:00")
         String currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
-        log.debug("⏰ [时间驱动] 引擎扫描当前系统时间: {}", currentTime);
+        log.debug("[规则引擎] 引擎扫描当前系统时间: {}", currentTime);
 
         // 我们约定：所有时间驱动的规则，触发源统一存为 "TIMER"
         List<AutomationRule> dbRules = ruleRepository.findByConditionType("TIMER");
@@ -72,7 +75,7 @@ public class RuleEngineService {
     }
 
     /**
-     * ⚙️ 核心：公共规则构建与发射器
+     * 公共规则构建与发射器
      */
     private void executeRules(List<AutomationRule> dbRules, Facts facts, String targetProperty) {
         Rules rules = new Rules();
@@ -80,7 +83,10 @@ public class RuleEngineService {
         for (AutomationRule dbRule : dbRules) {
             // 只过滤当前关注的属性规则
             if (!targetProperty.equals(dbRule.getConditionProperty())) continue;
-
+            boolean repeat = deviceRepository.findByDeviceSn(dbRule.getActionDeviceSn())
+                    .map(value -> value.getDeviceMode().equals(dbRule.getActionPayload()))
+                    .orElse(false);
+            if (repeat) continue;
             String mvelExpression = buildMvelExpression(dbRule);
 
             // 预先组装要下发的 MQTT 消息
@@ -93,8 +99,8 @@ public class RuleEngineService {
                     .description(dbRule.getRuleName())
                     .when(new MVELCondition(mvelExpression))
                     .then(f -> {
-                        log.info("✅ [EasyRules命中] 规则: {}, 条件: [{}]", dbRule.getRuleName(), mvelExpression);
-                        log.info("🚀 [执行动作] 下发控制指令给设备 {}: {}", dbRule.getActionDeviceSn(), payload);
+                        log.info("[规则引擎] 规则命中: {}, 条件: [{}]", dbRule.getRuleName(), mvelExpression);
+                        log.info("[规则引擎] 下发控制指令给设备 {}: {}", dbRule.getActionDeviceSn(), payload);
                         mqttService.sendCmdMessage(payload);
                     })
                     .build();
@@ -112,6 +118,7 @@ public class RuleEngineService {
      * 辅助：构建 MVEL 表达式
      */
     private String buildMvelExpression(AutomationRule rule) {
+        log.info("[规则引擎] 构建 MVEL 表达式");
         String prop = rule.getConditionProperty();
         String op = rule.getConditionOperator();
         String val = rule.getConditionValue();

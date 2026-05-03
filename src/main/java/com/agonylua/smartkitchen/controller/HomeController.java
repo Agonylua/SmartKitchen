@@ -23,16 +23,16 @@ public class HomeController {
      */
     @GetMapping("/info/{homeId}")
     public ApiResponse<HomeDTO> getMyHome(@PathVariable String homeId) {
-        log.info("▶️ [家庭控制器] 收到获取家庭信息请求: homeId={}", homeId);
+        log.info("[家庭控制器] 收到获取家庭信息请求: homeId={}", homeId);
         return homeRepository.findByHomeId(homeId)
                 .map(home -> ApiResponse.success(HomeDTO.fromEntity(home)))
                 .orElse(ApiResponse.error("未找到相关家庭信息"));
     }
 
     @PostMapping("/removeMember")
-    public ApiResponse<HomeDTO> removeMember(@RequestParam("homeId") String homeId, @RequestParam("userId") String userId) {
-        HomeDTO result = homeService.removeMember(homeId, userId);
-        log.info("▶️ [家庭控制器] 收到移除家庭成员请求, 移除后结果: {}", result);
+    public ApiResponse<HomeDTO> removeMember(@RequestParam("memberId") String memberId, @RequestParam("homeId") String homeId) {
+        log.info("[家庭控制器] 收到移除家庭成员请求");
+        HomeDTO result = homeService.removeMember(homeId, memberId);
         if (result == null) {
             return ApiResponse.error("移除失败，家庭不存在或用户不在家庭中");
         }
@@ -41,6 +41,7 @@ public class HomeController {
 
     @PostMapping("/joinHome")
     public ApiResponse<String> joinHome(@RequestParam("homeId") String homeId) {
+        log.info("[家庭控制器] 收到加入家庭请求: homeId={}", homeId);
         String userId = SecurityUtils.getCurrentUserId();
         String message = homeService.joinHome(homeId, userId);
         return ApiResponse.success(message);
@@ -48,7 +49,7 @@ public class HomeController {
 
     @PostMapping("/joinHomeApproval")
     public ApiResponse<String> joinHomeApproval(@RequestParam("result") Boolean result, @RequestParam("ownerId") String ownerId, @RequestParam("memberId") String memberId) {
-        log.info("▶️ [家庭控制器] 收到家庭加入审批结果: result={}, ownerId={}, memberId={}", result, ownerId, memberId);
+        log.info("[家庭控制器] 收到家庭加入审批结果: result={}, ownerId={}, memberId={}", result, ownerId, memberId);
         homeService.joinHomeApproval(result, ownerId, memberId);
         return ApiResponse.success("处理完成");
     }

@@ -33,20 +33,12 @@ public class MqttService {
     private static final String MQTT_TOPIC_PREFIX = "smartKitchen/";
     private final MessageChannel mqttOutputChannel;
     private final DeviceRepository deviceRepository;
-    // 注入规则引擎与 JSON 解析器
     private final RuleEngineService ruleEngineService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, Consumer<Boolean>> bindCallbackMap = new ConcurrentHashMap<>();
+    private final Map<String, ScheduledFuture<?>> scheduledTaskMap = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    // 🚀 新增：专门用于异步执行自动化规则计算的线程池
-    private final ExecutorService ruleEnginePool = Executors.newFixedThreadPool(4);
-    /**
-     * -- GETTER --
-     * 获取当前 MQTT 连接状态
-     *
-     * @return true 为已连接, false 为失去连接
-     */
-    // 记录 MQTT 连接状态
+    private final ExecutorService ruleEnginePool = Executors.newFixedThreadPool(4); // 规则引擎处理线程池
     @Getter
     private boolean connected = false;
     @Value("${mqtt.bind-topics}")
@@ -62,14 +54,14 @@ public class MqttService {
     @EventListener
     public void handleMqttConnectionFailed(MqttConnectionFailedEvent event) {
         connected = false;
-        log.warn("MQTT服务连接异常或掉线: {}", event.getCause() != null ? event.getCause().getMessage() : "Unknown");
+        log.warn("[MQTT服务] 连接异常或掉线: {}", event.getCause() != null ? event.getCause().getMessage() : "Unknown");
     }
 
     // 订阅成功代表已经连上（适配器重连成功时会重新订阅）
     @EventListener
     public void handleMqttSubscribed(MqttSubscribedEvent event) {
         connected = true;
-        log.info("MQTT服务已连接并准备就绪");
+        log.info("[MQTT服务] 已连接并准备就绪");
     }
 
     public void handleReceivedMessage(Message<?> message) {
@@ -78,36 +70,48 @@ public class MqttService {
             String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
 
             if (topic.startsWith(MQTT_TOPIC_PREFIX)) {
+                log.info("[MQTT服务] 处理消息 - Topic: {}, Payload: {}", topic, payload);
                 String[] topicParts = topic.substring(MQTT_TOPIC_PREFIX.length()).split("/");
                 if (topicParts[0].isEmpty() || topicParts[1].isEmpty()) return;
-
-                log.info("Received MQTT message - Topic: {}, Payload: {}", topic, payload);
                 String sn = topicParts[1];
 
-                // 1. 处理设备上下线
+                // 处理设备上下线
                 if (topicParts[0].equals("status")) {
+                    log.info("[MQTT服务] 设备状态变更");
                     deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
+                        device.setDeviceMode("IDLE");
+                        device.setRunTime("0");
                         String statusVal = payload.equals("offline") ? "OFFLINE" : (payload.equals("online") ? "ONLINE" : "");
                         if (payload.equals("offline")) device.setDeviceStatus(DeviceStatus.OFFLINE);
                         else if (payload.equals("online")) device.setDeviceStatus(DeviceStatus.ONLINE);
                         deviceRepository.save(device);
                         // 触发规则引擎：设备状态改变
                         if (!statusVal.isEmpty()) {
-                            log.info("设备 {} 状态更新为: {}", sn, statusVal);
                             ruleEnginePool.submit(() -> {
                                 try {
                                     ruleEngineService.processDeviceEvent(sn, "status", statusVal);
                                 } catch (Exception e) {
-                                    log.error("处理设备状态规则引擎事件时发生异常", e);
+                                    log.error("[MQTT服务] 处理设备状态规则引擎事件时发生异常", e);
                                 }
                             });
                         }
-                    }, () -> log.warn("收到状态消息但设备不存在: {}", sn));
+                    }, () -> log.warn("[MQTT服务] 收到状态消息但设备不存在: {}", sn));
                 }
 
-                // 2. 处理设备数据更新与控制
+                if (topicParts[0].equals("sensor")) {
+                    ruleEnginePool.submit(() -> {
+                        try {
+                            ruleEngineService.processDeviceEvent(sn, "sensor", payload);
+                        } catch (Exception e) {
+                            log.error("[MQTT服务] 处理设备状态规则引擎事件时发生异常", e);
+                        }
+                    });
+                }
+
+                // 处理设备数据更新与控制
                 if (topicParts[0].equals("service")) {
                     if (topicParts[2].equals("update")) {
+                        log.info("[MQTT服务] 设备数据更新 - SN: {}, Payload: {}", sn, payload);
                         deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
                             if (payload.equals(device.getDeviceData())) return;
 
@@ -122,7 +126,7 @@ public class MqttService {
                             // 🚀 触发规则引擎：解析具体的传感器数值并抛出事件
                             ruleEnginePool.submit(() -> {
                                 try {
-                                    parseAndTriggerRules(sn, newData);
+                                    parseAndTriggerRules(sn, payload);
                                 } catch (Exception e) {
                                     log.error("处理设备规则引擎解析任务时发生异常", e);
                                 }
@@ -130,13 +134,18 @@ public class MqttService {
 
                         }, () -> log.warn("收到消息但设备不存在: {}", sn));
                     } else if (topicParts[2].equals("unbind")) {
+                        log.info("[MQTT服务] 设备解绑 - SN: {}, Payload: {}", sn, payload);
                         deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
                             device.setHomeId(null);
                             deviceRepository.save(device);
                         }, () -> log.warn("收到绑定消息但设备不存在: {}", sn));
                     } else if (topicParts[2].equals("bind")) {
-                        log.info("收到设备 {} 的配网绑定消息: {}", sn, payload);
+                        log.info("[MQTT服务] 设备绑定 - SN: {}, Payload: {}", sn, payload);
                         Consumer<Boolean> callback = bindCallbackMap.remove(sn); // 取出并移除回调
+                        ScheduledFuture<?> task = scheduledTaskMap.remove(sn);
+                        if (task != null) {
+                            task.cancel(false);
+                        }
                         if (callback != null) {
                             if (payload.equals("1")) {
                                 CompletableFuture.runAsync(() -> callback.accept(true));
@@ -144,13 +153,13 @@ public class MqttService {
                                 CompletableFuture.runAsync(() -> callback.accept(false));
                             }
                         } else {
-                            log.warn("未找到设备 {} 的等待绑定回调任务 (可能已超时或未发起请求)", sn);
+                            log.warn("[MQTT服务] 未找到设备 {} 的等待绑定回调任务 (可能已超时或未发起请求)", sn);
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            log.error("处理MQTT接收消息时发生异常", e);
+            log.error("[MQTT服务] 处理MQTT接收消息时发生异常", e);
         }
     }
 
@@ -163,10 +172,10 @@ public class MqttService {
             JsonNode dataNode = objectMapper.readTree(dataJson);
             dataNode.fieldNames().forEachRemaining(key -> {
                 String value = dataNode.get(key).asText();
-                ruleEngineService.processDeviceEvent(sn, key, value); // 例如: processDeviceEvent("esp32_1", "temperature", "32.5")
+                ruleEngineService.processDeviceEvent(sn, key, value);
             });
         } catch (Exception e) {
-            log.error("解析设备数据用于规则引擎时出错", e);
+            log.error("[MQTT服务] 解析设备数据用于规则引擎时出错", e);
         }
     }
 
@@ -175,19 +184,28 @@ public class MqttService {
      */
     public void registerBindCallback(String deviceSn, Consumer<Boolean> callback) {
         bindCallbackMap.put(deviceSn, callback);
-        log.info("已注册设备 {} 的绑定回调，等待硬件端 MQTT 消息...", deviceSn);
+        log.info("[MQTT服务] 已注册设备 {} 的绑定回调，等待硬件端 MQTT 消息...", deviceSn);
 
-        // 设置 3 分钟超时
-        scheduler.schedule(() -> {
+        ScheduledFuture<?> existingTask = scheduledTaskMap.get(deviceSn);
+        if (existingTask != null) {
+            existingTask.cancel(false);
+        }
+
+        // 设置 5 分钟超时
+        ScheduledFuture<?> task = scheduler.schedule(() -> {
             if (bindCallbackMap.remove(deviceSn) != null) {
-                log.warn("⏳ 设备 {} 配网绑定等待超时，清理回调缓存", deviceSn);
-                sendReset(deviceSn);
+                log.warn("[MQTT服务] 设备 {} 配网绑定等待超时，清理回调缓存", deviceSn);
+                //sendReset(deviceSn);
             }
+            scheduledTaskMap.remove(deviceSn);
         }, 5, TimeUnit.MINUTES);
+
+        scheduledTaskMap.put(deviceSn, task);
     }
 
     // 发送消息
     public void sendBind(String homeId, String deviceSn) {
+        log.info("[MQTT服务] 发送设备绑定消息 - SN: {}, HomeID: {}", deviceSn, homeId);
         String topic = bindTopic + deviceSn + "/bind";
         if (homeId != null && !homeId.isEmpty()) {
             toPayload(homeId, topic, bindQos);
@@ -195,23 +213,26 @@ public class MqttService {
     }
 
     public void sendUnBind(String deviceSn) {
+        log.info("[MQTT服务] 发送设备解绑消息 - SN: {}", deviceSn);
         String topic = bindTopic + deviceSn + "/unBind";
         toPayload("", topic, bindQos);
     }
 
     public void sendCmdMessage(Map<String, String> payload) {
+        log.info("[MQTT服务] 发送设备控制消息 - SN: {}, Payload: {}", payload.get("deviceSn"), payload);
         String topic = publishTopic + payload.get("deviceSn") + "/control";
         payload.remove("deviceSn");
-        log.info("准备发送 MQTT 控制消息 - 设备: {}, Payload: {}", topic, payload);
         toPayload(JsonUtil.mapToJson(payload), topic, publishQos);
     }
 
     public void sendReset(String deviceSn) {
+        log.info("[MQTT服务] 发送设备重置消息 - SN: {}", deviceSn);
         String topic = publishTopic + deviceSn + "/reset";
         toPayload("", topic, publishQos);
     }
 
     private void toPayload(String payload, String topic, String publishQos) {
+        log.info("[MQTT服务] 消息载荷封装 - Topic: {}, Payload: {}, QoS: {}", topic, payload, publishQos);
         Message<String> message = null;
         try {
             int qos = Integer.parseInt(publishQos);
@@ -226,9 +247,8 @@ public class MqttService {
         if (message != null) {
             try {
                 mqttOutputChannel.send(message);
-                log.info("Sent MQTT message: {}", message);
             } catch (Exception e) {
-                log.error("Failed to send MQTT message", e);
+                log.error("[MQTT服务] 发送MQTT消息失败", e);
                 throw e;
             }
         }
@@ -239,8 +259,9 @@ public class MqttService {
      */
     @PreDestroy
     public void onDestroy() {
-        log.info("准备关闭 MqttService 线程池资源...");
+        log.info("[MQTT服务] 正在关闭，释放资源...");
         ruleEnginePool.shutdown();
         scheduler.shutdown();
     }
 }
+

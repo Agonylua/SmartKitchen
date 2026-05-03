@@ -15,20 +15,23 @@ import java.time.LocalDateTime;
 @Table(name = "user")
 public class User {
     @Id
-    private String userId; // 手动赋值，不使用 @GeneratedValue
+    private String userId;
 
     @Column(nullable = false, unique = true)
-    private String username; // 业务逻辑需校验只能含字母数字
+    private String username;
 
     @Column(nullable = false)
     private String password;
 
-    private String nickname; // 允许为 NULL
+    private String nickname;
     private String avatarUrl;
-    private String homeId; // 允许为 NULL，表示未加入任何家庭
+
+    @Column(nullable = false)
+    private String homeId;
 
     @CreationTimestamp
     private LocalDateTime createTime;
+
     @UpdateTimestamp
     private LocalDateTime updateTime;
 }

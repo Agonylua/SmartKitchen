@@ -37,28 +37,46 @@ public class SceneExecutionService {
      */
     public Boolean executeManualScene(String UserId, String ruleMode) {
         String homeId = homeRepository.findByOwnerIdOrMemberIds(UserId).map(home -> home.getHomeId()).orElse(null);
-        log.info("开始执行家庭 {} 的场景: {}", homeId, ruleMode);
+        log.info("[预设场景] 开始执行家庭 {} 的场景: {}", homeId, ruleMode);
         List<Device> homeDevices = deviceRepository.findByHomeId(homeId);
 
         switch (ruleMode) {
             case "SCENE_LEAVE_HOME": // 离家安全
+                log.info("[预设场景] 执行离家安全场景: 家庭 {} 设备数量 {}", homeId, homeDevices.size());
                 homeDevices.forEach(device -> {
                     if (device.getDeviceType().equals(DeviceType.REFRIGERATOR)) {
                         sendCommandAsync(device.getDeviceSn(), CMD_MODE, DeviceMode.HOLIDAY.name());
+                        deviceRepository.findByDeviceSn(device.getDeviceSn()).ifPresent(updatedDevice -> {
+                            updatedDevice.setDeviceMode(DeviceMode.HOLIDAY.name());
+                            deviceRepository.save(updatedDevice);
+                        });
                     } else {
                         sendCommandAsync(device.getDeviceSn(), CMD_MODE, DeviceMode.IDLE.name());
+                        deviceRepository.findByDeviceSn(device.getDeviceSn()).ifPresent(updatedDevice -> {
+                            updatedDevice.setDeviceMode(DeviceMode.IDLE.name());
+                            deviceRepository.save(updatedDevice);
+                        });
                     }
                 });
                 break;
 
             case "SCENE_CLEANUP": // 饭后清洁
+                log.info("[预设场景] 执行饭后清洁场景: 家庭 {} 设备数量 {}", homeId, homeDevices.size());
                 for (Device device : homeDevices) {
                     if (device.getDeviceType().equals(DeviceType.DISHWASHER)) {
                         sendCommandAsync(device.getDeviceSn(), CMD_MODE, DeviceMode.INTENSIVE_WASH.name());
+                        deviceRepository.findByDeviceSn(device.getDeviceSn()).ifPresent(updatedDevice -> {
+                            updatedDevice.setDeviceMode(DeviceMode.INTENSIVE_WASH.name());
+                            deviceRepository.save(updatedDevice);
+                        });
                         scheduler.schedule(() -> {
                             for (Device device1 : homeDevices) {
                                 if (device1.getDeviceType().equals(DeviceType.STERILIZER)) {
                                     sendCommandAsync(device1.getDeviceSn(), CMD_MODE, DeviceMode.UVB.name());
+                                    deviceRepository.findByDeviceSn(device.getDeviceSn()).ifPresent(updatedDevice -> {
+                                        updatedDevice.setDeviceMode(DeviceMode.UVB.name());
+                                        deviceRepository.save(updatedDevice);
+                                    });
                                 }
                             }
                         }, 30, TimeUnit.MINUTES);
@@ -66,11 +84,20 @@ public class SceneExecutionService {
                 }
                 break;
             case "SCENE_MEALPREP": // 备餐模式
+                log.info("[预设场景] 执行备餐模式场景: 家庭 {} 设备数量 {}", homeId, homeDevices.size());
                 for (Device device : homeDevices) {
                     if (device.getDeviceType().equals(DeviceType.MICROWAVE)) {
                         sendCommandAsync(device.getDeviceSn(), CMD_MODE, DeviceMode.IDLE.name());
+                        deviceRepository.findByDeviceSn(device.getDeviceSn()).ifPresent(updatedDevice -> {
+                            updatedDevice.setDeviceMode(DeviceMode.IDLE.name());
+                            deviceRepository.save(updatedDevice);
+                        });
                     } else if (device.getDeviceType().equals(DeviceType.RICE_COOKER)) {
                         sendCommandAsync(device.getDeviceSn(), CMD_MODE, DeviceMode.COOK_RICE.name());
+                        deviceRepository.findByDeviceSn(device.getDeviceSn()).ifPresent(updatedDevice -> {
+                            updatedDevice.setDeviceMode(DeviceMode.COOK_RICE.name());
+                            deviceRepository.save(updatedDevice);
+                        });
                     }
                 }
                 break;

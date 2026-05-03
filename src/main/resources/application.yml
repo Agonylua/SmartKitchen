@@ -11,11 +11,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MariaDBDialect
-        format_sql: true
+        format_sql: false
         use_sql_comments: true
         jdbc:
           batch_size: 20
@@ -42,9 +42,9 @@ jwt:
 
 file:
   upload-dir: ./avatars/  # 服务器本地存储的物理路径
-  # TODO: 生产环境中应使用实际的服务器地址替换localhost
-  access-url: http://192.168.89.85:1234/avatars/
+  access-url: https://agonylua.asia/file/avatars/
 
 logging:
   level:
-    org.springframework.integration: DEBUG
+    org.hibernate: ERROR
+    org.hibernate.orm.jdbc.batch: ERROR

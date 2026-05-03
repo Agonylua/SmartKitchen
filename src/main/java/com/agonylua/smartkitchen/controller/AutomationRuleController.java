@@ -23,31 +23,31 @@ public class AutomationRuleController {
 
     @PostMapping("/create")
     public ApiResponse<Boolean> addAutomationRule(@RequestBody AutomationRuleDTO ruleDTO) {
-        log.info("▶️ [规则控制器] 收到创建规则请求: {}", ruleDTO);
+        log.info("[规则控制器] 收到创建规则请求: {}", ruleDTO);
         String userId = SecurityUtils.getCurrentUserId();
 
         return ApiResponse.success(ruleService.createRule(userId, ruleDTO));
     }
 
     @GetMapping("/list")
-    public ApiResponse<List<AutomationRuleDTO>> getAutomationRules(@RequestParam String userId) {
+    public ApiResponse<List<AutomationRuleDTO>> getAutomationRules() {
+        log.info("[规则控制器] 收到获取规则列表请求");
+        String userId = SecurityUtils.getCurrentUserId();
         List<AutomationRuleDTO> ruleList = ruleService.getRulesDtoList(userId);
         return ApiResponse.success(ruleList);
     }
 
     @PostMapping("/delete")
     public ApiResponse<Boolean> deleteAutomationRule(@RequestParam String ruleId) {
-        log.info("▶️ [规则控制器] 收到删除规则请求: {}", ruleId);
+        log.info("[规则控制器] 收到删除规则请求: {}", ruleId);
         String userId = SecurityUtils.getCurrentUserId();
-
         return ApiResponse.success(ruleService.deleteRule(userId, ruleId));
     }
 
     @PostMapping("/scene")
     public ApiResponse<Boolean> executeScene(@RequestParam String ruleMode) {
-        log.info("▶️ [规则控制器] 收到执行场景请求: {}", ruleMode);
+        log.info("[规则控制器] 收到执行场景请求: {}", ruleMode);
         String userId = SecurityUtils.getCurrentUserId();
-
         return ApiResponse.success(sceneExecutionService.executeManualScene(userId, ruleMode));
     }
 }

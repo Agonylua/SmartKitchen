@@ -4,19 +4,29 @@ import com.agonylua.smartkitchen.databases.entity.AutomationRule;
 import com.agonylua.smartkitchen.databases.repository.AutomationRuleRepository;
 import com.agonylua.smartkitchen.dto.AutomationRuleDTO;
 import com.agonylua.smartkitchen.utils.IdUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class AutomationRuleService {
 
     @Autowired
     private AutomationRuleRepository ruleRepository;
 
+    /**
+     * 创建自动化规则
+     *
+     * @param userId 用户ID
+     * @param dto    规则DTO对象，包含规则名称、条件和动作等信息
+     * @return 创建成功返回true，失败返回false
+     */
     public Boolean createRule(String userId, AutomationRuleDTO dto) {
+        log.info("[规则服务] 创建规则: 用户 {} , 规则名称 {}", userId, dto.getRuleName());
         if (userId == null) {
             return false;
         }
@@ -60,7 +70,13 @@ public class AutomationRuleService {
         return true;
     }
 
+    /**
+     * 获取用户的自动化规则列表
+     * @param userId 用户ID
+     * @return 规则DTO列表，包含规则ID、规则名称、是否启用、条件和动作等信息
+     */
     public List<AutomationRuleDTO> getRulesDtoList(String userId) {
+        log.info("[规则服务] 获取规则列表: 用户 {}", userId);
         List<AutomationRuleDTO> dtoList = new ArrayList<>();
         List<AutomationRule> ruleList = ruleRepository.findByUserId(userId);
         for (AutomationRule rule : ruleList) {
@@ -92,7 +108,14 @@ public class AutomationRuleService {
         return dtoList;
     }
 
+    /**
+     * 删除自动化规则
+     * @param userId 用户ID
+     * @param ruleId 规则ID
+     * @return 删除成功返回true，失败返回false
+     */
     public Boolean deleteRule(String userId, String ruleId) {
+        log.info("[规则服务] 删除规则: 用户 {} , 规则ID {}", userId, ruleId);
         if (userId == null || ruleId == null) {
             return false;
         }
