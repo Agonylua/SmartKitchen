@@ -15,18 +15,14 @@ import com.agonylua.smartKitchen.R;
 import com.agonylua.smartKitchen.adapter.SmartAdapter;
 import com.agonylua.smartKitchen.database.entity.Rules;
 import com.agonylua.smartKitchen.databinding.FragmentSmartBinding;
-import com.agonylua.smartKitchen.repository.SmartRepository;
 import com.agonylua.smartKitchen.viewModel.SmartViewModel;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SmartFragment extends Fragment {
-
     private FragmentSmartBinding binding;
-    private static final String TAG = "SmartFragment";
     private SmartViewModel viewModel;
-    private SmartRepository repository;
     private SmartAdapter adapter;
 
     @Override
@@ -53,16 +49,6 @@ public class SmartFragment extends Fragment {
     private void initListener() {
         // 设置监听器处理长按删除
         adapter.setOnItemClickListener(new SmartAdapter.OnSceneActionListener() {
-            @Override
-            public void onExecutePreset(Rules rule) {
-
-            }
-
-            @Override
-            public void onToggleCustomRule(Rules rule, boolean isChecked) {
-
-            }
-
             @Override
             public void onDeleteRule(Rules rule) {
                 viewModel.deleteRule(rule.getRuleId());

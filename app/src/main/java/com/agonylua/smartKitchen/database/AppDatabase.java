@@ -9,7 +9,6 @@ import androidx.room.TypeConverters;
 
 import com.agonylua.smartKitchen.database.dao.DeviceDao;
 import com.agonylua.smartKitchen.database.dao.HomeDao;
-import com.agonylua.smartKitchen.database.dao.OfflineTaskDao;
 import com.agonylua.smartKitchen.database.dao.RulesDao;
 import com.agonylua.smartKitchen.database.entity.Device;
 import com.agonylua.smartKitchen.database.entity.Home;
@@ -28,9 +27,6 @@ public abstract class AppDatabase extends RoomDatabase {
                     mAppDatabase = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "smartKitchen_db")
                             // 添加数据库迁移策略
                             .addMigrations()
-                            // 默认不允许在主线程中连接数据库
-                            // TODO : 生产环境中应避免使用此选项
-                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }
@@ -44,5 +40,4 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract HomeDao homeDao();
 
-    public abstract OfflineTaskDao offlineTaskDao();
 }

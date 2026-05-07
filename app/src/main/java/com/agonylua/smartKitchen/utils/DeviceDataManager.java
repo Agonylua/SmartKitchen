@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import com.agonylua.smartKitchen.model.DeviceMode;
 
 public class DeviceDataManager {
-    private static final String TAG = "DeviceDataManager";
     private static DeviceDataManager Instance;
     private final SharedPreferences sp;
     private final SharedPreferences.Editor editor;

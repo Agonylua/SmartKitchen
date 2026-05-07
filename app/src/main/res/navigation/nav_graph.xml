@@ -35,6 +35,11 @@
             app:destination="@id/mainFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -112,5 +117,9 @@
         android:id="@+id/customRulesFragment"
         android:name="com.agonylua.smartKitchen.fragment.CustomRulesFragment"
         android:label="CustomRulesFragment" />
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.agonylua.smartKitchen.fragment.RegisterFragment"
+        android:label="RegisterFragment" />
 
 </navigation>

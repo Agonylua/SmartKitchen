@@ -22,6 +22,7 @@ import com.agonylua.smartKitchen.databinding.FragmentUserBinding;
 import com.agonylua.smartKitchen.model.User;
 import com.agonylua.smartKitchen.utils.SnackbarUtils;
 import com.agonylua.smartKitchen.utils.UserManager;
+import com.agonylua.smartKitchen.utils.WorkManagerHelper;
 import com.agonylua.smartKitchen.viewModel.UserViewModel;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
@@ -66,9 +67,6 @@ public class UserFragment extends Fragment {
             NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
             navController.navigate(R.id.action_main_to_userProfile);
         });
-        binding.btAbout.setOnClickListener(v -> {
-            NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-        });
         binding.refreshLayout.setOnRefreshListener(refreshLayout -> userViewModel.refreshUserData());
         binding.btJoinHome.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -77,7 +75,7 @@ public class UserFragment extends Fragment {
 
             AlertDialog dialog = builder.create();
 
-            // 【关键黑科技】使用 GradientDrawable 设置背景色及各个角的圆角弧度
+            // 使用 GradientDrawable 设置背景色及各个角的圆角弧度
             if (dialog.getWindow() != null) {
                 android.graphics.drawable.GradientDrawable bgShape = new android.graphics.drawable.GradientDrawable();
                 bgShape.setColor(android.graphics.Color.WHITE);
@@ -108,7 +106,7 @@ public class UserFragment extends Fragment {
 
             AlertDialog dialog = builder.create();
 
-            // 【关键黑科技】必须将 Dialog 窗口背景设为透明，否则圆角四个角会有白色方块底色
+            // 必须将 Dialog 窗口背景设为透明，否则圆角四个角会有白色方块底色
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
             }
@@ -131,6 +129,7 @@ public class UserFragment extends Fragment {
                 dialog.dismiss();
                 NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
                 navController.navigate(R.id.action_global_to_login);
+                WorkManagerHelper.stopPeriodicDataSync(requireContext());
             });
             dialog.show();
         });

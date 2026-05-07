@@ -29,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
     @Inject
     public UserManager userManager;
 
-    private String TAG = "MainActivity";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,22 +48,17 @@ public class MainActivity extends AppCompatActivity {
             if (isExpired != null && isExpired) {
                 NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
-                if (navController.getCurrentDestination() != null &&
-                        navController.getCurrentDestination().getId() != R.id.loginFragment) {
-
-                    navController.navigate(R.id.action_global_to_login);
+                if (navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() != R.id.loginFragment) {
                     SnackbarUtils.show(findViewById(android.R.id.content), "登录状态已过期，请重新登录");
+                    navController.navigate(R.id.action_global_to_login);
                 }
             }
         });
     }
 
     private void initFragments() {
-        // 获取 NavHostFragment
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
-
-        // 获取 controller 进行跳转
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
             if (userManager.getToken() == null || userManager.getToken().isEmpty()) {

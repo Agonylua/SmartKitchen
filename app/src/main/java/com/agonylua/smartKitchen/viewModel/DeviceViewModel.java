@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModel;
 import com.agonylua.smartKitchen.database.entity.Device;
 import com.agonylua.smartKitchen.model.ChipDeviceMode;
 import com.agonylua.smartKitchen.model.DeviceMode;
-import com.agonylua.smartKitchen.model.DeviceSet;
 import com.agonylua.smartKitchen.model.DeviceType;
 import com.agonylua.smartKitchen.repository.DeviceRepository;
 import com.agonylua.smartKitchen.utils.DeviceDataManager;
@@ -83,7 +82,6 @@ public class DeviceViewModel extends ViewModel {
     public MediatorLiveData<Boolean> autoSaverSetup = new MediatorLiveData<>();
     public final MutableLiveData<String> toastMessage = new MutableLiveData<>();
     private Device device;
-    private DeviceSet deviceSet;
     private DeviceDataManager deviceDataManager;
     private DeviceRepository deviceRepository;
     private Context context;
@@ -303,23 +301,29 @@ public class DeviceViewModel extends ViewModel {
         subTaskLoading.setValue(true);
         Map<String, String> data = new HashMap<>();
         Map<String, String> payload = new HashMap<>();
-        payload.put("deviceSn", device.getDeviceSn());
-        payload.put("mode", DeviceMode.toMode(getSelectedModeLiveData().getValue()));
-        if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
-            data.put("fridgeTempThreshold", String.valueOf(setFridgeTemp.getValue()));
-            data.put("freezeTempThreshold", String.valueOf(setFreezeTemp.getValue()));
-        } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
-            data.put("microwaveTime", String.valueOf(setMicrowaveTime.getValue()));
-            data.put("microwaveTemp", String.valueOf(setMicrowaveTemp.getValue()));
-        } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
-            data.put("keepFresh", String.valueOf(dishwasherKeepFresh.getValue()));
-        } else if (Objects.equals(device.getDeviceType(), "RICE_COOKER")) {
-            data.put("riceCookerTexture", String.valueOf(riceCookerTexture.getValue()));
-            data.put("riceCookerInsulation", String.valueOf(riceCookerInsulation.getValue()));
-        } else if (Objects.equals(device.getDeviceType(), "STERILIZER")) {
-            data.put("uvLight", String.valueOf(sterilizerUvLight.getValue()));
+        if (device.getDeviceMode().equals("IDLE")) {
+            payload.put("deviceSn", device.getDeviceSn());
+            payload.put("mode", DeviceMode.toMode(getSelectedModeLiveData().getValue()));
+            if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
+                data.put("fridgeTempThreshold", String.valueOf(setFridgeTemp.getValue()));
+                data.put("freezeTempThreshold", String.valueOf(setFreezeTemp.getValue()));
+            } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
+                data.put("microwaveTime", String.valueOf(setMicrowaveTime.getValue()));
+                data.put("microwaveTemp", String.valueOf(setMicrowaveTemp.getValue()));
+            } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
+                data.put("keepFresh", String.valueOf(dishwasherKeepFresh.getValue()));
+            } else if (Objects.equals(device.getDeviceType(), "RICE_COOKER")) {
+                data.put("riceCookerTexture", String.valueOf(riceCookerTexture.getValue()));
+                data.put("riceCookerInsulation", String.valueOf(riceCookerInsulation.getValue()));
+            } else if (Objects.equals(device.getDeviceType(), "STERILIZER")) {
+                data.put("uvLight", String.valueOf(sterilizerUvLight.getValue()));
+            }
+            payload.put("data", JsonUtils.toJson(data));
+        } else {
+            payload.put("deviceSn", device.getDeviceSn());
+            payload.put("mode", "IDLE");
+            payload.put("data", "");
         }
-        payload.put("data", JsonUtils.toJson(data));
         ThreadPoolUtils.getInstance().executeDelay(() -> {
             deviceRepository.sendControlCmd(payload, new DeviceRepository.callback() {
                 @Override

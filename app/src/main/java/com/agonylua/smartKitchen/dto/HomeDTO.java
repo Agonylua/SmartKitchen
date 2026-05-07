@@ -16,27 +16,8 @@ public class HomeDTO {
         this.homeId = homeId;
     }
 
-    public String getHomeName() {
-        return homeName;
-    }
-
-    public void setHomeName(String homeName) {
-        this.homeName = homeName;
-    }
-
-    public String getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
-    }
-
     public List<String> getMemberIds() {
         return memberIds;
     }
 
-    public void setMemberIds(List<String> memberIds) {
-        this.memberIds = memberIds;
-    }
 }

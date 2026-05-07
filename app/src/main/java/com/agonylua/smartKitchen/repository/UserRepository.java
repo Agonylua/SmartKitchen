@@ -51,7 +51,7 @@ public class UserRepository {
     }
 
     public void updateUserNickname(String newNickname, infoCallback callback) {
-        retrofit.getApi().updateNickname(userManager.getUserId(), newNickname).enqueue(new Callback<ApiResponse<String>>() {
+        retrofit.getApi().updateNickname(newNickname).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -77,7 +77,7 @@ public class UserRepository {
     public void updateUserAvatar(File newAvatarFile, infoCallback callback) {
         RequestBody requestFile = RequestBody.create(okhttp3.MediaType.parse("UserAvatar"), newAvatarFile);
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", newAvatarFile.getName(), requestFile);
-        retrofit.getApi().updateAvatar(body, userManager.getUserId()).enqueue(new Callback<ApiResponse<String>>() {
+        retrofit.getApi().updateAvatar(body).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -101,7 +101,7 @@ public class UserRepository {
     }
 
     public void resetUserPassword(String oldPassword, String newPassword, infoCallback callback) {
-        retrofit.getApi().resetPassword(userManager.getUserId(), oldPassword, newPassword).enqueue(new Callback<ApiResponse<String>>() {
+        retrofit.getApi().resetPassword(oldPassword, newPassword).enqueue(new Callback<ApiResponse<String>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -177,8 +177,7 @@ public class UserRepository {
 
     public void removeMember(String memberId, infoCallback callback) {
         String homeId = userManager.getHomeId();
-        // 1. 发起网络请求
-        retrofit.getApi().removeMember(homeId, memberId).enqueue(new Callback<ApiResponse<HomeDTO>>() {
+        retrofit.getApi().removeMember(memberId, homeId).enqueue(new Callback<ApiResponse<HomeDTO>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<HomeDTO>> call, @NonNull Response<ApiResponse<HomeDTO>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -229,23 +228,14 @@ public class UserRepository {
 
     public void exitHome(infoCallback callback) {
         String homeId = userManager.getHomeId();
-        // 1. 发起网络请求
-        retrofit.getApi().exitHome(homeId).enqueue(new Callback<ApiResponse<UserDTO>>() {
+        retrofit.getApi().exitHome(homeId).enqueue(new Callback<ApiResponse<String>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<UserDTO>> call, @NonNull Response<ApiResponse<UserDTO>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<UserDTO> body = response.body();
+                    ApiResponse<String> body = response.body();
                     if (body.getCode() == 200) {
-                        userManager.clear();
-                        userManager.saveUserInfo(
-                                body.getData().getUserId(),
-                                body.getData().getHomeId(),
-                                body.getData().getUsername(),
-                                body.getData().getNickname(),
-                                body.getData().getAvatarUrl(),
-                                body.getData().getToken()
-                        );
-                        retrofit.getApi().getHomeInfo(body.getData().getHomeId()).enqueue(new Callback<ApiResponse<Home>>() {
+                        userManager.setHomeId(body.getData());
+                        retrofit.getApi().getHomeInfo(body.getData()).enqueue(new Callback<ApiResponse<Home>>() {
                             @Override
                             public void onResponse(@NonNull Call<ApiResponse<Home>> call, @NonNull Response<ApiResponse<Home>> response) {
                                 if (response.isSuccessful() && response.body() != null) {
@@ -279,7 +269,7 @@ public class UserRepository {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<UserDTO>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
                 callback.onError("网络连接失败: " + t.getMessage());
             }
         });

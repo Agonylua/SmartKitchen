@@ -27,17 +27,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
-
     private HomeViewModel homeViewModel;
     private String homeId;
-
     @Inject
     public UserManager userManager;
-
     private DeviceAdapter adapter;
-    private String TAG = "HomeFragment";
-
-    // 引入 ViewBinding
     private FragmentHomeBinding binding;
 
     @Nullable

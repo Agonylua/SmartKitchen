@@ -49,7 +49,7 @@ public class GlobalRepository {
                 deviceDao.insertAll(deviceList);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -62,7 +62,7 @@ public class GlobalRepository {
                 homeDao.insertAll(home);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -76,13 +76,13 @@ public class GlobalRepository {
                 );
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
     public void syncAutomationRules() {
         try {
-            ApiResponse<List<AutomationRuleDTO>> apiResponse = retrofit.getApi().getRules(userManager.getHomeId()).execute().body();
+            ApiResponse<List<AutomationRuleDTO>> apiResponse = retrofit.getApi().getRules().execute().body();
             if (apiResponse != null && apiResponse.getCode() == 200) {
                 List<AutomationRuleDTO> ruleDTOs = apiResponse.getData();
                 List<Rules> rules = RuleMapper.toRulesList(ruleDTOs, userManager.getUserId());
@@ -90,7 +90,7 @@ public class GlobalRepository {
                 rulesDao.insertAll(rules);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 

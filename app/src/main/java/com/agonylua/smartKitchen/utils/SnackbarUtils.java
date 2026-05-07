@@ -28,16 +28,16 @@ public class SnackbarUtils {
         Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
         View snackbarView = snackbar.getView();
 
-        // 1. 设置宽度自适应、底部居中、悬浮边距
+        // 设置宽度自适应、底部居中、悬浮边距
         ViewGroup.LayoutParams params = snackbarView.getLayoutParams();
         if (params instanceof FrameLayout.LayoutParams) {
             FrameLayout.LayoutParams flp = (FrameLayout.LayoutParams) params;
-            // 核心修改 1：宽度改为根据内容自适应
+            // 宽度改为根据内容自适应
             flp.width = FrameLayout.LayoutParams.WRAP_CONTENT;
             flp.height = FrameLayout.LayoutParams.WRAP_CONTENT;
-            // 核心修改 2：设置对齐方式为水平居中 + 底部对齐
+            // 设置对齐方式为水平居中 + 底部对齐
             flp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-            // 保留边距：底部抬高 80 避开导航栏；左右保留 48 防止极端情况下长文本贴边
+            // 底部抬高 80 避开导航栏；左右保留 48 防止极端情况下长文本贴边
             flp.setMargins(48, 0, 48, 160);
             snackbarView.setLayoutParams(flp);
         }

@@ -50,7 +50,6 @@ public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceVi
         }
 
         public void bind(Device device) {
-            // 一行代码，搞定所有 UI 赋值与视图更新
             binding.setDevice(device);
             String runTime = TimeUtils.formatToDdHhMm(device.getRunTime());
             binding.runTime.setText(runTime);

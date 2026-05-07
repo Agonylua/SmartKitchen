@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.agonylua.smartKitchen.R;
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceViewHolder> {
-    private static final String TAG = "DeviceAdapter";
     private List<Device> deviceList = new ArrayList<>();
     private OnItemClickListener listener;
     private OnItemLongClickListener longClickListener;
@@ -31,8 +31,41 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     }
 
     public void submitList(List<Device> newDevices) {
-        this.deviceList = newDevices;
-        notifyDataSetChanged();
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return deviceList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newDevices.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                Device oldDevice = deviceList.get(oldItemPosition);
+                Device newDevice = newDevices.get(newItemPosition);
+                return oldDevice.getDeviceSn().equals(newDevice.getDeviceSn());
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                Device oldDevice = deviceList.get(oldItemPosition);
+                Device newDevice = newDevices.get(newItemPosition);
+                return oldDevice.equals(newDevice);
+            }
+
+            @androidx.annotation.Nullable
+            @Override
+            public Object getChangePayload(int oldItemPosition, int newItemPosition) {
+                return ""; // 返回非空 Payload，阻止默认的交叉渐变闪烁动画
+            }
+        });
+
+        this.deviceList.clear();
+        this.deviceList.addAll(newDevices);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
@@ -60,8 +93,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
             currentDeletingDeviceSn = null;
             for (int i = 0; i < deviceList.size(); i++) {
                 String dSn = deviceList.get(i).getDeviceSn();
-                if (dSn != null && dSn.equals(tempId)) {
-                    notifyItemChanged(i);
+                if (dSn.equals(tempId)) {
+                    notifyItemChanged(i, "");
                     break;
                 }
             }
@@ -78,20 +111,20 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         if (oldSn != null && !oldSn.equals(currentDeletingDeviceSn)) {
             for (int i = 0; i < deviceList.size(); i++) {
                 String dSn = deviceList.get(i).getDeviceSn();
-                if (dSn != null && dSn.equals(oldSn)) {
-                    notifyItemChanged(i);
+                if (dSn.equals(oldSn)) {
+                    notifyItemChanged(i, "");
                     break;
                 }
             }
         }
     }
 
-    // 定义点击事件接口，方便在 Fragment 中处理页面跳转
+    // 定义点击事件接口
     public interface OnItemClickListener {
         void onItemClick(Device device);
     }
 
-    // 定义长按事件接口，用于删除设备等操作
+    // 定义长按事件接口
     public interface OnItemLongClickListener {
         void onItemLongClick(Device device);
     }
@@ -112,14 +145,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         }
 
         public void bind(Device device, OnItemClickListener listener, OnItemLongClickListener longClickListener, String currentDeletingSn, DeviceAdapter adapter) {
-            // 设置设备名称
             tvDeviceName.setText(device.getDeviceName() != null ? device.getDeviceName() : "未知设备");
 
-            // 判断设备是否在线
             boolean isOnline = device.getDeviceStatus() != null && device.getDeviceStatus().equals("ONLINE");
             String deviceType = device.getDeviceType() != null ? device.getDeviceType() : "";
 
-            // 根据设备类型和在线状态加载不同的图标
             ivDeviceIcon.setImageResource(getIconForDevice(deviceType, isOnline));
 
             boolean isDeleting = device.getDeviceSn() != null && device.getDeviceSn().equals(currentDeletingSn);
@@ -131,20 +161,20 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
                     adapter.clearDeleteMode();
                 }
                 adapter.setCurrentDeletingDeviceSn(device.getDeviceSn());
-                adapter.notifyItemChanged(getAdapterPosition());
+                adapter.notifyItemChanged(getAdapterPosition(), "");
                 return true; // 返回 true 表示消耗了长按事件，不再触发点击
             });
 
             // 遮罩存在拦截点击，使得点击卡片其他地方取消删除
             clDeleteOverlay.setOnClickListener(v -> {
                 adapter.setCurrentDeletingDeviceSn(null);
-                adapter.notifyItemChanged(getAdapterPosition());
+                adapter.notifyItemChanged(getAdapterPosition(), "");
             });
 
             // 点击确认删除按钮
             btnDeleteConfirm.setOnClickListener(v -> {
                 adapter.setCurrentDeletingDeviceSn(null);
-                adapter.notifyItemChanged(getAdapterPosition());
+                adapter.notifyItemChanged(getAdapterPosition(), "");
                 if (longClickListener != null) {
                     longClickListener.onItemLongClick(device);
                 }

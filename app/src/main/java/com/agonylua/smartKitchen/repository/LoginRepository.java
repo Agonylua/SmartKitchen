@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.agonylua.smartKitchen.common.ApiResponse;
 import com.agonylua.smartKitchen.common.LoginRequest;
+import com.agonylua.smartKitchen.common.RegisterRequest;
 import com.agonylua.smartKitchen.database.dao.HomeDao;
 import com.agonylua.smartKitchen.database.entity.Home;
 import com.agonylua.smartKitchen.dto.UserDTO;
@@ -23,7 +24,6 @@ import retrofit2.Response;
 
 @Singleton
 public class LoginRepository {
-    private static volatile LoginRepository instance;
     private final String TAG = "poserCallback";
     private NetworkMonitor networkMonitor;
     private RetrofitClient retrofit;
@@ -154,6 +154,30 @@ public class LoginRepository {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Home>> call, @NonNull Throwable t) {
                 callback.onError("网络连接失败: " + t.getMessage());
+            }
+        });
+    }
+
+    public void register(String reqUserName, String reqNickname, String reqPassword, final LoginCallback callback) {
+        RegisterRequest request = new RegisterRequest(reqUserName, reqPassword, reqNickname);
+        retrofit.getApi().register(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Void> body = response.body();
+                    if (body.getCode() == 200) {
+                        callback.onSuccess();
+                    } else {
+                        callback.onError(body.getMessage());
+                    }
+                } else {
+                    callback.onError("注册失败，请稍后再试");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+                callback.onError("服务器连接错误");
             }
         });
     }

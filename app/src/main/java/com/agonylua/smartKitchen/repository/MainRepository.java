@@ -19,12 +19,10 @@ import retrofit2.Response;
 
 @Singleton
 public class MainRepository {
-    private static volatile MainRepository instance;
     public LiveData<Device> newDeviceData = new MutableLiveData<>();
     private DeviceDao deviceDao;
     private RetrofitClient retrofit;
     private UserManager userManager;
-    private Device device;
 
     @Inject
     public MainRepository(RetrofitClient retrofit, UserManager userManager, DeviceDao deviceDao) {

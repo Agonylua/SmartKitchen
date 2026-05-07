@@ -52,13 +52,13 @@ public class ProvisionFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 1. 注册权限申请回调
+        // 注册权限申请回调
         permissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 this::handlePermissionResult
         );
 
-        // 2. 注册蓝牙开启回调
+        // 注册蓝牙开启回调
         enableBtLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -70,7 +70,7 @@ public class ProvisionFragment extends Fragment {
                 }
         );
 
-        // 3. 注册系统定位开关开启回调
+        // 注册系统定位开关开启回调
         enableLocationLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -134,7 +134,7 @@ public class ProvisionFragment extends Fragment {
     }
 
     private void observeViewModel() {
-        // 1. 监听设备绑定成果信息并 Toast 提示
+        // 监听设备绑定成果信息并 Toast 提示
         viewModel.getBindResultMsg().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isEmpty()) {
                 SnackbarUtils.show(requireView(), msg);
@@ -142,7 +142,7 @@ public class ProvisionFragment extends Fragment {
             }
         });
 
-        // 2. 只有当验证且绑定成功后，此处变为 true，触发严格的权限检查链
+        // 只有当验证且绑定成功后，此处变为 true，触发严格的权限检查链
         viewModel.getQrCodeParsed().observe(getViewLifecycleOwner(), parsed -> {
             if (parsed != null && parsed) {
                 // 确保没有发生错误
@@ -152,7 +152,7 @@ public class ProvisionFragment extends Fragment {
             }
         });
 
-        // 3. 状态提示
+        // 状态提示
         viewModel.getScanStatus().observe(getViewLifecycleOwner(), statusMsg -> {
             if (statusMsg != null && binding.tvStatusMessage != null) {
                 binding.tvStatusMessage.setText(statusMsg);
@@ -160,7 +160,6 @@ public class ProvisionFragment extends Fragment {
             }
         });
 
-        // 4. 閰嶇綉缁撴灉
         viewModel.getProvisionStatus().observe(getViewLifecycleOwner(), status -> {
             if ("Success".equals(status)) {
                 SnackbarUtils.show(requireView(), "设备配网成功！");
@@ -176,7 +175,6 @@ public class ProvisionFragment extends Fragment {
             }
         });
 
-        // 5. 钃濈墮杩炴帴鎴愬姛鐘舵€?
         viewModel.getIsConnected().observe(getViewLifecycleOwner(), isConnected -> {
             if (isConnected != null && isConnected) {
                 binding.btnStartProvision.setEnabled(true);
@@ -195,7 +193,7 @@ public class ProvisionFragment extends Fragment {
     private void checkPermissionsAndAutoConnect() {
         List<String> permissionsNeeded = new ArrayList<>();
 
-        // Android 12+ (S) 需要扫描和连接权限
+        // 扫描和连接权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
                 permissionsNeeded.add(Manifest.permission.BLUETOOTH_SCAN);
@@ -205,7 +203,7 @@ public class ProvisionFragment extends Fragment {
             }
         }
 
-        // 任何版本都需要精确定位权限才能扫描到 BLE 广播包
+        // 定位权限
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
         }
@@ -237,7 +235,7 @@ public class ProvisionFragment extends Fragment {
      * 权限拦截第二关：手机硬件开关 (蓝牙与GPS)
      */
     private void checkHardwareSwitches() {
-        // 1. 查蓝牙
+        // 查蓝牙
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -245,7 +243,7 @@ public class ProvisionFragment extends Fragment {
             return;
         }
 
-        // 2. 查系统定位(GPS)开关 —— 这是很多国产安卓机静默拦截 BLE 扫描的罪魁祸首！
+        // 查系统定位
         LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -260,7 +258,6 @@ public class ProvisionFragment extends Fragment {
     }
 
     private void autoStartScan() {
-        // 双重校验：确保二维码没出错且已经验证放行才启动
         if (Boolean.TRUE.equals(viewModel.getQrCodeParsed().getValue()) &&
                 Boolean.FALSE.equals(viewModel.getIsScanError().getValue())) {
             viewModel.startBleScan();

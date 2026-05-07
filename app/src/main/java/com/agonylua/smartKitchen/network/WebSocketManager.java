@@ -16,7 +16,7 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 
 public class WebSocketManager {
-    private static final String BASE_URL = "ws://192.168.116.113:1234";
+    public static String IP_PORT = "192.168.40.146:1234";
     private static final String TAG = "WebSocketManager";
     private static WebSocketManager instance;
     // 重连逻辑相关
@@ -59,14 +59,14 @@ public class WebSocketManager {
         if (webSocket != null) return;
 
         // 替换为你的服务器地址
-        String wsUrl = BASE_URL + "/ws/notification?userId=" + userId;
+        String wsUrl = "ws://" + IP_PORT + "/ws/notification?userId=" + userId;
 
         Request request = new Request.Builder().url(wsUrl).build();
 
         webSocket = client.newWebSocket(request, new WebSocketListener() {
             @Override
             public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
-                Log.d(TAG, "🟢 WebSocket 连接成功!");
+                Log.d(TAG, "[WebSocket] 连接成功!");
                 reconnectCount = 0; // 连接成功，重置重连计数器
             }
 
@@ -79,12 +79,12 @@ public class WebSocketManager {
 
             @Override
             public void onClosing(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
-                Log.d(TAG, "🟡 服务器正在关闭连接: " + reason);
+                Log.d(TAG, "[WebSocket] 服务器正在关闭连接: " + reason);
             }
 
             @Override
             public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
-                Log.d(TAG, "⚫ 连接已关闭");
+                Log.d(TAG, "[WebSocket] 连接已关闭");
                 WebSocketManager.this.webSocket = null;
                 // 如果不是手动关闭，则尝试重连
                 tryReconnect();
@@ -92,7 +92,7 @@ public class WebSocketManager {
 
             @Override
             public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, @Nullable Response response) {
-                Log.e(TAG, "❌ WebSocket 连接失败: " + t.getMessage());
+                Log.e(TAG, "[WebSocket] 连接失败: " + t.getMessage());
                 WebSocketManager.this.webSocket = null;
                 // 尝试重连
                 tryReconnect();
@@ -112,11 +112,9 @@ public class WebSocketManager {
         // 计算下一次重连的延迟时间：2^n 秒，最大不超过 30 秒
         long delay = (long) Math.min(Math.pow(2, reconnectCount) * 1000, MAX_RECONNECT_DELAY);
 
-        Log.d(TAG, "⏳ 将在 " + (delay / 1000) + " 秒后尝试第 " + reconnectCount + " 次重连...");
-
         mainHandler.removeCallbacksAndMessages(null); // 清除之前的任务
         mainHandler.postDelayed(() -> {
-            Log.d(TAG, "🚀 正在执行重连...");
+            Log.d(TAG, "[WebSocket] 正在执行重连...");
             connect(currentUserId);
         }, delay);
     }

@@ -22,7 +22,7 @@ public class PermissionUtils {
             permissions.add(Manifest.permission.BLUETOOTH_SCAN);
             permissions.add(Manifest.permission.BLUETOOTH_CONNECT);
         }
-        // 无论哪个版本，蓝牙扫描都需要精确定位权限
+        // 精确定位权限
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         return permissions.toArray(new String[0]);
     }

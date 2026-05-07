@@ -47,7 +47,7 @@ public class MonitorFragment extends Fragment {
 
         monitorViewModel = new ViewModelProvider(this).get(MonitorViewModel.class);
 
-        // 初始化 RecyclerView (Adapter 绑定交给 XML, 我们只需给它一个实例和布局管理器)
+        // 初始化 RecyclerView
         binding.rvRunningDevices.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvRunningDevices.setAdapter(new MonitorAdapter());
 

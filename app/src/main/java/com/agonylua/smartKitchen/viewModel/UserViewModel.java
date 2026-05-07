@@ -37,8 +37,8 @@ public class UserViewModel extends ViewModel {
     private MutableLiveData<String> etConfirmPwd = new MutableLiveData<>();
     private MutableLiveData<File> newAvatarFile = new MutableLiveData<>();
     private MediatorLiveData<Boolean> isSaveEnabled = new MediatorLiveData<>(false);
-    private MutableLiveData<Boolean> isPasswordConsistency = new MutableLiveData<>();
     private MutableLiveData<Boolean> isUserInfoResult = new MutableLiveData<>(false);
+    private MutableLiveData<Boolean> exitHomeResult = new MutableLiveData<>();
     public MutableLiveData<Boolean> refreshResult = new MutableLiveData<>();
     private MutableLiveData<ArrayList<HomeMemberAdapter.HomeMember>> memberList = new MutableLiveData<>();
     private LiveData<Home> home = new MutableLiveData<>();
@@ -55,7 +55,6 @@ public class UserViewModel extends ViewModel {
     }
 
     public void observeChanges() {
-        // 监听输入变化，控制保存按钮状态
         isSaveEnabled.addSource(etNickname, s -> isSaveEnabled.setValue(numericalChanges()));
         isSaveEnabled.addSource(etOldPwd, s -> isSaveEnabled.setValue(numericalChanges()));
         isSaveEnabled.addSource(etNewPwd, s -> isSaveEnabled.setValue(numericalChanges()));
@@ -195,11 +194,13 @@ public class UserViewModel extends ViewModel {
             @Override
             public void onSuccess() {
                 toastMessage.postValue("已退出家庭");
+                exitHomeResult.postValue(true);
             }
 
             @Override
             public void onError(String message) {
                 toastMessage.postValue("退出家庭失败: " + message);
+                exitHomeResult.postValue(true);
             }
         });
     }
@@ -291,10 +292,6 @@ public class UserViewModel extends ViewModel {
         return usersDataList;
     }
 
-    public MutableLiveData<Boolean> getIsLogin() {
-        return isLogin;
-    }
-
     public MutableLiveData<Boolean> getBtnExitHome() {
         return btnExitHome;
     }
@@ -332,20 +329,16 @@ public class UserViewModel extends ViewModel {
         return isSaveEnabled;
     }
 
-    public void setIsSaveEnabled(Boolean isSaveEnabled) {
-        this.isSaveEnabled.setValue(isSaveEnabled);
-    }
-
-    public MutableLiveData<Boolean> getIsPasswordConsistency() {
-        return isPasswordConsistency;
-    }
-
-    public MutableLiveData<File> getNewAvatarFile() {
-        return newAvatarFile;
-    }
-
     public MutableLiveData<Boolean> getIsUserInfoResult() {
         return isUserInfoResult;
+    }
+
+    public MutableLiveData<Boolean> getExitHomeResult() {
+        return exitHomeResult;
+    }
+
+    public void setExitHomeResult(boolean result) {
+        exitHomeResult.setValue(result);
     }
 
     public void setIsUserInfoResult(Boolean isUserInfoResult) {

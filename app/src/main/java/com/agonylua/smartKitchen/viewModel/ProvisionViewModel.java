@@ -169,7 +169,6 @@ public class ProvisionViewModel extends ViewModel {
             @Override
             public void scanCompleted() {
                 Log.d(TAG, "scanCompleted: " + "扫描完成，未找到设备");
-                bleScanner.startScan();
             }
 
             @Override

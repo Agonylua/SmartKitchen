@@ -1,5 +1,6 @@
 package com.agonylua.smartKitchen.viewModel;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -16,13 +17,20 @@ public class LoginViewModel extends ViewModel {
     private LoginRepository repository;
     private final MutableLiveData<Boolean> loginResult = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    public final MutableLiveData<String> account = new MutableLiveData<>("");
+    public final MutableLiveData<String> nickname = new MutableLiveData<>("");
+    public final MutableLiveData<String> password = new MutableLiveData<>("");
+    public final MutableLiveData<String> confirmPassword = new MutableLiveData<>("");
+    private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>(true);
+    private final MutableLiveData<Boolean> isNetwork = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> registerSuccess = new MutableLiveData<>(false);
 
     @Inject
     public LoginViewModel(LoginRepository repository) {
         this.repository = repository;
     }
 
-    // 供 Activity 调用的方法
     public void login(String username, String password) {
         ThreadPoolUtils.getInstance().executeDelay(() -> {
             repository.login(username, password, new LoginRepository.LoginCallback() {
@@ -34,7 +42,6 @@ public class LoginViewModel extends ViewModel {
                 @Override
                 public void onError(String message) {
                     errorMessage.postValue(message);
-                    loginResult.postValue(false);
                 }
 
             });
@@ -53,18 +60,39 @@ public class LoginViewModel extends ViewModel {
                 @Override
                 public void onFailure(String message) {
                     errorMessage.postValue(message);
-                    loginResult.postValue(false);
+                    isConnected.postValue(false);
                 }
             });
-        }, 5000);
+        }, 3000);
     }
 
-    public Boolean isNetwork() {
-        return repository.validateNetwork();
+    public void register(String reqUserName, String reqNickname, String reqPassword) {
+        isLoading.setValue(true);
+        errorMessage.setValue("");
+
+        ThreadPoolUtils.getInstance().executeDelay(() -> {
+            isLoading.postValue(false);
+            repository.register(reqUserName, reqNickname, reqPassword, new LoginRepository.LoginCallback() {
+                @Override
+                public void onSuccess() {
+                    registerSuccess.postValue(true);
+                }
+
+                @Override
+                public void onError(String message) {
+                    errorMessage.postValue(message);
+                    registerSuccess.postValue(false);
+                }
+            });
+        }, 3000);
     }
 
-    public Boolean isExistToken() {
-        return repository.isExistToken();
+    public void retryConnection() {
+        tokenValidate();
+        loginResult.setValue(null);
+        errorMessage.setValue(null);
+        isNetwork.setValue(null);
+        isConnected.setValue(true);
     }
 
     public void clearErrorMessage() {
@@ -82,5 +110,23 @@ public class LoginViewModel extends ViewModel {
 
     public MutableLiveData<String> getErrorMessage() {
         return errorMessage;
+    }
+
+    public MutableLiveData<Boolean> getIsConnected() {
+        return isConnected;
+    }
+
+    public MutableLiveData<Boolean> getIsNetwork() {
+        boolean networkStatus = repository.validateNetwork();
+        isNetwork.postValue(networkStatus);
+        return isNetwork;
+    }
+
+    public LiveData<Boolean> getIsLoading() {
+        return isLoading;
+    }
+
+    public LiveData<Boolean> getRegisterSuccess() {
+        return registerSuccess;
     }
 }

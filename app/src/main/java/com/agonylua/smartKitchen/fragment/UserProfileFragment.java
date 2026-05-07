@@ -192,7 +192,7 @@ public class UserProfileFragment extends Fragment {
 
             AlertDialog dialog = builder.create();
 
-            // 【关键黑科技】必须将 Dialog 窗口背景设为透明，否则圆角四个角会有白色方块底色
+            // 必须将 Dialog 窗口背景设为透明，否则圆角四个角会有白色方块底色
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
             }

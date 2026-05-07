@@ -4,6 +4,7 @@
 
     <data>
 
+        <import type="android.view.View" />
         <variable
             name="viewModel"
             type="com.agonylua.smartKitchen.viewModel.LoginViewModel" />
@@ -12,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F4F6F8"> <!-- 与应用整体风格一致的浅灰背景 -->
+        android:background="#F4F6F8">
 
         <LinearLayout
             android:id="@+id/ll_logo_container"
@@ -24,9 +25,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.4"> <!-- 稍微偏上的位置 -->
+            app:layout_constraintVertical_bias="0.4">
 
-            <!-- 使用 MaterialCardView 给 Logo 加一个精致的外框和阴影 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
@@ -65,41 +65,42 @@
 
         </LinearLayout>
 
-        <!-- 底部版权或加载提示区 -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="40dp"
             android:gravity="center"
             android:orientation="vertical"
+            android:onClick="@{() -> viewModel.retryConnection()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <!-- 增加一个更现代的加载进度条 -->
             <ProgressBar
                 android:id="@+id/pb_loading"
                 style="?android:attr/progressBarStyleSmall"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginBottom="16dp"
-                android:indeterminateTint="#14B8A6" />
+                android:indeterminateTint="#14B8A6"
+                android:visibility="@{viewModel.isConnected ? View.VISIBLE : View.GONE}" />
 
             <ImageView
                 android:id="@+id/tv_error_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_warning"
-                android:visibility="gone" />
+                android:layout_marginBottom="6dp"
+                android:visibility="@{viewModel.isConnected ? View.GONE : View.VISIBLE}" />
 
             <TextView
                 android:id="@+id/tv_error_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="无网络连接"
+                android:text="@{viewModel.isConnected ? `网络连接失败` : `无法连接到服务器`}"
                 android:textColor="@color/text_secondary"
-                android:visibility="gone" />
+                android:visibility="@{viewModel.isConnected ? View.GONE : View.VISIBLE}" />
 
             <TextView
                 android:layout_width="wrap_content"

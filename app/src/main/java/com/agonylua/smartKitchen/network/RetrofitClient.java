@@ -9,24 +9,20 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "http://192.168.116.113:1234";
+    public static String IP_PORT = "192.168.40.146:1234";
     private static RetrofitClient instance;
     private ApiService apiService;
+    private Context context;
 
     private RetrofitClient(Context context) {
-        // 创建 OkHttpClient
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new AuthInterceptor(context))
-                .build();
+        this.context = context.getApplicationContext();
+        buildApiService();
+    }
 
-        // 创建 Retrofit
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        apiService = retrofit.create(ApiService.class);
+    public static synchronized void resetInstance() {
+        if (instance != null) {
+            instance.buildApiService();
+        }
     }
 
     // 单例方法
@@ -35,6 +31,22 @@ public class RetrofitClient {
             instance = new RetrofitClient(context.getApplicationContext());
         }
         return instance;
+    }
+
+    private void buildApiService() {
+        // 创建 OkHttpClient
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new AuthInterceptor(context))
+                .build();
+
+        // 创建 Retrofit
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://" + IP_PORT)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        apiService = retrofit.create(ApiService.class);
     }
 
     public ApiService getApi() {

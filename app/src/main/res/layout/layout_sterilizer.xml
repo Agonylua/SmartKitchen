@@ -4,6 +4,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <import type="com.agonylua.smartKitchen.R" />
 
         <variable
@@ -155,16 +157,16 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_launcher_foreground"
                         android:duplicateParentState="true"
+                        android:src="@drawable/ic_launcher_foreground"
                         app:tint="@color/selector_mode_color" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="自动"
                         android:duplicateParentState="true"
+                        android:text="自动"
                         android:textColor="@color/selector_mode_color"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -187,16 +189,16 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_launcher_foreground"
                         android:duplicateParentState="true"
+                        android:src="@drawable/ic_launcher_foreground"
                         app:tint="@color/selector_mode_color" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="消毒"
                         android:duplicateParentState="true"
+                        android:text="消毒"
                         android:textColor="@color/selector_mode_color"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -219,16 +221,16 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_launcher_foreground"
                         android:duplicateParentState="true"
+                        android:src="@drawable/ic_launcher_foreground"
                         app:tint="@color/selector_mode_color" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="烘干"
                         android:duplicateParentState="true"
+                        android:text="烘干"
                         android:textColor="@color/selector_mode_color"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -251,16 +253,16 @@
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_launcher_foreground"
                         android:duplicateParentState="true"
+                        android:src="@drawable/ic_launcher_foreground"
                         app:tint="@color/selector_mode_color" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="保洁"
                         android:duplicateParentState="true"
+                        android:text="保洁"
                         android:textColor="@color/selector_mode_color"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -331,10 +333,10 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="32dp"
-            android:enabled="@{device.deviceStatus != `ONLINE` || device.deviceStatus != `RUNNING`}"
+            android:enabled="@{device.deviceStatus != `ONLINE` || device.deviceMode != `IDEA`}"
+            android:text="@{device.deviceMode.equals(`IDEA`) ? `停止运行` : `开始工作`}"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:text="@{device.deviceStatus.equals(`RUNING`) ? `停止运行` : `开始工作`}"
             app:cornerRadius="30dp"
             app:iconGravity="textStart"
             app:iconPadding="8dp"

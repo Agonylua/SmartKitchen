@@ -22,7 +22,6 @@ import retrofit2.Response;
 
 @Singleton
 public class DeviceRepository {
-    private static final String TAG = "DeviceRepository";
     private DeviceDao deviceDao;
     private RetrofitClient retrofitClient;
     private MqttManager mqttManager;

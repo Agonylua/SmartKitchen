@@ -84,7 +84,7 @@ public class SmartRepository {
     }
 
     public void getRules(SmartCallback callback) {
-        retrofit.getApi().getRules(userManager.getUserId()).enqueue(new Callback<>() {
+        retrofit.getApi().getRules().enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<AutomationRuleDTO>>> call, @NonNull Response<ApiResponse<List<AutomationRuleDTO>>> response) {
                 if (response.isSuccessful() && response.body() != null) {

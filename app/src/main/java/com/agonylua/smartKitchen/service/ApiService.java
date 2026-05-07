@@ -3,7 +3,7 @@ package com.agonylua.smartKitchen.service;
 import com.agonylua.smartKitchen.common.ApiResponse;
 import com.agonylua.smartKitchen.common.DeviceRequest;
 import com.agonylua.smartKitchen.common.LoginRequest;
-import com.agonylua.smartKitchen.common.UserRequest;
+import com.agonylua.smartKitchen.common.RegisterRequest;
 import com.agonylua.smartKitchen.database.entity.Device;
 import com.agonylua.smartKitchen.database.entity.Home;
 import com.agonylua.smartKitchen.dto.AutomationRuleDTO;
@@ -39,15 +39,7 @@ public interface ApiService {
      * 注册接口
      */
     @POST("/user/register")
-    Call<ApiResponse<UserDTO>> register(@Body LoginRequest request);
-
-    /**
-     * 更新用户信息
-     *
-     * @param request 更新数据
-     */
-    @POST("user/update")
-    Call<ApiResponse<Void>> updateUserInfo(@Body UserRequest request);
+    Call<ApiResponse<Void>> register(@Body RegisterRequest request);
 
     /**
      * 验证 Token 接口
@@ -80,16 +72,16 @@ public interface ApiService {
      */
     @Multipart
     @POST("/user/updateAvatar")
-    Call<ApiResponse<String>> updateAvatar(@Part MultipartBody.Part file, @Part("userId") String userId);
+    Call<ApiResponse<String>> updateAvatar(@Part MultipartBody.Part file);
 
     @POST("user/updateNickname")
-    Call<ApiResponse<String>> updateNickname(@Query("userId") String userId, @Query("nickName") String newNickName);
+    Call<ApiResponse<String>> updateNickname(@Query("nickName") String newNickName);
 
     @POST("user/resetPassword")
-    Call<ApiResponse<String>> resetPassword(@Query("userId") String userId, @Query("oldPassword") String oldPassword, @Query("newPassword") String newPassword);
+    Call<ApiResponse<String>> resetPassword(@Query("oldPassword") String oldPassword, @Query("newPassword") String newPassword);
 
     @POST("/user/exitHome")
-    Call<ApiResponse<UserDTO>> exitHome(@Query("homeId") String homeId);
+    Call<ApiResponse<String>> exitHome(@Query("homeId") String homeId);
     //------------------------------ 设备相关接口 ---------------------------------
 
     /**
@@ -154,7 +146,7 @@ public interface ApiService {
     Call<ApiResponse<Home>> getHomeInfo(@Path("homeId") String homeId);
 
     @POST("/home/removeMember")
-    Call<ApiResponse<HomeDTO>> removeMember(@Query("homeId") String homeId, @Query("userId") String userId);
+    Call<ApiResponse<HomeDTO>> removeMember(@Query("memberId") String memberId, @Query("homeId") String homeId);
 
     @POST("/home/joinHome")
     Call<ApiResponse<String>> joinHome(@Query("homeId") String homeId);
@@ -178,7 +170,7 @@ public interface ApiService {
      * @param userId 用户 ID
      */
     @GET("/rules/list")
-    Call<ApiResponse<List<AutomationRuleDTO>>> getRules(@Query("userId") String userId);
+    Call<ApiResponse<List<AutomationRuleDTO>>> getRules();
 
     /**
      * 删除自动化规则接口
@@ -196,7 +188,4 @@ public interface ApiService {
     @POST("/rules/scene")
     Call<ApiResponse<Boolean>> executeScene(@Query("ruleMode") String ruleMode);
 
-
-    @GET("/global/sync")
-    Call<ApiResponse<Boolean>> globalDataSync();
 }
