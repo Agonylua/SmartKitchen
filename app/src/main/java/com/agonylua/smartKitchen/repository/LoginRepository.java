@@ -94,7 +94,7 @@ public class LoginRepository {
     public void tokenValidate(final ValidateCallback callback) {
         if (!userManager.isLogIn()) {
             callback.onVerify(false);
-            return;
+            return; // 没有 Token 时直接返回 false，这样在外部服务器连通的前提下就可以进入登录界面
         }
         retrofit.getApi().validateToken().enqueue(new Callback<Void>() {
             @Override
@@ -182,8 +182,31 @@ public class LoginRepository {
         });
     }
 
-    public boolean validateNetwork() {
-        return networkMonitor.isInternetReachable();
+    public void validateNetwork(ValidateCallback callback) {
+        if (!networkMonitor.isInternetReachable()) {
+            callback.onVerify(false);
+            return;
+        }
+        ThreadPoolUtils.getInstance().execute(() -> {
+            try {
+                String ipPort = RetrofitClient.IP_PORT;
+                String ip = ipPort;
+                int port = 80;
+                if (ipPort.contains(":")) {
+                    String[] parts = ipPort.split(":");
+                    ip = parts[0];
+                    port = Integer.parseInt(parts[1]);
+                }
+                java.net.Socket socket = new java.net.Socket();
+                // 测试连接当前服务器IP和端口是否可通（超时2秒）
+                socket.connect(new java.net.InetSocketAddress(ip, port), 2000);
+                socket.close();
+                callback.onVerify(true);
+            } catch (Exception e) {
+                Log.e(TAG, "Server ping failed: " + e.getMessage());
+                callback.onVerify(false);
+            }
+        });
     }
 
     public Boolean isExistToken() {

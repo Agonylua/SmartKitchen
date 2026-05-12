@@ -63,7 +63,7 @@ public class UserProfileFragment extends Fragment {
 
             @Override
             public void onError(String errorMessage) {
-                SnackbarUtils.show(binding.getRoot(), "头像选择失败: ");
+                SnackbarUtils.show(binding.getRoot(), "头像选择失败");
             }
         });
     }

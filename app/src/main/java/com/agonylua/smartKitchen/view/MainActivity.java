@@ -5,7 +5,6 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.agonylua.smartKitchen.R;
 import com.agonylua.smartKitchen.model.MqttLiveBus;
@@ -36,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
         MqttLiveBus.getInstance().init(getApplicationContext());
         mqttManager.connect();
-        initFragments();
         networkMonitor.startMonitoring();
 
         // 注册全局 Token 失效监听
@@ -56,16 +54,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void initFragments() {
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment);
-        if (navHostFragment != null) {
-            NavController navController = navHostFragment.getNavController();
-            if (userManager.getToken() == null || userManager.getToken().isEmpty()) {
-                navController.navigate(R.id.loginFragment);
-            }
-        }
-    }
 
     @Override
     protected void onDestroy() {

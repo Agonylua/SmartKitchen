@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,7 @@ public class SplashFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(LoginViewModel.class);
 
         SharedPreferences prefs = requireContext().getSharedPreferences("ApiConfig", Context.MODE_PRIVATE);
-        String newUrl = prefs.getString("baseUrl", "192.168.40.146:1234");
+        String newUrl = prefs.getString("baseUrl", "47.238.79.228:1234");
         updateApiUrl(newUrl);
 
         binding.ivLogo.setOnLongClickListener(v -> {
@@ -76,6 +77,7 @@ public class SplashFragment extends Fragment {
         viewModel.getIsNetwork().observe(getViewLifecycleOwner(), isNetwork -> {
             if (isNetwork != null && !isNetwork) {
                 if (getView() != null) {
+                    Log.d(TAG, "observeViewModel: 服务器连接失败，显示错误界面");
                     binding.pbLoading.setVisibility(View.GONE);
                     binding.tvErrorIcon.setVisibility(View.VISIBLE);
                     binding.tvErrorMessage.setVisibility(View.VISIBLE);
@@ -83,6 +85,9 @@ public class SplashFragment extends Fragment {
             }
         });
         viewModel.getLoginResult().observe(getViewLifecycleOwner(), valid -> {
+            if (viewModel.getIsNetwork().getValue() != null && !viewModel.getIsNetwork().getValue()) {
+                return;
+            }
             if (valid != null && isAdded() && getView() != null) {
                 if (valid) {
                     navController.navigate(R.id.action_splash_to_main);

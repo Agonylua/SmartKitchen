@@ -1,5 +1,7 @@
 package com.agonylua.smartKitchen.viewModel;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -13,7 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
 public class LoginViewModel extends ViewModel {
-
+    private static final String TAG = "LoginViewModel";
     private LoginRepository repository;
     private final MutableLiveData<Boolean> loginResult = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
@@ -51,15 +53,35 @@ public class LoginViewModel extends ViewModel {
 
     public void tokenValidate() {
         ThreadPoolUtils.getInstance().executeDelay(() -> {
-            repository.tokenValidate(new LoginRepository.ValidateCallback() {
+            // 先验证服务器连通性
+            repository.validateNetwork(new LoginRepository.ValidateCallback() {
                 @Override
                 public void onVerify(boolean isValid) {
-                    loginResult.postValue(isValid);
+                    isNetwork.postValue(isValid);
+                    if (isValid) {
+                        // 服务器通畅，继续验证 Token
+                        repository.tokenValidate(new LoginRepository.ValidateCallback() {
+                            @Override
+                            public void onVerify(boolean isTokenValid) {
+                                loginResult.postValue(isTokenValid);
+                            }
+
+                            @Override
+                            public void onFailure(String message) {
+                                errorMessage.postValue(message);
+                                // 这里说明服务器能连接但是后续验证出错
+                                loginResult.postValue(false);
+                            }
+                        });
+                    } else {
+                        // 服务器不通畅，不响应 loginResult，从而阻止页面跳转到登录页
+                        isConnected.postValue(false);
+                    }
                 }
 
                 @Override
                 public void onFailure(String message) {
-                    errorMessage.postValue(message);
+                    isNetwork.postValue(false);
                     isConnected.postValue(false);
                 }
             });
@@ -117,8 +139,18 @@ public class LoginViewModel extends ViewModel {
     }
 
     public MutableLiveData<Boolean> getIsNetwork() {
-        boolean networkStatus = repository.validateNetwork();
-        isNetwork.postValue(networkStatus);
+        repository.validateNetwork(new LoginRepository.ValidateCallback() {
+            @Override
+            public void onVerify(boolean isValid) {
+                Log.d(TAG, "onVerify: 服务器连通性验证结果: " + isValid);
+                isNetwork.postValue(isValid);
+            }
+
+            @Override
+            public void onFailure(String message) {
+                isNetwork.postValue(false);
+            }
+        });
         return isNetwork;
     }
 

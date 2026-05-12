@@ -16,7 +16,7 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 
 public class WebSocketManager {
-    public static String IP_PORT = "192.168.40.146:1234";
+    public static String IP_PORT = "47.238.79.228:1234";
     private static final String TAG = "WebSocketManager";
     private static WebSocketManager instance;
     // 重连逻辑相关

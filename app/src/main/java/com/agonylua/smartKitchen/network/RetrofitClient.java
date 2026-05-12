@@ -9,7 +9,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    public static String IP_PORT = "192.168.40.146:1234";
+    public static String IP_PORT = "47.238.79.228:1234";
     private static RetrofitClient instance;
     private ApiService apiService;
     private Context context;
