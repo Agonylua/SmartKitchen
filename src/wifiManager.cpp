@@ -51,6 +51,7 @@ void WiFiConnector::SysProvEvent(arduino_event_t *sys_event)
 
     case ARDUINO_EVENT_PROV_END:
         Serial.println("\n[Provisioning] Session Ended.");
+        ESP.restart();
         break;
 
     default:

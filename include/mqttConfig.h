@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-#define MQTT_BROKER "192.168.61.52"
+#define MQTT_BROKER "agonylua.asia"
 #define MQTT_PORT 1883
 #define MQTT_CLIENT_ID "SK-R001"
 #define MQTT_USERNAME "smartKitchen"

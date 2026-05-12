@@ -64,6 +64,30 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
 
     if (cmd.equals("bind"))
     {
+        // 忽略空载荷消息（这些是我们发送用来清除保留消息的）
+        if (len == 0)
+        {
+            Serial.println("收到空载荷 bind 消息，忽略（清除保留消息动作）");
+            return;
+        }
+
+        // 1. 清除可能的 retained 保留消息，防止重复触发
+        // 注意：底层 topic 指针指向了 MQTT 的内部缓冲区，调用 publish 可能会覆写该缓冲区从而导致崩溃 (LoadProhibited)
+        // 所以我们必须先把 topic 拷贝成独立变量再发送
+        String currentTopic = String(topic);
+        mqtt.publish(currentTopic.c_str(), "", true);
+
+        // 2. 检查是否已经是最新的配置，避免重复重启
+        preferences.begin("deviceConfig", true);
+        String savedHomeId = preferences.getString("homeId", "");
+        preferences.end();
+
+        if (savedHomeId.equals(String(msg)))
+        {
+            Serial.println("设备已处于该绑定状态");
+            return;
+        }
+
         homeId = msg;
         preferences.begin("deviceConfig", false);
         preferences.putString("homeId", homeId);
@@ -71,17 +95,42 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
 
         Serial.println("设备绑定成功，已保存 Home ID: " + homeId);
         publishBindStatus(true);
+
+        // 3. 延迟一小段时间，确保MQTT底层网络包发送完毕再重启
+        delay(500);
         ESP.restart();
         return;
     }
     else if (cmd.equals("unBind"))
     {
+        // 同样忽略空载荷消息
+        if (len == 0)
+        {
+            Serial.println("收到空载荷 unBind 消息，忽略（清除保留消息动作）");
+            return;
+        }
+
+        // 1. 清除可能的 retained 保留消息
+        // 同样需避免访问冲突，先把 topic 保存起来
+        String currentTopic = String(topic);
+        mqtt.publish(currentTopic.c_str(), "", true);
+
+        // 2. 如果已经处于解绑状态，避免一直陷入重启循环
+        preferences.begin("deviceConfig", true);
+        String savedHomeId = preferences.getString("homeId", "");
+        preferences.end();
+
+        if (savedHomeId.isEmpty())
+        {
+            Serial.println("设备已经处于无绑定状态，跳过重复解绑");
+            return;
+        }
+
         Serial.println("设备解绑，清除配置");
-        wifi.resetSettings();
         preferences.begin("deviceConfig", false);
         preferences.clear();
         preferences.end();
-        ESP.restart();
+        wifi.resetSettings();
         return;
     }
 
@@ -262,7 +311,7 @@ void publishBindStatus(boolean bindStatus)
     String topic = String(TOPIC_PUB[0]) + "bind";
     if (bindStatus)
     {
-        mqtt.publish(topic.c_str(), "1", true);
+        mqtt.publish(topic.c_str(), "1", false);
     }
 }
 

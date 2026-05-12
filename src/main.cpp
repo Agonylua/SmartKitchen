@@ -10,7 +10,7 @@ Preferences preferences;
 unsigned long pressStartTime = 0;
 bool isPressing = false;
 bool isBind = false;
-const unsigned long RESET_TIME_MS = 5000; // 5秒
+const unsigned long RESET_TIME_MS = 2000; // 5秒
 unsigned long lastDisplayUpdate = 0;
 Ticker ticker;
 
