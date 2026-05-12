@@ -46,7 +46,7 @@ public class PowerSimulationTask {
 
             // 1. 计算这一分钟的模拟功耗 (度)
             double basePower = getBasePower(device.getDeviceType(), device.getDeviceMode());
-            double currentPowerW = Math.max(0, basePower + (basePower * 0.05 * (random.nextDouble() * 2 - 1)));
+            random.nextDouble();
 
             // 3. 处理 devicePower (维护 7 天 JSON 滑动窗口)
             Map<String, Double> powerHistory = new TreeMap<>();
@@ -131,7 +131,6 @@ public class PowerSimulationTask {
                     case STERILIZER_DRY -> 300.0;
                     default -> 5.0;
                 };
-                default -> 5.0;
             };
         } catch (IllegalArgumentException e) {
             return 5.0;

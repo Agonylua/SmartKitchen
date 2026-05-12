@@ -1,21 +1,13 @@
 package com.agonylua.smartkitchen.security;
 
 import com.agonylua.smartkitchen.databases.entity.User;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
 
-public class CustomUserDetails implements UserDetails {
-
-    @Getter
-    private final User user;
-
-    public CustomUserDetails(User user) {
-        this.user = user;
-    }
+public record CustomUserDetails(User user) implements UserDetails {
 
     public String getUserId() {
         return user.getUserId();

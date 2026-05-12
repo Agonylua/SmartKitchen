@@ -11,6 +11,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -86,11 +87,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * 客户端断开连接后触发
      */
     @Override
-    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) throws Exception {
+    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
         String userId = extractUserIdFromSession(session);
         if (userId != null) {
             // 从在线集合中移除该用户
-            userSessions.remove(userId);
+            userSessions.remove(userId, session);
             log.info("[WebSocket] 用户 [{}] 已离线。当前在线人数: {}", userId, userSessions.size());
         }
     }
@@ -100,7 +101,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * 例如 URI 是: ws://localhost:8080/ws/notification?userId=1001
      */
     private String extractUserIdFromSession(WebSocketSession session) {
-        String query = session.getUri().getQuery();
+        String query = Objects.requireNonNull(session.getUri()).getQuery();
         if (query != null && query.contains("userId=")) {
             // 简单的字符串分割获取参数值
             String[] params = query.split("&");

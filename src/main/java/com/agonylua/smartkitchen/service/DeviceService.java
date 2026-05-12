@@ -22,8 +22,6 @@ public class DeviceService {
     private HomeRepository homeRepository;
     @Autowired
     private MqttService mqttService;
-    @Autowired
-    private UserService userService;
 
     /**
      * 添加设备

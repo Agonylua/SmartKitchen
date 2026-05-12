@@ -85,8 +85,8 @@ public class DeviceController {
     /**
      * 获取家庭下所有设备的近7天功耗数据
      *
-     * @param homeId
-     * @return
+     * @param homeId 家庭ID
+     * @return 近七日功耗数据列表
      */
     @GetMapping("/power")
     public ApiResponse<List<Map<String, Object>>> getDevicesPower(@RequestParam String homeId) {
@@ -107,9 +107,7 @@ public class DeviceController {
                     );
 
                     // 汇总到家庭大集合中
-                    devicePowerMap.forEach((date, kwh) -> {
-                        homeAggregatedPower.merge(date, kwh, Double::sum);
-                    });
+                    devicePowerMap.forEach((date, kwh) -> homeAggregatedPower.merge(date, kwh, Double::sum));
                 } catch (Exception e) {
                     // 忽略 JSON 格式不正确的数据
                 }

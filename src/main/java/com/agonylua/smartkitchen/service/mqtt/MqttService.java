@@ -110,50 +110,59 @@ public class MqttService {
 
                 // 处理设备数据更新与控制
                 if (topicParts[0].equals("service")) {
-                    if (topicParts[2].equals("update")) {
-                        log.info("[MQTT服务] 设备数据更新 - SN: {}, Payload: {}", sn, payload);
-                        deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
-                            if (payload.equals(device.getDeviceData())) return;
+                    switch (topicParts[2]) {
+                        case "update" -> {
+                            log.info("[MQTT服务] 设备数据更新 - SN: {}, Payload: {}", sn, payload);
+                            deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
+                                if (payload.equals(device.getDeviceData())) return;
 
-                            device.setDeviceMode(JsonUtil.getValue(payload, "mode"));
-                            String newData = JsonUtil.getJsonStr(payload, "data");
-                            if (newData != null && newData.trim().startsWith("{")) {
-                                device.setDeviceData(newData);
-                            }
-                            device.setRunTime(JsonUtil.getJsonStr(payload, "runTime"));
-                            deviceRepository.save(device);
-
-                            // 🚀 触发规则引擎：解析具体的传感器数值并抛出事件
-                            ruleEnginePool.submit(() -> {
-                                try {
-                                    parseAndTriggerRules(sn, payload);
-                                } catch (Exception e) {
-                                    log.error("处理设备规则引擎解析任务时发生异常", e);
+                                device.setDeviceMode(JsonUtil.getValue(payload, "mode"));
+                                String newData = JsonUtil.getValue(payload, "data");
+                                if (newData != null && newData.trim().startsWith("{")) {
+                                    device.setDeviceData(newData);
                                 }
-                            });
+                                String rawRunTime = JsonUtil.getValue(payload, "runTime");
+                                if (rawRunTime != null) {
+                                    String cleanRunTime = rawRunTime.replaceAll("[^0-9]", "");
+                                    device.setRunTime(cleanRunTime.isEmpty() ? "0" : cleanRunTime);
+                                }
+                                deviceRepository.save(device);
 
-                        }, () -> log.warn("收到消息但设备不存在: {}", sn));
-                    } else if (topicParts[2].equals("unbind")) {
-                        log.info("[MQTT服务] 设备解绑 - SN: {}, Payload: {}", sn, payload);
-                        deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
-                            device.setHomeId(null);
-                            deviceRepository.save(device);
-                        }, () -> log.warn("收到绑定消息但设备不存在: {}", sn));
-                    } else if (topicParts[2].equals("bind")) {
-                        log.info("[MQTT服务] 设备绑定 - SN: {}, Payload: {}", sn, payload);
-                        Consumer<Boolean> callback = bindCallbackMap.remove(sn); // 取出并移除回调
-                        ScheduledFuture<?> task = scheduledTaskMap.remove(sn);
-                        if (task != null) {
-                            task.cancel(false);
+                                // 触发规则引擎：解析具体的传感器数值并抛出事件
+                                ruleEnginePool.submit(() -> {
+                                    try {
+                                        parseAndTriggerRules(sn, payload);
+                                    } catch (Exception e) {
+                                        log.error("处理设备规则引擎解析任务时发生异常", e);
+                                    }
+                                });
+
+                            }, () -> log.warn("收到消息但设备不存在: {}", sn));
                         }
-                        if (callback != null) {
-                            if (payload.equals("1")) {
-                                CompletableFuture.runAsync(() -> callback.accept(true));
-                            } else {
-                                CompletableFuture.runAsync(() -> callback.accept(false));
+                        case "unbind" -> {
+                            log.info("[MQTT服务] 设备解绑 - SN: {}, Payload: {}", sn, payload);
+                            deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
+                                device.setHomeId(null);
+                                deviceRepository.save(device);
+                            }, () -> log.warn("收到绑定消息但设备不存在: {}", sn));
+                        }
+                        case "bind" -> {
+                            log.info("[MQTT服务] 设备绑定 - SN: {}, Payload: {}", sn, payload);
+                            Consumer<Boolean> callback = bindCallbackMap.remove(sn); // 取出并移除回调
+
+                            ScheduledFuture<?> task = scheduledTaskMap.remove(sn);
+                            if (task != null) {
+                                task.cancel(false);
                             }
-                        } else {
-                            log.warn("[MQTT服务] 未找到设备 {} 的等待绑定回调任务 (可能已超时或未发起请求)", sn);
+                            if (callback != null) {
+                                if (payload.equals("1")) {
+                                    CompletableFuture.runAsync(() -> callback.accept(true));
+                                } else {
+                                    CompletableFuture.runAsync(() -> callback.accept(false));
+                                }
+                            } else {
+                                log.warn("[MQTT服务] 未找到设备 {} 的等待绑定回调任务 (可能已超时或未发起请求)", sn);
+                            }
                         }
                     }
                 }
@@ -225,12 +234,6 @@ public class MqttService {
         toPayload(JsonUtil.mapToJson(payload), topic, publishQos);
     }
 
-    public void sendReset(String deviceSn) {
-        log.info("[MQTT服务] 发送设备重置消息 - SN: {}", deviceSn);
-        String topic = publishTopic + deviceSn + "/reset";
-        toPayload("", topic, publishQos);
-    }
-
     private void toPayload(String payload, String topic, String publishQos) {
         log.info("[MQTT服务] 消息载荷封装 - Topic: {}, Payload: {}, QoS: {}", topic, payload, publishQos);
         Message<String> message = null;
@@ -264,4 +267,3 @@ public class MqttService {
         scheduler.shutdown();
     }
 }
-

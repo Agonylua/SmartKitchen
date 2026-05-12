@@ -6,7 +6,6 @@ import com.agonylua.smartkitchen.common.UserReq;
 import com.agonylua.smartkitchen.databases.entity.User;
 import com.agonylua.smartkitchen.databases.repository.UserRepository;
 import com.agonylua.smartkitchen.dto.UserDTO;
-import com.agonylua.smartkitchen.service.HomeService;
 import com.agonylua.smartkitchen.service.UserService;
 import com.agonylua.smartkitchen.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final HomeService homeService;
     private final UserRepository userRepository;
 
 

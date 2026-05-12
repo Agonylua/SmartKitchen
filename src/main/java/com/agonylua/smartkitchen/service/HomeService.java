@@ -24,8 +24,6 @@ public class HomeService {
     private HomeRepository homeRepository;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private WebSocketConfig webSocketConfig;
 
     public void createHome(String userId) {
         Home home = new Home();

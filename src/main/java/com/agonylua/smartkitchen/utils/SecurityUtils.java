@@ -11,8 +11,7 @@ public class SecurityUtils {
      */
     public static String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
-            CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
             return customUserDetails.getUserId();
         }
         return null;

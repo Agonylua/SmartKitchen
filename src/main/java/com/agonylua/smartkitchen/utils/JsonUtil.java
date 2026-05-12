@@ -47,7 +47,7 @@ public class JsonUtil {
     public static Map<String, Object> parseMap(String jsonStr) {
         if (jsonStr == null || jsonStr.isEmpty()) return null;
         try {
-            return mapper.readValue(jsonStr, new TypeReference<Map<String, Object>>() {
+            return mapper.readValue(jsonStr, new TypeReference<>() {
             });
         } catch (Exception e) {
             log.error("JSON反序列化失败: {}", jsonStr, e);
@@ -63,20 +63,6 @@ public class JsonUtil {
         try {
             JsonNode node = mapper.readTree(jsonStr);
             return node.has(key) ? node.get(key).asText() : null;
-        } catch (Exception e) {
-            log.warn("解析JSON字段失败 Key: {}, JSON: {}", key, jsonStr);
-            return null;
-        }
-    }
-
-    /**
-     * 获取 JSON 中的某个特定字段的 raw JSON 字符串 (保留 JSON 结构，用于存 JSON 字段)
-     */
-    public static String getJsonStr(String jsonStr, String key) {
-        if (jsonStr == null || jsonStr.isEmpty()) return null;
-        try {
-            JsonNode node = mapper.readTree(jsonStr);
-            return node.has(key) ? node.get(key).toString() : null;
         } catch (Exception e) {
             log.warn("解析JSON字段失败 Key: {}, JSON: {}", key, jsonStr);
             return null;

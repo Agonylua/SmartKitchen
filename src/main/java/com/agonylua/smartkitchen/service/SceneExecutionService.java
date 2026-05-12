@@ -3,6 +3,7 @@ package com.agonylua.smartkitchen.service;
 import com.agonylua.smartkitchen.databases.entity.Device;
 import com.agonylua.smartkitchen.databases.entity.DeviceMode;
 import com.agonylua.smartkitchen.databases.entity.DeviceType;
+import com.agonylua.smartkitchen.databases.entity.Home;
 import com.agonylua.smartkitchen.databases.repository.DeviceRepository;
 import com.agonylua.smartkitchen.databases.repository.HomeRepository;
 import com.agonylua.smartkitchen.service.mqtt.MqttService;
@@ -24,7 +25,6 @@ public class SceneExecutionService {
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final String CMD_MODE = "mode";
-    private final String CMD_STATUS = "status";
     @Autowired
     private MqttService mqttService;
     @Autowired
@@ -36,7 +36,7 @@ public class SceneExecutionService {
      * Android App 调用此接口触发一键场景
      */
     public Boolean executeManualScene(String UserId, String ruleMode) {
-        String homeId = homeRepository.findByOwnerIdOrMemberIds(UserId).map(home -> home.getHomeId()).orElse(null);
+        String homeId = homeRepository.findByOwnerIdOrMemberIds(UserId).map(Home::getHomeId).orElse(null);
         log.info("[预设场景] 开始执行家庭 {} 的场景: {}", homeId, ruleMode);
         List<Device> homeDevices = deviceRepository.findByHomeId(homeId);
 
