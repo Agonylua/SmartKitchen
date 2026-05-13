@@ -132,6 +132,7 @@ public class UserRepository {
                     ApiResponse<UserDTO> apiResponse = response.body();
                     if (apiResponse.getCode() == 200) {
                         userManager.saveUser(
+                                apiResponse.getData().getHomeId(),
                                 apiResponse.getData().getNickname(),
                                 apiResponse.getData().getAvatarUrl()
                         );

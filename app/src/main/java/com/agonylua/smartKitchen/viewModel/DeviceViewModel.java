@@ -301,28 +301,31 @@ public class DeviceViewModel extends ViewModel {
         subTaskLoading.setValue(true);
         Map<String, String> data = new HashMap<>();
         Map<String, String> payload = new HashMap<>();
-        if (device.getDeviceMode().equals("IDLE")) {
-            payload.put("deviceSn", device.getDeviceSn());
-            payload.put("mode", DeviceMode.toMode(getSelectedModeLiveData().getValue()));
-            if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
-                data.put("fridgeTempThreshold", String.valueOf(setFridgeTemp.getValue()));
-                data.put("freezeTempThreshold", String.valueOf(setFreezeTemp.getValue()));
-            } else if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
-                data.put("microwaveTime", String.valueOf(setMicrowaveTime.getValue()));
-                data.put("microwaveTemp", String.valueOf(setMicrowaveTemp.getValue()));
-            } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
-                data.put("keepFresh", String.valueOf(dishwasherKeepFresh.getValue()));
-            } else if (Objects.equals(device.getDeviceType(), "RICE_COOKER")) {
-                data.put("riceCookerTexture", String.valueOf(riceCookerTexture.getValue()));
-                data.put("riceCookerInsulation", String.valueOf(riceCookerInsulation.getValue()));
-            } else if (Objects.equals(device.getDeviceType(), "STERILIZER")) {
-                data.put("uvLight", String.valueOf(sterilizerUvLight.getValue()));
-            }
+        payload.put("deviceSn", device.getDeviceSn());
+        payload.put("mode", DeviceMode.toMode(getSelectedModeLiveData().getValue()));
+        payload.put("data", "");
+        if (Objects.equals(device.getDeviceType(), "REFRIGERATOR")) {
+            data.put("fridgeTempThreshold", String.valueOf(setFridgeTemp.getValue()));
+            data.put("freezeTempThreshold", String.valueOf(setFreezeTemp.getValue()));
             payload.put("data", JsonUtils.toJson(data));
         } else {
-            payload.put("deviceSn", device.getDeviceSn());
-            payload.put("mode", "IDLE");
-            payload.put("data", "");
+            if (device.getDeviceMode().equals("IDLE")) {
+                if (Objects.equals(device.getDeviceType(), "MICROWAVE")) {
+                    data.put("microwaveTime", String.valueOf(setMicrowaveTime.getValue()));
+                    data.put("microwaveTemp", String.valueOf(setMicrowaveTemp.getValue()));
+                } else if (Objects.equals(device.getDeviceType(), "DISHWASHER")) {
+                    data.put("keepFresh", String.valueOf(dishwasherKeepFresh.getValue()));
+                } else if (Objects.equals(device.getDeviceType(), "RICE_COOKER")) {
+                    data.put("riceCookerTexture", String.valueOf(riceCookerTexture.getValue()));
+                    data.put("riceCookerInsulation", String.valueOf(riceCookerInsulation.getValue()));
+                } else if (Objects.equals(device.getDeviceType(), "STERILIZER")) {
+                    data.put("uvLight", String.valueOf(sterilizerUvLight.getValue()));
+                }
+                payload.put("data", JsonUtils.toJson(data));
+            } else {
+                payload.put("mode", "IDLE");
+                deviceRepository.resetDeviceMode(device.getDeviceSn());
+            }
         }
         ThreadPoolUtils.getInstance().executeDelay(() -> {
             deviceRepository.sendControlCmd(payload, new DeviceRepository.callback() {

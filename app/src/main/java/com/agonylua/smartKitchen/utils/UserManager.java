@@ -59,6 +59,13 @@ public class UserManager {
         editor.apply(); // 异步提交
     }
 
+    public void saveUser(String homeId, String nickname, String avatarUrl) {
+        editor.putString(KEY_HOME_ID, homeId);
+        editor.putString(KEY_NICKNAME, nickname);
+        editor.putString(KEY_AVATAR, avatarUrl);
+        editor.apply();
+    }
+
     public void saveUser(String nickname, String avatarUrl) {
         editor.putString(KEY_NICKNAME, nickname);
         editor.putString(KEY_AVATAR, avatarUrl);

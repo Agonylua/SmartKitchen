@@ -127,6 +127,12 @@ public class ProvisionFragment extends Fragment {
 
                 hideKeyboard();
                 viewModel.startProvisioning(ssid, password);
+                binding.getRoot().postDelayed(() -> {
+                    if (getView() != null) {
+                        NavController navController = Navigation.findNavController(getView());
+                        navController.navigate(R.id.action_provision_to_main);
+                    }
+                }, 2000); // 2秒后返回上一页
             } else {
                 SnackbarUtils.show(requireView(), "请等待蓝牙连接成功后再发送 WiFi");
             }
@@ -163,10 +169,6 @@ public class ProvisionFragment extends Fragment {
         viewModel.getProvisionStatus().observe(getViewLifecycleOwner(), status -> {
             if ("Success".equals(status)) {
                 SnackbarUtils.show(requireView(), "设备配网成功！");
-                binding.getRoot().postDelayed(() -> {
-                    NavController navController = Navigation.findNavController(getView());
-                    navController.navigate(R.id.action_provision_to_main);
-                }, 2000); // 2秒后返回上一页
             } else if (status != null && (status.contains("失败") || status.contains("异常"))) {
                 SnackbarUtils.show(requireView(), "设备配网失败，请重试");
             }

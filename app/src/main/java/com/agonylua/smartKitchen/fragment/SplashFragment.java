@@ -54,6 +54,7 @@ public class SplashFragment extends Fragment {
 
         SharedPreferences prefs = requireContext().getSharedPreferences("ApiConfig", Context.MODE_PRIVATE);
         String newUrl = prefs.getString("baseUrl", "47.238.79.228:1234");
+        //String newUrl = prefs.getString("baseUrl", "192.168.163.68:1234");
         updateApiUrl(newUrl);
 
         binding.ivLogo.setOnLongClickListener(v -> {

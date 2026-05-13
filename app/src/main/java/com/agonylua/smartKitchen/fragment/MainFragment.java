@@ -238,6 +238,18 @@ public class MainFragment extends Fragment {
                 globalRepository.syncAllData();
             });
             ThreadPoolUtils.getInstance().executeDelay(dialog::dismiss, 2000);
+        } else if (Objects.equals(megMap.get("type"), "JOIN_RESULT")) {
+            btnNegative.setVisibility(View.GONE);
+            btnPositive.setVisibility(View.GONE);
+            tvTitle.setText("家庭加入结果通知");
+            boolean approved = Boolean.parseBoolean(megMap.get("approved").toString());
+            String meg = approved ? "您已成功加入家庭" : "您加入家庭的请求被拒绝了";
+            tvMessage.setText(meg);
+            dialog.show();
+            ThreadPoolUtils.getInstance().execute(() -> {
+                globalRepository.syncAllData();
+            });
+            ThreadPoolUtils.getInstance().executeDelay(dialog::dismiss, 2000);
         }
 
 

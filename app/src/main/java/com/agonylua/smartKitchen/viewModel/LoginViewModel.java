@@ -69,8 +69,7 @@ public class LoginViewModel extends ViewModel {
                             @Override
                             public void onFailure(String message) {
                                 errorMessage.postValue(message);
-                                // 这里说明服务器能连接但是后续验证出错
-                                loginResult.postValue(false);
+                                //loginResult.postValue(false);
                             }
                         });
                     } else {

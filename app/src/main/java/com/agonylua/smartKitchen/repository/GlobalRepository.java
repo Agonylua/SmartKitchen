@@ -71,6 +71,7 @@ public class GlobalRepository {
             ApiResponse<UserDTO> apiResponse = retrofit.getApi().getUserInfo().execute().body();
             if (apiResponse != null && apiResponse.getCode() == 200) {
                 userManager.saveUser(
+                        apiResponse.getData().getHomeId(),
                         apiResponse.getData().getNickname(),
                         apiResponse.getData().getAvatarUrl()
                 );
@@ -107,9 +108,9 @@ public class GlobalRepository {
 //    }
 
     public void syncAllData() {
-        syncDeviceState();
-        syncHomeInfo();
         syncUserInfo();
+        syncHomeInfo();
+        syncDeviceState();
         syncAutomationRules();
 //        syncDevicePower();
     }

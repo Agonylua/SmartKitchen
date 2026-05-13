@@ -53,7 +53,7 @@ public interface ApiService {
      * 获取家庭用户信息接口
      *
      */
-    @GET("user/info")
+    @GET("/user/info")
     Call<ApiResponse<UserDTO>> getUserInfo();
 
     /**
@@ -61,7 +61,7 @@ public interface ApiService {
      *
      * @param homeId 家庭 ID 列表 (逗号分隔)
      */
-    @GET("user/list")
+    @GET("/user/list")
     Call<ApiResponse<List<UserDTO>>> getUserListInfo(@Query("homeId") String homeId);
 
     /**
@@ -74,10 +74,10 @@ public interface ApiService {
     @POST("/user/updateAvatar")
     Call<ApiResponse<String>> updateAvatar(@Part MultipartBody.Part file);
 
-    @POST("user/updateNickname")
+    @POST("/user/updateNickname")
     Call<ApiResponse<String>> updateNickname(@Query("nickName") String newNickName);
 
-    @POST("user/resetPassword")
+    @POST("/user/resetPassword")
     Call<ApiResponse<String>> resetPassword(@Query("oldPassword") String oldPassword, @Query("newPassword") String newPassword);
 
     @POST("/user/exitHome")
@@ -89,7 +89,7 @@ public interface ApiService {
      *
      * @param homeId 家庭 ID
      */
-    @GET("device/list/{homeId}")
+    @GET("/device/list/{homeId}")
     Call<ApiResponse<List<Device>>> getDeviceList(@Path("homeId") String homeId);
 
     /**
@@ -97,7 +97,7 @@ public interface ApiService {
      *
      * @param deviceSn 设备序列号
      */
-    @POST("device/update/{deviceSn}")
+    @POST("/device/update/{deviceSn}")
     Call<ApiResponse<Void>> updateDeviceInfo(@Path("deviceSn") String deviceSn, @Body Device device);
 
     /**
@@ -142,7 +142,7 @@ public interface ApiService {
      *
      * @param homeId 家庭 ID
      */
-    @GET("home/info/{homeId}")
+    @GET("/home/info/{homeId}")
     Call<ApiResponse<Home>> getHomeInfo(@Path("homeId") String homeId);
 
     @POST("/home/removeMember")

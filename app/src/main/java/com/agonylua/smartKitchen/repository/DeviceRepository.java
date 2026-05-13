@@ -87,6 +87,12 @@ public class DeviceRepository {
         });
     }
 
+    public void resetDeviceMode(String deviceSn) {
+        ThreadPoolUtils.getInstance().execute(() -> {
+            deviceDao.resetMode(deviceSn);
+        });
+    }
+
     public interface callback {
         void onSuccess(String message);
 

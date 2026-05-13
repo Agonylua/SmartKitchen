@@ -114,13 +114,11 @@ public class MonitorFragment extends Fragment {
         for (int i = 0; i < dataList.size(); i++) {
             DevicePowerDTO item = dataList.get(i);
             entries.add(new Entry(i, item.totalKwh));
-            // 截取日期字符串，例如 "2023-10-25" -> "10-25"
             String shortDate = item.date != null && item.date.length() >= 10
                     ? item.date.substring(5) : item.date;
             xLabels.add(shortDate);
         }
 
-        // 自定义 X 轴显示
         binding.lineChartPower.getXAxis().setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -132,28 +130,22 @@ public class MonitorFragment extends Fragment {
             }
         });
 
-        // 配置折线数据集
         LineDataSet dataSet = new LineDataSet(entries, "日功耗");
 
-        // 关键美化：设置为平滑的贝塞尔曲线
         dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 
-        // 颜色配置 (使用项目的主题色 Teal)
         int tealColor = Color.parseColor("#00BFA5");
         dataSet.setColor(tealColor);
-        dataSet.setLineWidth(3f); // 线条宽度
+        dataSet.setLineWidth(3f);
         dataSet.setCircleColor(tealColor);
-        dataSet.setCircleRadius(4f); // 数据点圆圈大小
+        dataSet.setCircleRadius(4f);
         dataSet.setDrawCircleHole(true);
         dataSet.setCircleHoleColor(Color.WHITE);
 
-        // 关键美化：开启下方区域填充渐变色
         dataSet.setDrawFilled(true);
-        // 如果你有 bg_app_gradient.xml，可以用 ContextCompat.getDrawable() 替换，这里用纯色带透明度示例
         dataSet.setFillColor(tealColor);
-        dataSet.setFillAlpha(50); // 透明度 0-255
+        dataSet.setFillAlpha(50);
 
-        // 数据点上的文本标签加上 "度"
         dataSet.setValueTextSize(10f);
         dataSet.setValueTextColor(Color.DKGRAY);
         dataSet.setValueFormatter(new ValueFormatter() {
@@ -165,7 +157,7 @@ public class MonitorFragment extends Fragment {
 
         LineData lineData = new LineData(dataSet);
         binding.lineChartPower.setData(lineData);
-        binding.lineChartPower.invalidate(); // 刷新图表
+        binding.lineChartPower.invalidate();
     }
 
     @Override
