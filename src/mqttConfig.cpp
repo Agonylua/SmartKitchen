@@ -160,46 +160,42 @@ void mqttCallback(char *topic, byte *payload, unsigned int len)
 
         JsonDocument dataDoc;
         JsonObject payloadObj;
-
-        if (doc["data"].is<JsonObject>())
+        if (mode.equals("STANDARD"))
         {
-            payloadObj = doc["data"];
-        }
-        else if (doc["data"].is<String>())
-        {
-            String dataStr = doc["data"].as<String>();
-            Serial.printf("[DEBUG] data 是字符串，反序列化: %s\n", dataStr.c_str());
-
-            DeserializationError dataError = deserializeJson(dataDoc, dataStr);
-            if (dataError)
+            if (doc["data"].is<JsonObject>())
             {
-                Serial.printf("data 字符串解析失败: %s\n", dataError.f_str());
+                payloadObj = doc["data"];
+            }
+            else if (doc["data"].is<String>())
+            {
+                String dataStr = doc["data"].as<String>();
+                Serial.printf("[DEBUG] data 是字符串，反序列化: %s\n", dataStr.c_str());
+
+                DeserializationError dataError = deserializeJson(dataDoc, dataStr);
+                if (dataError)
+                {
+                    Serial.printf("data 字符串解析失败: %s\n", dataError.f_str());
+                    return;
+                }
+                payloadObj = dataDoc.as<JsonObject>();
+            }
+            else
+            {
+                Serial.println("JSON 格式不匹配: data 字段格式错误");
                 return;
             }
-            payloadObj = dataDoc.as<JsonObject>();
-        }
-        else
-        {
-            Serial.println("JSON 格式不匹配: data 字段格式错误");
-            return;
         }
 
-        float fridgeTempThreshold = 0;
-        float freezeTempThreshold = 0;
+        float fridgeTempThreshold = 21;
+        float freezeTempThreshold = 10;
 
         if (!payloadObj["fridgeTempThreshold"].isNull() && !payloadObj["freezeTempThreshold"].isNull())
         {
             fridgeTempThreshold = payloadObj["fridgeTempThreshold"].as<float>();
             freezeTempThreshold = payloadObj["freezeTempThreshold"].as<float>();
         }
-        else
-        {
-            Serial.println("JSON 格式不匹配: 缺少温度阈值字段");
-            return;
-        }
         currentMode = stringToDeviceMode(mode);
         Serial.println("当前模式: " + mode);
-        Serial.printf("[DEBUG] 解析的温度阈值 - 冷藏: %.2f, 冷冻: %.2f\n", fridgeTempThreshold, freezeTempThreshold);
 
         scenarioModeControl(mode, fridgeTempThreshold, freezeTempThreshold);
     }
@@ -293,6 +289,29 @@ void publishSensorData()
     JsonObject sensor = root["data"].to<JsonObject>();
     sensor["fridgeTemp"] = fridgeTemp;
     sensor["freezeTemp"] = freezeTemp;
+
+    // 模拟不同模式下的功耗
+    int currentPower = 0.0;
+    switch (currentMode)
+    {
+    case DeviceMode::STANDARD:
+        currentPower = 1200; // 模拟标准模式功耗 1.2 kWh/天 或 kW，这里用数值示意
+        break;
+    case DeviceMode::FAST_COOL:
+        currentPower = 2500;
+        break;
+    case DeviceMode::ENERGY_SAVING:
+        currentPower = 800;
+        break;
+    case DeviceMode::HOLIDAY:
+        currentPower = 500;
+        break;
+    default:
+        currentPower = 1000;
+        break;
+    }
+    sensor["power"] = currentPower;
+
     char payload[256];
     serializeJson(doc, payload);
     for (size_t i = 0; i < TOPIC_PUB_COUNT; i++)

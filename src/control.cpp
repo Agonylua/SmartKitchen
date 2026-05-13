@@ -88,6 +88,7 @@ void scenarioModeControl(String mode, float fridgeTempThreshold, float freezeTem
         targetFreezeTemp = -18;
     }
 
+    Serial.printf("[DEBUG] 温度阈值调整 - 冷藏: %.2f, 冷冻: %.2f\n", targetFridgeTemp, targetFreezeTemp);
     // Update control state immediately
     temperatureControl();
 }
