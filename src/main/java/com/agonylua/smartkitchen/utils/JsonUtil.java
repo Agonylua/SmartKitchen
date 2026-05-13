@@ -62,7 +62,12 @@ public class JsonUtil {
         if (jsonStr == null || jsonStr.isEmpty()) return null;
         try {
             JsonNode node = mapper.readTree(jsonStr);
-            return node.has(key) ? node.get(key).asText() : null;
+            if (!node.has(key)) return null;
+            JsonNode valNode = node.get(key);
+            if (valNode.isObject() || valNode.isArray()) {
+                return valNode.toString();
+            }
+            return valNode.asText();
         } catch (Exception e) {
             log.warn("解析JSON字段失败 Key: {}, JSON: {}", key, jsonStr);
             return null;

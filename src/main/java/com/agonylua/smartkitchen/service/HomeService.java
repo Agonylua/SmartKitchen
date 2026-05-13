@@ -109,6 +109,11 @@ public class HomeService {
                                 });
                         homeRepository.save(home);
                     });
+            Map<String, String> applicantInfo = new HashMap<>();
+            applicantInfo.put("type", "JOIN_RESULT");
+            applicantInfo.put("approved", "1");
+            String notificationJson = JsonUtil.toJson(applicantInfo);
+            WebSocketHandler.sendMessageToUser(memberId, notificationJson);
         } else {
             // TODO: (可选) 处理拒绝逻辑，如给 memberId 推送拒绝通知
             log.info("[家庭服务] 户主 {} 拒绝了用户 {} 的加入申请", ownerId, memberId);

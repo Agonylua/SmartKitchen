@@ -119,9 +119,9 @@ public class UserService {
                     String newHome = IdUtil.generateHomeId();
                     user.setHomeId(newHome);
                     userRepository.save(user);
-                    homeRepository.findByHomeId(newHome)
+                    homeRepository.findByMemberId(userId)
                             .ifPresent(home -> {
-                                home.getMemberIds().remove(user.getUserId());
+                                home.getMemberIds().remove(userId);
                                 homeRepository.save(home);
                             });
                     Home home = new Home();

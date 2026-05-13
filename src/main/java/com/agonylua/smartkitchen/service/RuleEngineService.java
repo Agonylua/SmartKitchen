@@ -41,7 +41,7 @@ public class RuleEngineService {
      * 事件驱动入口 (由 MQTT 硬件上报瞬间触发)
      */
     public void processDeviceEvent(String deviceSn, String property, String currentValue) {
-        log.debug("[规则引擎] 收到事件: Device={}, Property={}, Value={}", deviceSn, property, currentValue);
+        log.info("[规则引擎] 收到事件: Device={}, Property={}, Value={}", deviceSn, property, currentValue);
 
         List<AutomationRule> dbRules = ruleRepository.findByConditionDeviceSn(deviceSn);
         if (dbRules.isEmpty()) return;
@@ -61,17 +61,17 @@ public class RuleEngineService {
     public void processTimeEvent() {
         // 获取当前时间，格式化为 HH:mm (例如 "08:00")
         String currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
-        log.debug("[规则引擎] 引擎扫描当前系统时间: {}", currentTime);
+        log.info("[规则引擎] 引擎扫描当前系统时间: {}", currentTime);
 
         // 我们约定：所有时间驱动的规则，触发源统一存为 "TIMER"
-        List<AutomationRule> dbRules = ruleRepository.findByConditionType("TIMER");
+        List<AutomationRule> dbRules = ruleRepository.findByConditionType("TIME");
         if (dbRules.isEmpty()) return;
 
         Facts facts = new Facts();
-        facts.put("time", currentTime); // 将当前时间塞进 MVEL 的变量中
+        facts.put("cron", currentTime); // 将当前时间塞进 MVEL 的变量中
 
         // 调用公共执行器
-        executeRules(dbRules, facts, "time");
+        executeRules(dbRules, facts, "cron");
     }
 
     /**
@@ -84,10 +84,14 @@ public class RuleEngineService {
             // 只过滤当前关注的属性规则
             if (!targetProperty.equals(dbRule.getConditionProperty())) continue;
             boolean repeat = deviceRepository.findByDeviceSn(dbRule.getActionDeviceSn())
-                    .map(value -> value.getDeviceMode().equals(dbRule.getActionPayload()))
+                    .map(value -> value.getDeviceMode() != null && value.getDeviceMode().equals(dbRule.getActionPayload()))
                     .orElse(false);
-            if (repeat) continue;
+            if (repeat) {
+                log.info("[规则引擎] 规则[{}]动作被拦截: 目标设备 {} 的模式已经是 {}", dbRule.getRuleName(), dbRule.getActionDeviceSn(), dbRule.getActionPayload());
+                continue;
+            }
             String mvelExpression = buildMvelExpression(dbRule);
+            log.info("[规则引擎] 准备注册规则: ID={}, 名称={}, 表达式=[{}]", dbRule.getRuleId(), dbRule.getRuleName(), mvelExpression);
 
             // 预先组装要下发的 MQTT 消息
             Map<String, String> payload = new HashMap<>();
@@ -109,7 +113,10 @@ public class RuleEngineService {
         }
 
         // 开火！执行所有满足条件的规则
-        if (!rules.isEmpty() && mqttService.isConnected()) {
+        if (!rules.isEmpty()) {
+            if (!mqttService.isConnected()) {
+                log.warn("[规则引擎] 虽然规则非空，但 MQTT 未连接，实际可能无法成功下发指令。");
+            }
             rulesEngine.fire(rules, facts);
         }
     }
@@ -118,15 +125,21 @@ public class RuleEngineService {
      * 辅助：构建 MVEL 表达式
      */
     private String buildMvelExpression(AutomationRule rule) {
-        log.info("[规则引擎] 构建 MVEL 表达式");
         String prop = rule.getConditionProperty();
         String op = rule.getConditionOperator();
         String val = rule.getConditionValue();
 
-        // 字符串比对（如 time == '08:00' 或 status == 'FINISHED'），MVEL 需要加单引号
-        if ("==".equals(op) && !isNumeric(val)) {
-            return prop + " == '" + val + "'";
+        if (op == null || op.trim().isEmpty()) {
+            op = "==";
+        } else if ("=".equals(op)) {
+            op = "==";
         }
+
+        // 非数值类型（例如 "15:30" 或 "FINISHED"），在 MVEL 中必须加单引号
+        if (!isNumeric(val)) {
+            return prop + " " + op + " '" + val + "'";
+        }
+
         // 数值比较 (如 temperature > 30)
         return prop + " " + op + " " + val;
     }

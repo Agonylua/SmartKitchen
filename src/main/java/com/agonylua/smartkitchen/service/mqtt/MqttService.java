@@ -114,10 +114,11 @@ public class MqttService {
                         case "update" -> {
                             log.info("[MQTT服务] 设备数据更新 - SN: {}, Payload: {}", sn, payload);
                             deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
-                                if (payload.equals(device.getDeviceData())) return;
-
-                                device.setDeviceMode(JsonUtil.getValue(payload, "mode"));
                                 String newData = JsonUtil.getValue(payload, "data");
+                                String newMode = JsonUtil.getValue(payload, "mode");
+
+                                device.setDeviceMode(newMode);
+
                                 if (newData != null && newData.trim().startsWith("{")) {
                                     device.setDeviceData(newData);
                                 }
@@ -131,7 +132,7 @@ public class MqttService {
                                 // 触发规则引擎：解析具体的传感器数值并抛出事件
                                 ruleEnginePool.submit(() -> {
                                     try {
-                                        parseAndTriggerRules(sn, payload);
+                                        parseAndTriggerRules(sn, newData, payload);
                                     } catch (Exception e) {
                                         log.error("处理设备规则引擎解析任务时发生异常", e);
                                     }
@@ -175,16 +176,36 @@ public class MqttService {
     /**
      * 将设备的 JSON 数据拆解为单一属性事件，扔给规则引擎
      */
-    private void parseAndTriggerRules(String sn, String dataJson) {
-        if (dataJson == null || !dataJson.trim().startsWith("{")) return;
-        try {
-            JsonNode dataNode = objectMapper.readTree(dataJson);
-            dataNode.fieldNames().forEachRemaining(key -> {
-                String value = dataNode.get(key).asText();
-                ruleEngineService.processDeviceEvent(sn, key, value);
-            });
-        } catch (Exception e) {
-            log.error("[MQTT服务] 解析设备数据用于规则引擎时出错", e);
+    private void parseAndTriggerRules(String sn, String dataJson, String fullPayload) {
+        // 先解析并触发嵌套的 data 内容（如具体的传感器值）
+        if (dataJson != null && dataJson.trim().startsWith("{")) {
+            try {
+                JsonNode dataNode = objectMapper.readTree(dataJson);
+                dataNode.fieldNames().forEachRemaining(key -> {
+                    String value = dataNode.get(key).asText();
+                    log.info("[MQTT服务] 触发规则引擎事件 - SN: {}, Property: {}, Value: {}", sn, key, value);
+                    ruleEngineService.processDeviceEvent(sn, key, value);
+                });
+            } catch (Exception e) {
+                log.error("[MQTT服务] 解析设备数据用于规则引擎时出错", e);
+            }
+        }
+
+        // 解析并触发全载荷的其他顶层属性（如 mode, runTime 等）
+        if (fullPayload != null && fullPayload.trim().startsWith("{")) {
+            try {
+                JsonNode payNode = objectMapper.readTree(fullPayload);
+                payNode.fieldNames().forEachRemaining(key -> {
+                    // 过滤掉 data，因为上面已经解析过了
+                    if (!"data".equals(key)) {
+                        String value = payNode.get(key).asText();
+                        log.info("[MQTT服务] 触发规则引擎事件(全载荷) - SN: {}, Property: {}, Value: {}", sn, key, value);
+                        ruleEngineService.processDeviceEvent(sn, key, value);
+                    }
+                });
+            } catch (Exception e) {
+                log.error("[MQTT服务] 解析设备全载荷用于规则引擎时出错", e);
+            }
         }
     }
 
@@ -207,7 +228,7 @@ public class MqttService {
                 //sendReset(deviceSn);
             }
             scheduledTaskMap.remove(deviceSn);
-        }, 5, TimeUnit.MINUTES);
+        }, 3, TimeUnit.MINUTES);
 
         scheduledTaskMap.put(deviceSn, task);
     }
@@ -224,7 +245,7 @@ public class MqttService {
     public void sendUnBind(String deviceSn) {
         log.info("[MQTT服务] 发送设备解绑消息 - SN: {}", deviceSn);
         String topic = bindTopic + deviceSn + "/unBind";
-        toPayload("", topic, bindQos);
+        toPayload("1", topic, "0");
     }
 
     public void sendCmdMessage(Map<String, String> payload) {

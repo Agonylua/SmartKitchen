@@ -39,7 +39,7 @@ public class AutomationRuleService {
             return false;
         }
         boolean isDuplicateName = existingRules.stream()
-                .anyMatch(r -> r.getRuleId().equals(dto.getRuleId()));
+                .anyMatch(r -> r.getRuleName().equals(dto.getRuleName()));
 
         AutomationRule rule = new AutomationRule();
         rule.setRuleId(IdUtil.generateRulesId());

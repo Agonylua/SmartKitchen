@@ -122,9 +122,8 @@ public class DeviceService {
         }
         if (mqttService.isConnected()) {
             mqttService.sendUnBind(deviceSn);
-            return false;
         }
-        device.setHomeId(null);
+        device.setHomeId("");
         deviceRepository.save(device);
         return true;
     }
