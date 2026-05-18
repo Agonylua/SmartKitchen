@@ -53,6 +53,7 @@ public class ProvisionViewModel extends ViewModel {
 
     // 弹窗提示信息
     private final MutableLiveData<String> bindResultMsg = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
 
     private BleScanner bleScanner;
     private EspProvisioningHelper provisioningHelper;
@@ -65,11 +66,12 @@ public class ProvisionViewModel extends ViewModel {
     private String targetPop = null;
 
     @Inject
-    public ProvisionViewModel(@ApplicationContext Context context, EspProvisioningHelper provisioningHelper, AddDeviceRepository repository, UserManager userManager) {
+    public ProvisionViewModel(@ApplicationContext Context context, EspProvisioningHelper provisioningHelper, AddDeviceRepository repository, UserManager userManager, HomeRepository homeRepository) {
         this.provisioningHelper = provisioningHelper;
         EventBus.getDefault().register(this);
         this.repository = repository;
         this.userManager = userManager;
+        this.homeRepository = homeRepository;
         this.context = context;
     }
 
@@ -217,16 +219,30 @@ public class ProvisionViewModel extends ViewModel {
     }
 
     public void startProvisioning(String ssid, String password) {
+        isLoading.setValue(true);
         provisionStatus.setValue("正在发送网络配置...");
+        ThreadPoolUtils.getInstance().executeDelay(() -> {
+            homeRepository.getDevices(userManager.getHomeId(), new HomeRepository.DeviceListCallback() {
+                @Override
+                public void onSuccess(List<Device> devices) {
+                    Log.d(TAG, "onSuccess: 触发刷新");
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+
+                }
+            });
+        }, 6000); // 等待设备连接 Wi-Fi 的时间窗口
         provisioningHelper.startProvisioning(ssid, password, new ProvisionListener() {
             @Override
             public void createSessionFailed(Exception e) {
-                provisionStatus.postValue("会话创建失败: " + e.getMessage());
+                provisionStatus.postValue("会话创建失败");
             }
 
             @Override
             public void wifiConfigSent() {
-                provisionStatus.postValue("Wi-Fi 配置已发送...");
+                //provisionStatus.postValue("Wi-Fi 配置已发送...");
             }
 
             @Override
@@ -236,6 +252,7 @@ public class ProvisionViewModel extends ViewModel {
 
             @Override
             public void wifiConfigApplied() {
+                isLoading.setValue(false);
                 provisionStatus.postValue("设备正在连接 Wi-Fi...");
             }
 
@@ -246,28 +263,27 @@ public class ProvisionViewModel extends ViewModel {
 
             @Override
             public void provisioningFailedFromDevice(ESPConstants.ProvisionFailureReason failureReason) {
-                provisionStatus.postValue("设备配网失败: " + failureReason.name());
+                switch (failureReason) {
+                    case AUTH_FAILED:
+                        provisionStatus.postValue("Wi-Fi 密码错误");
+                        break;
+                    case NETWORK_NOT_FOUND:
+                        provisionStatus.postValue("未找到指定的 Wi-Fi 网络！");
+                        break;
+                    default:
+                        provisionStatus.postValue("设备配网失败");
+                        break;
+                }
             }
 
             @Override
             public void deviceProvisioningSuccess() {
-                provisionStatus.postValue("Success");
-                homeRepository.getDevices(userManager.getHomeId(), new HomeRepository.DeviceListCallback() {
-                    @Override
-                    public void onSuccess(List<Device> devices) {
-
-                    }
-
-                    @Override
-                    public void onFailure(String errorMessage) {
-
-                    }
-                });
+                provisionStatus.postValue("设备配网成功！");
             }
 
             @Override
             public void onProvisioningFailed(Exception e) {
-                provisionStatus.postValue("配网流程异常: " + e.getMessage());
+                provisionStatus.postValue("配网流程异常");
             }
         });
 
@@ -284,6 +300,7 @@ public class ProvisionViewModel extends ViewModel {
     }
 
     public void resetState() {
+        isLoading.setValue(false);
         scanStatus.setValue(null);
         isConnected.setValue(false);
         provisionStatus.setValue(null);
@@ -326,5 +343,9 @@ public class ProvisionViewModel extends ViewModel {
 
     public LiveData<String> getBindResultMsg() {
         return bindResultMsg;
+    }
+
+    public MutableLiveData<Boolean> getIsLoading() {
+        return isLoading;
     }
 }

@@ -54,7 +54,7 @@ public class MonitorFragment extends Fragment {
         binding.setLifecycleOwner(getViewLifecycleOwner());
         binding.setViewModel(monitorViewModel);
 
-        monitorViewModel.refreshData();
+        //monitorViewModel.refreshData();
         observeChartData();
         setupChart();
         binding.refreshLayout.setOnRefreshListener(refreshLayout -> {

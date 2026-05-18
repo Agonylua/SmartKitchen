@@ -112,6 +112,7 @@ public class MqttManager {
                     if (deviceList != null) {
                         for (Device device : deviceList) {
                             subscribe(SUB_TOPIC + device.getDeviceSn() + "/#");
+                            subscribe("smartKitchen/environment/" + userManager.getHomeId());
                             subscribe("smartKitchen/device/" + device.getDeviceSn() + "/#");
                         }
                     } else {

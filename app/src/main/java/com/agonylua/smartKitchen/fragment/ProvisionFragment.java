@@ -132,7 +132,7 @@ public class ProvisionFragment extends Fragment {
                         NavController navController = Navigation.findNavController(getView());
                         navController.navigate(R.id.action_provision_to_main);
                     }
-                }, 2000); // 2秒后返回上一页
+                }, 1000); // 2秒后返回上一页
             } else {
                 SnackbarUtils.show(requireView(), "请等待蓝牙连接成功后再发送 WiFi");
             }
@@ -143,7 +143,7 @@ public class ProvisionFragment extends Fragment {
         // 监听设备绑定成果信息并 Toast 提示
         viewModel.getBindResultMsg().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isEmpty()) {
-                SnackbarUtils.show(requireView(), msg);
+                //SnackbarUtils.show(requireView(), msg);
                 viewModel.clearBindResultMsg();
             }
         });
@@ -167,14 +167,8 @@ public class ProvisionFragment extends Fragment {
         });
 
         viewModel.getProvisionStatus().observe(getViewLifecycleOwner(), status -> {
-            if ("Success".equals(status)) {
-                SnackbarUtils.show(requireView(), "设备配网成功！");
-            } else if (status != null && (status.contains("失败") || status.contains("异常"))) {
-                SnackbarUtils.show(requireView(), "设备配网失败，请重试");
-            }
-            if (status != null && binding.tvStatusMessage != null) {
-                binding.tvStatusMessage.setText(status);
-            }
+            //SnackbarUtils.show(requireView(), status);
+            binding.tvStatusMessage.setText(status);
         });
 
         viewModel.getIsConnected().observe(getViewLifecycleOwner(), isConnected -> {

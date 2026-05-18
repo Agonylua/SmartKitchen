@@ -25,7 +25,7 @@ public class SnackbarUtils {
         Context context = view.getContext();
         if (context == null) return;
 
-        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
+        Snackbar snackbar = Snackbar.make(view, message, 1200);
         View snackbarView = snackbar.getView();
 
         // 设置宽度自适应、底部居中、悬浮边距

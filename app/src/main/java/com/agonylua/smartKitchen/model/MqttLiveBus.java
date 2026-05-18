@@ -35,7 +35,16 @@ public class MqttLiveBus {
     public void post(String topic, String message) {
         //mqttEvent.postValue(new MqttEvent(topic, message));
         try {
+            if (!topic.startsWith("smartKitchen/")) return;
             String[] topicParts = topic.substring("smartKitchen/".length()).split("/");
+            if (topicParts.length < 2) return;
+
+            if (topicParts[0].equals("environment")) {
+                Map<String, Object> payload = JsonUtils.toMap(message);
+                mqttEvent.postValue(new MqttEvent(topic, payload));
+                return;
+            }
+
             if (topicParts.length != 3) return;
             String sn = topicParts[1];
             if (topicParts[0].equals("application") && topicParts[2].equals("update")) {
@@ -71,9 +80,9 @@ public class MqttLiveBus {
     // 数据包装类
     public static class MqttEvent {
         public String topic;
-        public String message;
+        public Map<String, Object> message;
 
-        public MqttEvent(String t, String m) {
+        public MqttEvent(String t, Map<String, Object> m) {
             topic = t;
             message = m;
         }

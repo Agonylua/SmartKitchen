@@ -333,8 +333,8 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="32dp"
-            android:enabled="@{device.deviceStatus != `ONLINE` || device.deviceMode != `IDEA`}"
-            android:text="@{device.deviceMode.equals(`IDEA`) ? `停止运行` : `开始工作`}"
+            android:enabled="@{viewModel.status != `离线`}"
+            android:text="@{viewModel.subTaskLoading ? `` : device.deviceMode.equals(`IDEA`) ? `停止运行` : `开始工作`}"
             android:textSize="18sp"
             android:textStyle="bold"
             app:cornerRadius="30dp"
@@ -342,6 +342,17 @@
             app:iconPadding="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/card_options" />
+
+        <ProgressBar
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:elevation="10dp"
+            android:indeterminateTint="#2196F3"
+            android:visibility="@{viewModel.subTaskLoading ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_start"
+            app:layout_constraintEnd_toEndOf="@+id/btn_start"
+            app:layout_constraintStart_toStartOf="@id/btn_start"
+            app:layout_constraintTop_toTopOf="@+id/btn_start" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

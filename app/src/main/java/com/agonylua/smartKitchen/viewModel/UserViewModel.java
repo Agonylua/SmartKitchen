@@ -52,6 +52,7 @@ public class UserViewModel extends ViewModel {
         this.repository = repository;
         this.userManager = userManager;
         observeChanges();
+        loadUserData();
     }
 
     public void observeChanges() {

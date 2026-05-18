@@ -1,7 +1,5 @@
 package com.agonylua.smartKitchen.viewModel;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -48,7 +46,7 @@ public class LoginViewModel extends ViewModel {
 
             });
 
-        }, 5000);
+        }, 2000);
     }
 
     public void tokenValidate() {
@@ -105,7 +103,7 @@ public class LoginViewModel extends ViewModel {
                     registerSuccess.postValue(false);
                 }
             });
-        }, 3000);
+        }, 2000);
     }
 
     public void retryConnection() {
@@ -141,7 +139,6 @@ public class LoginViewModel extends ViewModel {
         repository.validateNetwork(new LoginRepository.ValidateCallback() {
             @Override
             public void onVerify(boolean isValid) {
-                Log.d(TAG, "onVerify: 服务器连通性验证结果: " + isValid);
                 isNetwork.postValue(isValid);
             }
 

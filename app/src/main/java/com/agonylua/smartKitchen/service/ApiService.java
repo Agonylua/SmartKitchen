@@ -68,7 +68,6 @@ public interface ApiService {
      * 上传用户头像接口
      *
      * @param file   头像文件
-     * @param userId 用户 ID
      */
     @Multipart
     @POST("/user/updateAvatar")
@@ -167,7 +166,6 @@ public interface ApiService {
     /**
      * 获取自动化规则列表接口
      *
-     * @param userId 用户 ID
      */
     @GET("/rules/list")
     Call<ApiResponse<List<AutomationRuleDTO>>> getRules();

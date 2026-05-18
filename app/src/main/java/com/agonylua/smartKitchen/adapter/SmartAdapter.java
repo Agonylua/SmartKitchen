@@ -117,7 +117,7 @@ public class SmartAdapter extends RecyclerView.Adapter<SmartAdapter.SceneViewHol
                 holder.tvAction.setText(action);
                 break;
             }
-            case "TIMER": {
+            case "TIME": {
                 String condition = "每天" +
                         rule.getConditionValue();
                 holder.tvCondition.setText(condition);

@@ -72,12 +72,12 @@ public class LoginRepository {
                         });
                     } else {
                         // 数据为空或Token为空，视为失败
-                        callback.onError("登录失败，服务器响应异常");
-                        Log.i(TAG, "登陆失败，返回数据不完整");
+                        callback.onError(body.getMessage());
+                        Log.i(TAG, "登陆失败" + body.getMessage());
                     }
                 } else {
                     // HTTP 请求成功但业务失败 (如 404, 500)
-                    callback.onError("登录失败，请检查账号密码");
+                    callback.onError("登录请求失败");
                     Log.i(TAG, "登录请求被拒绝: " + response.code());
                 }
             }

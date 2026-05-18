@@ -56,7 +56,7 @@ public class UserFragment extends Fragment {
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         binding.setViewModel(userViewModel);
         obServeViewModel();
-        userViewModel.loadUserData();
+        //userViewModel.loadUserData();
 
         binding.setLifecycleOwner(getViewLifecycleOwner());
         binding.btHomeManager.setOnClickListener(v -> {
