@@ -27,7 +27,7 @@ import java.util.Map;
 @Service
 public class RuleEngineService {
 
-    // 复用同一个 Easy Rules 引擎实例
+    // 同一个 Easy Rules 引擎实例
     private final RulesEngine rulesEngine = new DefaultRulesEngine();
     @Autowired
     private AutomationRuleRepository ruleRepository;
@@ -41,7 +41,7 @@ public class RuleEngineService {
      * 事件驱动入口 (由 MQTT 硬件上报瞬间触发)
      */
     public void processDeviceEvent(String deviceSn, String property, String currentValue) {
-        log.info("[规则引擎] 收到事件: Device={}, Property={}, Value={}", deviceSn, property, currentValue);
+        //log.info("[规则引擎] 收到事件: Device={}, Property={}, Value={}", deviceSn, property, currentValue);
 
         List<AutomationRule> dbRules = ruleRepository.findByConditionDeviceSn(deviceSn);
         if (dbRules.isEmpty()) return;
@@ -59,11 +59,11 @@ public class RuleEngineService {
      */
     @Scheduled(cron = "0 * * * * ?")
     public void processTimeEvent() {
-        // 获取当前时间，格式化为 HH:mm (例如 "08:00")
+        // 获取当前时间，格式化为 HH:mm
         String currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
-        log.info("[规则引擎] 引擎扫描当前系统时间: {}", currentTime);
+        //log.info("[规则引擎] 引擎扫描当前系统时间: {}", currentTime);
 
-        // 我们约定：所有时间驱动的规则，触发源统一存为 "TIMER"
+        // 所有时间驱动的规则，触发源统一存为 "TIMER"
         List<AutomationRule> dbRules = ruleRepository.findByConditionType("TIME");
         if (dbRules.isEmpty()) return;
 
@@ -87,11 +87,11 @@ public class RuleEngineService {
                     .map(value -> value.getDeviceMode() != null && value.getDeviceMode().equals(dbRule.getActionPayload()))
                     .orElse(false);
             if (repeat) {
-                log.info("[规则引擎] 规则[{}]动作被拦截: 目标设备 {} 的模式已经是 {}", dbRule.getRuleName(), dbRule.getActionDeviceSn(), dbRule.getActionPayload());
+                //log.info("[规则引擎] 规则[{}]动作被拦截: 目标设备 {} 的模式已经是 {}", dbRule.getRuleName(), dbRule.getActionDeviceSn(), dbRule.getActionPayload());
                 continue;
             }
             String mvelExpression = buildMvelExpression(dbRule);
-            log.info("[规则引擎] 准备注册规则: ID={}, 名称={}, 表达式=[{}]", dbRule.getRuleId(), dbRule.getRuleName(), mvelExpression);
+            //log.info("[规则引擎] 准备注册规则: ID={}, 名称={}, 表达式=[{}]", dbRule.getRuleId(), dbRule.getRuleName(), mvelExpression);
 
             // 预先组装要下发的 MQTT 消息
             Map<String, String> payload = new HashMap<>();
@@ -99,9 +99,9 @@ public class RuleEngineService {
             payload.put(dbRule.getActionCommand(), dbRule.getActionPayload());
 
             Rule easyRule = new RuleBuilder()
-                    .name("Rule_" + dbRule.getRuleId())
-                    .description(dbRule.getRuleName())
-                    .when(new MVELCondition(mvelExpression))
+                    .name("Rule_" + dbRule.getRuleId()) // 使用规则ID作为规则名称，确保唯一性
+                    .description(dbRule.getRuleName()) // 将规则名称放在描述中，便于日志输出
+                    .when(new MVELCondition(mvelExpression)) // 使用 MVEL 表达式作为条件
                     .then(f -> {
                         log.info("[规则引擎] 规则命中: {}, 条件: [{}]", dbRule.getRuleName(), mvelExpression);
                         log.info("[规则引擎] 下发控制指令给设备 {}: {}", dbRule.getActionDeviceSn(), payload);
@@ -109,15 +109,15 @@ public class RuleEngineService {
                     })
                     .build();
 
-            rules.register(easyRule);
+            rules.register(easyRule); // 注册规则到引擎中
         }
 
-        // 开火！执行所有满足条件的规则
+        // 执行所有满足条件的规则
         if (!rules.isEmpty()) {
             if (!mqttService.isConnected()) {
                 log.warn("[规则引擎] 虽然规则非空，但 MQTT 未连接，实际可能无法成功下发指令。");
             }
-            rulesEngine.fire(rules, facts);
+            rulesEngine.fire(rules, facts); // 触发规则引擎，传入事实数据，执行匹配的规则
         }
     }
 
@@ -144,6 +144,7 @@ public class RuleEngineService {
         return prop + " " + op + " " + val;
     }
 
+    // 尝试将字符串解析为数字，如果失败则原样返回字符串
     private Object parseTypedValue(String value) {
         try {
             return Double.parseDouble(value);
@@ -152,6 +153,7 @@ public class RuleEngineService {
         }
     }
 
+    // 判断字符串是否为数值类型
     private boolean isNumeric(String str) {
         try {
             Double.parseDouble(str);

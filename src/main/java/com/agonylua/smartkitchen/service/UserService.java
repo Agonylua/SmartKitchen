@@ -52,9 +52,11 @@ public class UserService {
         // 2. 准备用户对象
         User user = new User();
         // 生成唯一ID (实际生产中需检查ID是否碰撞，这里简化)
-        user.setUserId(IdUtil.generateUserId());
+        String newHomeId = IdUtil.generateUserId();
+        user.setUserId(newHomeId);
         user.setUsername(username);
         user.setPassword(password); // 记得加密！
+        user.setHomeId(newHomeId);
 
         // 3. 处理默认昵称逻辑
         if (inputNickname == null || inputNickname.trim().isEmpty()) {
@@ -67,16 +69,7 @@ public class UserService {
         userRepository.save(user);
 
         // 5. 自动创建家庭
-        Home home = new Home();
-        home.setHomeId(IdUtil.generateHomeId()); // 生成6位家庭ID
-        home.setOwnerId(user.getUserId());
-        // 默认家庭名称: 昵称 + 的家
-        home.setHomeName(user.getNickname() + "的家");
-
-        // 初始成员列表为空或包含户主自己
-        home.getMemberIds().add(user.getUserId());
-
-        homeRepository.save(home);
+        creatNewHome(newHomeId, user);
 
         return user;
     }
@@ -116,22 +109,16 @@ public class UserService {
                     if (!homeId.equals(user.getHomeId())) {
                         return user.getHomeId();
                     }
-                    String newHome = IdUtil.generateHomeId();
-                    user.setHomeId(newHome);
+                    String newHomeId = IdUtil.generateHomeId();
+                    user.setHomeId(newHomeId);
                     userRepository.save(user);
                     homeRepository.findByMemberId(userId)
                             .ifPresent(home -> {
                                 home.getMemberIds().remove(userId);
                                 homeRepository.save(home);
                             });
-                    Home home = new Home();
-                    home.setHomeId(newHome);
-                    home.setOwnerId(user.getUserId());
-                    home.setHomeName(user.getNickname() + "的家");
-                    home.getMemberIds().add(user.getUserId());
-                    homeRepository.save(home);
-
-                    return newHome;
+                    creatNewHome(newHomeId, user);
+                    return newHomeId;
                 })
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
     }
@@ -179,6 +166,15 @@ public class UserService {
             log.error("[用户服务] 上传文件时发生异常", e);
             return null; // 或者抛出自定义异常，视业务需求而定
         }
+    }
+
+    public void creatNewHome(String newHomeId, User user) {
+        Home home = new Home();
+        home.setHomeId(newHomeId);
+        home.setOwnerId(user.getUserId());
+        home.setHomeName(user.getNickname() + "的家");
+        home.getMemberIds().add(user.getUserId());
+        homeRepository.save(home);
     }
 
 }

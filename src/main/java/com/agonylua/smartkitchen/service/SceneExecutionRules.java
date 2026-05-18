@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class SceneExecutionService {
+public class SceneExecutionRules {
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final String CMD_MODE = "mode";

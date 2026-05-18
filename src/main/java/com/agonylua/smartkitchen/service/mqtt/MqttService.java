@@ -70,14 +70,14 @@ public class MqttService {
             String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
 
             if (topic.startsWith(MQTT_TOPIC_PREFIX)) {
-                log.info("[MQTT服务] 处理消息 - Topic: {}, Payload: {}", topic, payload);
+                //log.info("[MQTT服务] 处理消息 - Topic: {}, Payload: {}", topic, payload);
                 String[] topicParts = topic.substring(MQTT_TOPIC_PREFIX.length()).split("/");
                 if (topicParts[0].isEmpty() || topicParts[1].isEmpty()) return;
                 String sn = topicParts[1];
 
                 // 处理设备上下线
                 if (topicParts[0].equals("status")) {
-                    log.info("[MQTT服务] 设备状态变更");
+                    //log.info("[MQTT服务] 设备状态变更");
                     deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
                         device.setDeviceMode("IDLE");
                         device.setRunTime("0");
@@ -112,7 +112,7 @@ public class MqttService {
                 if (topicParts[0].equals("service")) {
                     switch (topicParts[2]) {
                         case "update" -> {
-                            log.info("[MQTT服务] 设备数据更新 - SN: {}, Payload: {}", sn, payload);
+                            //log.info("[MQTT服务] 设备数据更新 - SN: {}, Payload: {}", sn, payload);
                             deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
                                 String newData = JsonUtil.getValue(payload, "data");
                                 String newMode = JsonUtil.getValue(payload, "mode");
@@ -141,14 +141,14 @@ public class MqttService {
                             }, () -> log.warn("收到消息但设备不存在: {}", sn));
                         }
                         case "unbind" -> {
-                            log.info("[MQTT服务] 设备解绑 - SN: {}, Payload: {}", sn, payload);
+                            //log.info("[MQTT服务] 设备解绑 - SN: {}, Payload: {}", sn, payload);
                             deviceRepository.findByDeviceSn(sn).ifPresentOrElse(device -> {
                                 device.setHomeId(null);
                                 deviceRepository.save(device);
                             }, () -> log.warn("收到绑定消息但设备不存在: {}", sn));
                         }
                         case "bind" -> {
-                            log.info("[MQTT服务] 设备绑定 - SN: {}, Payload: {}", sn, payload);
+                            //log.info("[MQTT服务] 设备绑定 - SN: {}, Payload: {}", sn, payload);
                             Consumer<Boolean> callback = bindCallbackMap.remove(sn); // 取出并移除回调
 
                             ScheduledFuture<?> task = scheduledTaskMap.remove(sn);
@@ -183,7 +183,7 @@ public class MqttService {
                 JsonNode dataNode = objectMapper.readTree(dataJson);
                 dataNode.fieldNames().forEachRemaining(key -> {
                     String value = dataNode.get(key).asText();
-                    log.info("[MQTT服务] 触发规则引擎事件 - SN: {}, Property: {}, Value: {}", sn, key, value);
+                    //log.info("[MQTT服务] 触发规则引擎事件 - SN: {}, Property: {}, Value: {}", sn, key, value);
                     ruleEngineService.processDeviceEvent(sn, key, value);
                 });
             } catch (Exception e) {
@@ -199,7 +199,7 @@ public class MqttService {
                     // 过滤掉 data，因为上面已经解析过了
                     if (!"data".equals(key)) {
                         String value = payNode.get(key).asText();
-                        log.info("[MQTT服务] 触发规则引擎事件(全载荷) - SN: {}, Property: {}, Value: {}", sn, key, value);
+                        //log.info("[MQTT服务] 触发规则引擎事件(全载荷) - SN: {}, Property: {}, Value: {}", sn, key, value);
                         ruleEngineService.processDeviceEvent(sn, key, value);
                     }
                 });

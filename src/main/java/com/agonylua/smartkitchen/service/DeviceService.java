@@ -78,7 +78,7 @@ public class DeviceService {
             return 0;
         }
 
-        // 核心：验证通过，注册异步回调，不再立即操作数据库
+        // 验证通过，注册异步回调，不再立即操作数据库
         log.info("[设备服务] 验证通过！正在等待设备 {} 硬件端联网确认...", deviceSn);
 
         mqttService.sendBind(homeId, deviceSn);

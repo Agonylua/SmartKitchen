@@ -52,6 +52,11 @@ public class MqttConfig {
         return factory;
     }
 
+    /*
+     * 定义消息通道 mqttInputChannel，用于接收从 MQTT 服务器发送过来的消息
+     * 通过 @Bean 注解将该方法注册为 Spring Bean，使其成为一个可用的消息通道
+     * 该通道使用 DirectChannel 实现，表示消息将直接发送到订阅该通道的消息处理器，而不会经过任何中间处理器或队列
+     */
     @Bean
     public MessageChannel mqttInputChannel() {
         return new DirectChannel();
@@ -69,13 +74,18 @@ public class MqttConfig {
         return adapter;
     }
 
-    //接收消息
+    /*
+     * 定义消息处理器，处理从 MQTT 服务器接收到的消息，并调用 MqttService 的 handleReceivedMessage 方法进行处理
+     * 通过 @ServiceActivator 注解将该方法绑定到 mqttInputChannel 上，当有消息发送到该通道时，自动调用该方法进行处理
+     * 这样就实现了从 MQTT 服务器接收消息并进行处理的功能
+     */
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler(MqttService mqttService) {
         return mqttService::handleReceivedMessage;
     }
 
+    // 定义消息通道 mqttOutputChannel，用于发送消息到 MQTT 服务器
     @Bean
     public MessageChannel mqttOutputChannel() {
         return new DirectChannel();

@@ -31,7 +31,7 @@ public class PowerSimulationTask {
     private final Random random = new Random();
 
     // 每分钟执行一次
-    @Scheduled(fixedRate = 18000000)
+    @Scheduled(fixedRate = 60000)
     @Transactional(rollbackFor = Exception.class)
     public void simulatePowerConsumption() {
         List<Device> devices = deviceRepository.findAll();
