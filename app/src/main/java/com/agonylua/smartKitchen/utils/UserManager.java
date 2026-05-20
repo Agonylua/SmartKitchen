@@ -23,6 +23,7 @@ public class UserManager {
     private static final String KEY_HOME_ID = "home_id";
     private static final String KEY_NICKNAME = "nickname";
     private static final String KEY_AVATAR = "avatar_url";
+    private static final String KEY_CLIENTID = "clientId";
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
     private static final String TAG = "UserManager";
@@ -141,6 +142,15 @@ public class UserManager {
     // 设置昵称
     public void setNickname(String nickname) {
         editor.putString(KEY_NICKNAME, nickname);
+        editor.apply();
+    }
+
+    public String getClientId() {
+        return sp.getString(KEY_CLIENTID, "");
+    }
+
+    public void setClientId(String clientId) {
+        editor.putString(KEY_CLIENTID, clientId);
         editor.apply();
     }
 

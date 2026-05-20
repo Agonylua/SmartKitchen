@@ -78,7 +78,7 @@ public class SplashFragment extends Fragment {
         viewModel.getIsNetwork().observe(getViewLifecycleOwner(), isNetwork -> {
             if (isNetwork != null && !isNetwork) {
                 if (getView() != null) {
-                    Log.d(TAG, "observeViewModel: 服务器连接失败，显示错误界面");
+                    Log.d(TAG, "服务器连接失败，显示错误界面");
                     binding.pbLoading.setVisibility(View.GONE);
                     binding.tvErrorIcon.setVisibility(View.VISIBLE);
                     binding.tvErrorMessage.setVisibility(View.VISIBLE);

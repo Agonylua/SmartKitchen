@@ -263,17 +263,7 @@ public class ProvisionViewModel extends ViewModel {
 
             @Override
             public void provisioningFailedFromDevice(ESPConstants.ProvisionFailureReason failureReason) {
-                switch (failureReason) {
-                    case AUTH_FAILED:
-                        provisionStatus.postValue("Wi-Fi 密码错误");
-                        break;
-                    case NETWORK_NOT_FOUND:
-                        provisionStatus.postValue("未找到指定的 Wi-Fi 网络！");
-                        break;
-                    default:
-                        provisionStatus.postValue("设备配网失败");
-                        break;
-                }
+                provisionStatus.postValue("设备配网失败: " + failureReason.name());
             }
 
             @Override

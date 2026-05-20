@@ -20,7 +20,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 /**
  * MQTT 连接管理类
  */
@@ -29,8 +28,8 @@ public class MqttManager {
 
     private static final String TAG = "MqttManager";
     // ================= 配置参数 =================
-    private static final String BROKER_URL = "tcp://agonylua.asia:1883";
-    private static final String CLIENT_ID = "Android_App";
+    public static String BROKER_URL = "tcp://agonylua.asia:1883";
+    private static final String CLIENT_ID_PREFIX = "Android_App_";
     private static final String USERNAME = "smartKitchen";
     private static final String PASSWORD = "wei.liu-liu";
     public static final String SUB_TOPIC = "smartKitchen/application/";
@@ -42,6 +41,7 @@ public class MqttManager {
     private OnMessageListener onMessageListener;
     private final UserManager userManager;
     private final DeviceDao deviceDao;
+    private String currentBrokerUrl;
 
     // 注入构造
     @Inject
@@ -53,15 +53,22 @@ public class MqttManager {
 
     private void init() {
         try {
+            currentBrokerUrl = BROKER_URL;
+//            String clientId = userManager.getClientId();
+//            if (clientId == null || clientId.isEmpty()) {
+//                clientId = CLIENT_ID_PREFIX + java.util.UUID.randomUUID().toString().substring(0, 8);
+//                userManager.setClientId(clientId);
+//            }
+            String clientId = CLIENT_ID_PREFIX + java.util.UUID.randomUUID().toString().substring(0, 8);
             // MemoryPersistence: 数据保存在内存中，重启 App 会丢失未发送的消息
-            mqttClient = new MqttClient(BROKER_URL, CLIENT_ID, new MemoryPersistence());
+            mqttClient = new MqttClient(currentBrokerUrl, clientId, new MemoryPersistence());
 
             // 配置连接选项
             options = new MqttConnectOptions();
-            options.setCleanSession(false); // false: 保留会话 (离线也能收到之前的消息)
+            options.setCleanSession(true); // false: 保留会话 (离线也能收到之前的消息)
             options.setUserName(USERNAME);
             options.setPassword(PASSWORD.toCharArray());
-            options.setMaxReconnectDelay(10000); // 最大重连间隔 (毫秒)
+            options.setMaxReconnectDelay(5000); // 最大重连间隔 (毫秒)
             options.setConnectionTimeout(10); // 连接超时 (秒)
             options.setKeepAliveInterval(20); // 心跳间隔 (秒) - 越短越灵敏但耗电
             options.setAutomaticReconnect(true); // 开启自动重连
@@ -102,6 +109,11 @@ public class MqttManager {
     public void connect() {
         ThreadPoolUtils.getInstance().execute(() -> {
             try {
+                if (mqttClient != null && !BROKER_URL.equals(currentBrokerUrl)) {
+                    disconnect();
+                    init();
+                }
+
                 String homeId = userManager.getHomeId();
                 List<Device> deviceList = deviceDao.getDevicesByHomeId(homeId);
                 if (mqttClient != null && !mqttClient.isConnected()) {
