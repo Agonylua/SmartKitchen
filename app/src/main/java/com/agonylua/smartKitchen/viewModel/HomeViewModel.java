@@ -31,12 +31,14 @@ public class HomeViewModel extends ViewModel {
     private LiveData<Integer> deviceCount = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private MutableLiveData<Boolean> isRefresh = new MutableLiveData<>(false);
+    private MutableLiveData<Float> tempSensor = new MutableLiveData<>(0f);
 
     @Inject
     public HomeViewModel(HomeRepository repository, DeviceDao deviceDao, UserManager userManager) {
         this.repository = repository;
         this.deviceDao = deviceDao;
         this.userManager = userManager;
+        syncServiceData(userManager.getHomeId());
     }
 
     /**

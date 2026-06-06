@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -34,7 +35,6 @@ public class HomeManageFragment extends Fragment {
     private FragmentHomeManageBinding binding;
     private HomeMemberAdapter adapter;
     private UserViewModel viewModel;
-    private boolean isCurrentUserOwner = true;
 
     @Nullable
     @Override
@@ -71,6 +71,14 @@ public class HomeManageFragment extends Fragment {
 
         viewModel.getMemberList().observe(getViewLifecycleOwner(), members -> {
             adapter.submitList(members);
+        });
+
+        viewModel.getExitHomeResult().observe(getViewLifecycleOwner(), result -> {
+            if (result) {
+                NavController navController = Navigation.findNavController(requireView());
+                navController.popBackStack();
+                viewModel.setExitHomeResult(false);
+            }
         });
 
     }

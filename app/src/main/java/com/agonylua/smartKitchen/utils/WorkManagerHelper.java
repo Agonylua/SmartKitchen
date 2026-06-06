@@ -28,7 +28,7 @@ public class WorkManagerHelper {
     public static void testOneTimeDataSync(Context context) {
         OneTimeWorkRequest syncRequest = new OneTimeWorkRequest.Builder(
                 GlobalSyncWorker.class
-        ).build(); // 为了立刻测试，可以先不加 constraints
+        ).build();
 
         WorkManager.getInstance(context.getApplicationContext()).enqueueUniqueWork(
                 TEST_SYNC_WORK_NAME,
@@ -42,14 +42,14 @@ public class WorkManagerHelper {
      * 建议在用户登录成功后，或者 Application 的 onCreate 中调用
      */
     public static void startPeriodicDataSync(Context context) {
-        // 1. 设置任务运行约束条件
+        // 设置任务运行约束条件
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED) // 必须在有网络连接时才执行
-                .setRequiresBatteryNotLow(true)                // 手机电量不能太低
+                .setRequiresBatteryNotLow(true)                // 手机电量不能过低
                 .build();
 
-        // 2. 创建周期性任务请求
-        // 注意：Android WorkManager 规定的最小周期是 15 分钟
+        // 创建周期性任务请求
+        // Android WorkManager 规定最小周期是 15 分钟
         PeriodicWorkRequest syncRequest = new PeriodicWorkRequest.Builder(
                 GlobalSyncWorker.class,
                 15, TimeUnit.MINUTES // 每 15 分钟执行一次
@@ -57,12 +57,11 @@ public class WorkManagerHelper {
                 .setConstraints(constraints)
                 .build();
 
-        // 3. 将任务加入调度队列
+        // 将任务加入调度队列
         // 使用 enqueueUniquePeriodicWork 防止同一任务被重复调度
-        // ExistingPeriodicWorkPolicy.KEEP 表示如果任务已存在，则保持原有任务运行，不替换
         WorkManager.getInstance(context.getApplicationContext()).enqueueUniquePeriodicWork(
                 SYNC_WORK_NAME,
-                ExistingPeriodicWorkPolicy.KEEP,
+                ExistingPeriodicWorkPolicy.KEEP, // 如果已有同名任务正在运行，则保持原有任务，不替换
                 syncRequest
         );
     }

@@ -102,7 +102,6 @@ public class DeviceFragment extends Fragment {
         FrameLayout container = binding.containerDevice;
         container.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        View contentView;
 
         switch (deviceType) {
             case "REFRIGERATOR": // 冰箱

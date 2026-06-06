@@ -172,6 +172,7 @@
                             android:textColor="@color/text_primary"
                             android:textSize="16sp"
                             android:textStyle="normal"
+                            android:visibility="gone"
                             app:drawableEndCompat="@drawable/ic_arrow_right"
                             app:drawableStartCompat="@drawable/ic_info"
                             app:layout_constraintBottom_toBottomOf="parent"

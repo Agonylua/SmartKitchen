@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.agonylua.smartKitchen.common.ApiResponse;
 import com.agonylua.smartKitchen.common.LoginRequest;
+import com.agonylua.smartKitchen.common.RegisterRequest;
 import com.agonylua.smartKitchen.database.dao.HomeDao;
 import com.agonylua.smartKitchen.database.entity.Home;
 import com.agonylua.smartKitchen.dto.UserDTO;
@@ -23,7 +24,6 @@ import retrofit2.Response;
 
 @Singleton
 public class LoginRepository {
-    private static volatile LoginRepository instance;
     private final String TAG = "poserCallback";
     private NetworkMonitor networkMonitor;
     private RetrofitClient retrofit;
@@ -72,12 +72,12 @@ public class LoginRepository {
                         });
                     } else {
                         // 数据为空或Token为空，视为失败
-                        callback.onError("登录失败，服务器响应异常");
-                        Log.i(TAG, "登陆失败，返回数据不完整");
+                        callback.onError(body.getMessage());
+                        Log.i(TAG, "登陆失败" + body.getMessage());
                     }
                 } else {
                     // HTTP 请求成功但业务失败 (如 404, 500)
-                    callback.onError("登录失败，请检查账号密码");
+                    callback.onError("登录请求失败");
                     Log.i(TAG, "登录请求被拒绝: " + response.code());
                 }
             }
@@ -94,7 +94,7 @@ public class LoginRepository {
     public void tokenValidate(final ValidateCallback callback) {
         if (!userManager.isLogIn()) {
             callback.onVerify(false);
-            return;
+            return; // 没有 Token 时直接返回 false，这样在外部服务器连通的前提下就可以进入登录界面
         }
         retrofit.getApi().validateToken().enqueue(new Callback<Void>() {
             @Override
@@ -158,8 +158,55 @@ public class LoginRepository {
         });
     }
 
-    public boolean validateNetwork() {
-        return networkMonitor.isInternetReachable();
+    public void register(String reqUserName, String reqNickname, String reqPassword, final LoginCallback callback) {
+        RegisterRequest request = new RegisterRequest(reqUserName, reqPassword, reqNickname);
+        retrofit.getApi().register(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Void> body = response.body();
+                    if (body.getCode() == 200) {
+                        callback.onSuccess();
+                    } else {
+                        callback.onError(body.getMessage());
+                    }
+                } else {
+                    callback.onError("注册失败，请稍后再试");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+                callback.onError("服务器连接错误");
+            }
+        });
+    }
+
+    public void validateNetwork(ValidateCallback callback) {
+        if (!networkMonitor.isInternetReachable()) {
+            callback.onVerify(false);
+            return;
+        }
+        ThreadPoolUtils.getInstance().execute(() -> {
+            try {
+                String ipPort = RetrofitClient.IP_PORT;
+                String ip = ipPort;
+                int port = 80;
+                if (ipPort.contains(":")) {
+                    String[] parts = ipPort.split(":");
+                    ip = parts[0];
+                    port = Integer.parseInt(parts[1]);
+                }
+                java.net.Socket socket = new java.net.Socket();
+                // 测试连接当前服务器IP和端口是否可通（超时2秒）
+                socket.connect(new java.net.InetSocketAddress(ip, port), 2000);
+                socket.close();
+                callback.onVerify(true);
+            } catch (Exception e) {
+                Log.e(TAG, "Server ping failed: " + e.getMessage());
+                callback.onVerify(false);
+            }
+        });
     }
 
     public Boolean isExistToken() {

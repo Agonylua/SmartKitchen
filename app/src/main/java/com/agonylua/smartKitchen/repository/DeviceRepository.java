@@ -22,7 +22,6 @@ import retrofit2.Response;
 
 @Singleton
 public class DeviceRepository {
-    private static final String TAG = "DeviceRepository";
     private DeviceDao deviceDao;
     private RetrofitClient retrofitClient;
     private MqttManager mqttManager;
@@ -85,6 +84,12 @@ public class DeviceRepository {
             public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
                 callback.onFailure("网络错误");
             }
+        });
+    }
+
+    public void resetDeviceMode(String deviceSn) {
+        ThreadPoolUtils.getInstance().execute(() -> {
+            deviceDao.resetMode(deviceSn);
         });
     }
 

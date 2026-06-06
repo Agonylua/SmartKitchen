@@ -35,6 +35,7 @@ public class MonitorViewModel extends ViewModel {
         onlineDevices = repository.getOnlineDevices();
         this.repository = repository;
         this.userManager = userManager;
+        refreshData();
     }
 
     public void refreshData() {

@@ -55,12 +55,12 @@ public class HomeMemberAdapter extends RecyclerView.Adapter<HomeMemberAdapter.Me
                         int x = (int) e.getRawX();
                         int y = (int) e.getRawY();
 
-                        // 1. 若触摸点不在当前打开的卡片范围内，则收起它并拦截本次事件
+                        // 若触摸点不在当前打开的卡片范围内，则收起它并拦截本次事件
                         if (x < left || x > right || y < top || y > bottom) {
                             closeOpenedSwipe();
                             return true;
                         } else {
-                            // 2. 触摸点在当前卡片范围内，但检查是否点击在移除按钮上
+                            // 触摸点在当前卡片范围内，但检查是否点击在移除按钮上
                             View deleteContainer = openedSwipeView.findViewById(R.id.fl_delete_container);
                             if (deleteContainer != null && deleteContainer.getVisibility() == View.VISIBLE) {
                                 int[] delPos = new int[2];
@@ -132,12 +132,12 @@ public class HomeMemberAdapter extends RecyclerView.Adapter<HomeMemberAdapter.Me
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_home_member, parent, false);
         MemberViewHolder holder = new MemberViewHolder(view);
 
-        // 核心技术点 1：将内部的显示容器撑开，使其与外层 RecyclerView 宽度完全一致
+        // 将内部的显示容器撑开，使其与外层 RecyclerView 宽度完全一致
         ViewGroup.LayoutParams lp = holder.flMainContent.getLayoutParams();
         lp.width = parent.getWidth();
         holder.flMainContent.setLayoutParams(lp);
 
-        // 核心技术点 2：监听触摸松开事件，实现自动吸附(Snap)动画，防止停留在半开半闭状态
+        // 监听触摸松开事件，实现自动吸附(Snap)动画，防止停留在半开半闭状态
         holder.hsvSwipe.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 // 滑动当前项时，如果其他项是打开状态，则将其他项收起
@@ -159,12 +159,12 @@ public class HomeMemberAdapter extends RecyclerView.Adapter<HomeMemberAdapter.Me
                         openedSwipeView = null;
                     }
                 }
-                return true; // 拦截默认的 Fling(快速滑动) 行为
+                return true; // 拦截默认的快速滑动行为
             }
             return false;
         });
 
-        // 点击其他部分（主内容区域）时，如果有打开的菜单，则自动收起
+        // 点击其他部分时，如果有打开的菜单，则自动收起
         holder.flMainContent.setOnClickListener(v -> {
             if (openedSwipeView != null) {
                 openedSwipeView.smoothScrollTo(0, 0);
@@ -179,7 +179,6 @@ public class HomeMemberAdapter extends RecyclerView.Adapter<HomeMemberAdapter.Me
     public void onBindViewHolder(@NonNull MemberViewHolder holder, int position) {
         HomeMember member = memberList.get(position);
 
-        // 【重要】RecyclerView 会复用 View，必须立即将滑动视图归零，防止出现被复用的卡片是“拉开”的状态
         holder.hsvSwipe.scrollTo(0, 0);
         if (openedSwipeView == holder.hsvSwipe) {
             openedSwipeView = null;

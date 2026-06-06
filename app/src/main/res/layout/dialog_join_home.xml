@@ -17,6 +17,7 @@
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/tv_dialog_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -42,7 +43,6 @@
             android:layout_height="wrap_content"
             android:hint="邀请码 (如: A8F2B9)"
             android:inputType="textCapCharacters"
-            android:maxLength="6"
             android:maxLines="1"
             android:padding="16dp"
             android:textSize="16sp" />

@@ -15,9 +15,8 @@ import com.google.android.material.chip.ChipGroup;
 import java.util.List;
 
 public class ChipBindingAdapters {
-    private static final String TAG = "ChipBindingAdapters";
 
-    @BindingAdapter("app:tint")
+    @BindingAdapter("tint")
     public static void setTintColor(ImageView imageView, int color) {
         imageView.setImageTintList(ColorStateList.valueOf(color));
     }

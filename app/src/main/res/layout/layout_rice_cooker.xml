@@ -4,6 +4,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="viewModel"
             type="com.agonylua.smartKitchen.viewModel.DeviceViewModel" />
@@ -272,15 +274,25 @@
             android:layout_height="60dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="32dp"
-            android:enabled="@{device.deviceStatus != `ONLINE` || device.deviceStatus != `RUNNING`}"
+            android:enabled="@{viewModel.status != `离线`}"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:backgroundTint="@color/primary"
             app:cornerRadius="30dp"
             app:iconGravity="textStart"
-            android:text="@{device.deviceStatus.equals(`RUNING`) ? `停止煮饭` : `开始煮饭`}"
+            android:text="@{viewModel.subTaskLoading ? `` : device.deviceMode.equals(`IDEA`) ? `停止煮饭` : `开始煮饭`}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/card_taste" />
+
+        <ProgressBar
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:elevation="10dp"
+            android:indeterminateTint="#2196F3"
+            android:visibility="@{viewModel.subTaskLoading ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_start"
+            app:layout_constraintEnd_toEndOf="@+id/btn_start"
+            app:layout_constraintStart_toStartOf="@id/btn_start"
+            app:layout_constraintTop_toTopOf="@+id/btn_start" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

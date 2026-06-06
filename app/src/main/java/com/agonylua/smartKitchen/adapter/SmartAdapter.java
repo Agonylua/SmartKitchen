@@ -19,7 +19,6 @@ public class SmartAdapter extends RecyclerView.Adapter<SmartAdapter.SceneViewHol
 
     private final List<Rules> sceneList = new ArrayList<>();
     private OnSceneActionListener listener;
-    // 记录当前处于删除确认状态的规则ID，只允许一个规则显示删除界面
     private String currentDeletingRuleId = null;
 
     public void setOnItemClickListener(SmartAdapter.OnSceneActionListener listener) {
@@ -118,7 +117,7 @@ public class SmartAdapter extends RecyclerView.Adapter<SmartAdapter.SceneViewHol
                 holder.tvAction.setText(action);
                 break;
             }
-            case "TIMER": {
+            case "TIME": {
                 String condition = "每天" +
                         rule.getConditionValue();
                 holder.tvCondition.setText(condition);
@@ -147,12 +146,6 @@ public class SmartAdapter extends RecyclerView.Adapter<SmartAdapter.SceneViewHol
                 break;
             }
         }
-
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onExecutePreset(rule);
-            }
-        });
     }
 
     @Override
@@ -160,7 +153,7 @@ public class SmartAdapter extends RecyclerView.Adapter<SmartAdapter.SceneViewHol
         return sceneList.size();
     }
 
-    // 暴露方法：清除所有的删除确认遮罩状态（用于点击其他地方时调用）
+    // 清除所有的删除确认遮罩状态
     public void clearDeleteMode() {
         if (currentDeletingRuleId != null) {
             String tempId = currentDeletingRuleId;
@@ -185,11 +178,6 @@ public class SmartAdapter extends RecyclerView.Adapter<SmartAdapter.SceneViewHol
     }
 
     public interface OnSceneActionListener {
-        void onExecutePreset(Rules rule);
-
-        void onToggleCustomRule(Rules rule, boolean isChecked);
-
-        // 新增删除回调
         void onDeleteRule(Rules rule);
     }
 

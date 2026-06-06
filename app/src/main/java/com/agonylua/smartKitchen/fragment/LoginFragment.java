@@ -99,8 +99,8 @@ public class LoginFragment extends Fragment {
         // 注册跳转
         binding.tvGoRegister.setOnClickListener(v -> {
             // TODO: 跳转到注册 Fragment
-            // Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_registerFragment);
-            SnackbarUtils.show(requireView(), "跳转到注册页");
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_loginFragment_to_registerFragment);
         });
 
         // 忘记密码

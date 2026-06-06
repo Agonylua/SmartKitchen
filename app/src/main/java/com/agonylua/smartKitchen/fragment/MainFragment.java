@@ -18,8 +18,10 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.agonylua.smartKitchen.R;
 import com.agonylua.smartKitchen.network.WebSocketManager;
+import com.agonylua.smartKitchen.repository.GlobalRepository;
 import com.agonylua.smartKitchen.utils.JsonUtils;
 import com.agonylua.smartKitchen.utils.SnackbarUtils;
+import com.agonylua.smartKitchen.utils.ThreadPoolUtils;
 import com.agonylua.smartKitchen.utils.UserManager;
 import com.agonylua.smartKitchen.utils.WorkManagerHelper;
 import com.agonylua.smartKitchen.viewModel.MainViewModel;
@@ -37,13 +39,13 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class MainFragment extends Fragment {
-
-    private static final String TAG = "MainFragment";
     private ViewPager2 mViewPager2;
     private RadioGroup mRadioGroup;
     @Inject
     public UserManager userManager;
     private MainViewModel mainViewModel;
+    @Inject
+    public GlobalRepository globalRepository;
     private int currentPosition = 0;
     private long mExitTime = 0;
 
@@ -174,6 +176,7 @@ public class MainFragment extends Fragment {
                         mExitTime = System.currentTimeMillis();
                     } else {
                         requireActivity().finish();
+                        WorkManagerHelper.stopPeriodicDataSync(requireContext());
                     }
                 }
             }
@@ -188,44 +191,68 @@ public class MainFragment extends Fragment {
         if (megMap == null || !megMap.containsKey("type")) {
             return;
         }
-        if (!Objects.equals(megMap.get("type"), "JOIN_REQUEST")) {
-            return;
-        }
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_custom_confirm, null);
         builder.setView(dialogView);
 
         AlertDialog dialog = builder.create();
 
-        // 【关键黑科技】必须将 Dialog 窗口背景设为透明，否则圆角四个角会有白色方块底色
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
 
-        // 获取内部控件并绑定事件
         MaterialButton btnNegative = dialogView.findViewById(R.id.btn_dialog_negative);
         MaterialButton btnPositive = dialogView.findViewById(R.id.btn_dialog_positive);
         TextView tvTitle = dialogView.findViewById(R.id.tv_dialog_title);
         TextView tvMessage = dialogView.findViewById(R.id.tv_dialog_message);
         ImageView ivIcon = dialogView.findViewById(R.id.iv_dialog_icon);
         ivIcon.setImageResource(R.drawable.ic_remind);
-        btnNegative.setText("拒绝");
-        btnPositive.setText("允许加入");
-        tvTitle.setText("家庭加入请求");
-        String memberId = megMap.get("memberId").toString();
-        String meg = "用户" + memberId + "请求加入您的家庭，是否允许？";
-        tvMessage.setText(meg);
-        btnNegative.setOnClickListener(v -> {
-            mainViewModel.joinHomeApproval(false, memberId);
-            dialog.dismiss();
-        });
 
-        btnPositive.setOnClickListener(v -> {
-            mainViewModel.joinHomeApproval(true, memberId);
-            dialog.dismiss();
-        });
+        if (Objects.equals(megMap.get("type"), "JOIN_REQUEST")) {
+            btnNegative.setText("拒绝");
+            btnPositive.setText("允许加入");
+            tvTitle.setText("家庭加入请求");
+            String memberId = megMap.get("memberId").toString();
+            String meg = "用户" + memberId + "请求加入您的家庭，是否允许？";
+            tvMessage.setText(meg);
+            btnNegative.setOnClickListener(v -> {
+                mainViewModel.joinHomeApproval(false, memberId);
+                dialog.dismiss();
+            });
 
-        dialog.show();
+            btnPositive.setOnClickListener(v -> {
+                mainViewModel.joinHomeApproval(true, memberId);
+                dialog.dismiss();
+            });
+
+            dialog.show();
+        } else if (Objects.equals(megMap.get("type"), "REMOVE_REMIND")) {
+            btnNegative.setVisibility(View.GONE);
+            btnPositive.setVisibility(View.GONE);
+            tvTitle.setText("家庭成员变动通知");
+            String homeId = megMap.get("homeId").toString();
+            String meg = "您已被移出" + homeId + "家庭";
+            tvMessage.setText(meg);
+            dialog.show();
+            ThreadPoolUtils.getInstance().execute(() -> {
+                globalRepository.syncAllData();
+            });
+            ThreadPoolUtils.getInstance().executeDelay(dialog::dismiss, 2000);
+        } else if (Objects.equals(megMap.get("type"), "JOIN_RESULT")) {
+            btnNegative.setVisibility(View.GONE);
+            btnPositive.setVisibility(View.GONE);
+            tvTitle.setText("家庭加入结果通知");
+            boolean approved = Boolean.parseBoolean(megMap.get("approved").toString());
+            String meg = approved ? "您已成功加入家庭" : "您加入家庭的请求被拒绝了";
+            tvMessage.setText(meg);
+            dialog.show();
+            ThreadPoolUtils.getInstance().execute(() -> {
+                globalRepository.syncAllData();
+            });
+            ThreadPoolUtils.getInstance().executeDelay(dialog::dismiss, 2000);
+        }
+
+
     }
 
     /**
@@ -244,7 +271,6 @@ public class MainFragment extends Fragment {
         mViewPager2 = null;
         WebSocketManager.getInstance().disconnect();
         WebSocketManager.getInstance().setNotificationListener(null);
-        WorkManagerHelper.stopPeriodicDataSync(requireContext());
     }
 
 }

@@ -11,12 +11,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 智能家居 App 专用线程池工具类
- * 特点：自动计算 CPU 核心数、支持 UI 线程切换、拒绝策略安全
+ * 线程池工具类
  */
 public class ThreadPoolUtils {
-
-    private static final String TAG = "ThreadPoolUtils";
 
     // 获取设备 CPU 核心数 (通常是 8 核)
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();

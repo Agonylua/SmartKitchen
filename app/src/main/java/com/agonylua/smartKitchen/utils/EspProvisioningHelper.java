@@ -44,7 +44,7 @@ public class EspProvisioningHelper {
         // 1. 创建实例
         espDevice = new ESPDevice(context, ESPConstants.TransportType.TRANSPORT_BLE, ESPConstants.SecurityType.SECURITY_1);
 
-        // 2. 【关键修复】必须设置原生的 BluetoothDevice 对象，否则连接时会报空指针
+        // 2. 设置原生的 BluetoothDevice 对象
         espDevice.setBluetoothDevice(device);
 
         // 3. 设置其他属性

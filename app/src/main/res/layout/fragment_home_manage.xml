@@ -162,17 +162,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/card_home_info" />
 
-        <TextView
-            android:id="@+id/tv_member_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@{`(` + home.memberIds.size() + `人)`}"
-            android:textColor="#9CA3AF"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="@id/tv_member_title"
-            app:layout_constraintStart_toEndOf="@id/tv_member_title"
-            app:layout_constraintTop_toTopOf="@id/tv_member_title" />
+        <!--        <TextView-->
+        <!--            android:id="@+id/tv_member_count"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="8dp"-->
+        <!--            android:text="@{`(` + home.memberIds.size() + `人)`}"-->
+        <!--            android:textColor="#9CA3AF"-->
+        <!--            android:textSize="14sp"-->
+        <!--            app:layout_constraintBottom_toBottomOf="@id/tv_member_title"-->
+        <!--            app:layout_constraintStart_toEndOf="@id/tv_member_title"-->
+        <!--            app:layout_constraintTop_toTopOf="@id/tv_member_title" />-->
 
         <!-- 成员列表 (RecyclerView) -->
         <androidx.recyclerview.widget.RecyclerView

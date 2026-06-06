@@ -17,6 +17,7 @@ import com.agonylua.smartKitchen.R;
 import com.agonylua.smartKitchen.adapter.DeviceAdapter;
 import com.agonylua.smartKitchen.database.entity.Device;
 import com.agonylua.smartKitchen.databinding.FragmentHomeBinding;
+import com.agonylua.smartKitchen.model.MqttLiveBus;
 import com.agonylua.smartKitchen.utils.SnackbarUtils;
 import com.agonylua.smartKitchen.utils.UserManager;
 import com.agonylua.smartKitchen.viewModel.HomeViewModel;
@@ -27,17 +28,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
-
     private HomeViewModel homeViewModel;
     private String homeId;
-
     @Inject
     public UserManager userManager;
-
     private DeviceAdapter adapter;
-    private String TAG = "HomeFragment";
-
-    // 引入 ViewBinding
     private FragmentHomeBinding binding;
 
     @Nullable
@@ -63,7 +58,7 @@ public class HomeFragment extends Fragment {
         setupRefreshLayout();
         observeViewModel();
 
-        homeViewModel.syncServiceData(homeId);
+        //homeViewModel.syncServiceData(homeId);
 
         String nickname = userManager.getNickName() != null ? userManager.getNickName() : "我";
         nickname = nickname.length() > 5 ? nickname.substring(0, 4) + "..." : nickname;
@@ -143,6 +138,16 @@ public class HomeFragment extends Fragment {
 
         homeViewModel.getIsRefresh().observe(getViewLifecycleOwner(), isRefresh -> {
             binding.refreshLayout.finishRefresh(isRefresh);
+        });
+
+        MqttLiveBus.getInstance().getEvent().observe(getViewLifecycleOwner(), mqttEvent -> {
+            if (mqttEvent != null && mqttEvent.message != null) {
+                if (mqttEvent.message.containsKey("temp") && mqttEvent.message.containsKey("hum")) {
+                    int temp = (int) Float.parseFloat(String.valueOf(mqttEvent.message.get("temp")));
+                    int hum = (int) Float.parseFloat(String.valueOf(mqttEvent.message.get("hum")));
+                    binding.tvWeather.setText("室内环境  温度 " + temp + "°C · 湿度 " + hum + "%");
+                }
+            }
         });
     }
 

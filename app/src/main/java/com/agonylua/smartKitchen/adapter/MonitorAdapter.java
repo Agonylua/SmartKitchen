@@ -12,6 +12,7 @@ import com.agonylua.smartKitchen.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceViewHolder> {
 
@@ -50,9 +51,13 @@ public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.DeviceVi
         }
 
         public void bind(Device device) {
-            // 一行代码，搞定所有 UI 赋值与视图更新
             binding.setDevice(device);
-            String runTime = TimeUtils.formatToDdHhMm(device.getRunTime());
+            String runTime;
+            if (!Objects.equals(device.getDeviceMode(), "IDLE")) {
+                runTime = TimeUtils.formatToDdHhMm(device.getRunTime());
+            } else {
+                runTime = TimeUtils.formatToDdHhMm(0);
+            }
             binding.runTime.setText(runTime);
             binding.executePendingBindings(); // 强制立即刷新绑定
         }

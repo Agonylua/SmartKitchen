@@ -254,7 +254,6 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:text="@{viewModel.subTaskLoading ? `` : `提交任务`}"
-                app:backgroundTint="@color/primary"
                 app:cornerRadius="30dp"
                 app:iconGravity="textStart"
                 app:iconPadding="8dp"

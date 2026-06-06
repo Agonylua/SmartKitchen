@@ -75,7 +75,7 @@ public class MonitorBindingAdapters {
             textView.setText("-- W");
             return;
         }
-        String powerStr = power + " W";
+        String powerStr = (int) Float.parseFloat(power) + " W";
         textView.setText(powerStr);
     }
 }
