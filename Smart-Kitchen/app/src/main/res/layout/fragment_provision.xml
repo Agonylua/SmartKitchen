@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.agonylua.smartKitchen.viewModel.ProvisionViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F4F6F8"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="48dp">
+
+            <!-- 返回按钮 -->
+            <ImageView
+                android:id="@+id/iv_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="12dp"
+                android:src="@drawable/ic_left_arrow"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="#111827" />
+
+            <!-- 动态标题：根据是否出错显示不同文字 -->
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:text="@{viewModel.isScanError ? `设备识别失败` : `设备配网`}"
+                android:textColor="#111827"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/iv_back"
+                app:layout_constraintStart_toEndOf="@id/iv_back"
+                app:layout_constraintTop_toTopOf="@id/iv_back" />
+
+            <TextView
+                android:id="@+id/tv_subtitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="12dp"
+                android:lineSpacingExtra="4dp"
+                android:text="@{viewModel.isScanError ? viewModel.errorMessage : `请将手机靠近设备，并确保设备处于配网模式（指示灯快速闪烁）。`}"
+                android:textColor="@{viewModel.isScanError ? @color/design_default_color_error : @color/text_secondary}"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+
+            <!-- ================= 正常配网状态 UI (识别成功) ================= -->
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/group_normal_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="@{viewModel.isScanError ? View.GONE : View.VISIBLE}"
+                app:constraint_referenced_ids="fl_radar_area,card_wifi_input,btn_start_provision" />
+
+            <!-- 中心雷达/扫描动画区 -->
+            <FrameLayout
+                android:id="@+id/fl_radar_area"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_marginTop="40dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_subtitle">
+
+                <View
+                    android:id="@+id/view_radar_ripple"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:alpha="0.5"
+                    android:background="@drawable/bg_circle_outline_faint" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="40dp"
+                    app:cardElevation="8dp"
+                    app:strokeWidth="0dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="20dp"
+                        android:src="@drawable/ic_network"
+                        app:tint="#14B8A6" />
+                </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
+
+            <!-- Wi-Fi 密码输入卡片 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_wifi_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="40dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:layout_constraintTop_toBottomOf="@id/fl_radar_area"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="连接到 Wi-Fi"
+                        android:textColor="#1F2937"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <!-- SSID 输入框 -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssid"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Wi-Fi 名称"
+                        android:enabled="@{viewModel.isConnected}"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxStrokeColor="#14B8A6"
+                        app:hintTextColor="#14B8A6">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssid"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:maxLines="1" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- 密码输入框 -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_password"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:hint="Wi-Fi 密码"
+                        android:enabled="@{viewModel.isConnected}"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxStrokeColor="#14B8A6"
+                        app:hintTextColor="#14B8A6"
+                        app:passwordToggleEnabled="true"
+                        app:passwordToggleTint="#9CA3AF">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_password"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"
+                            android:maxLength="8"
+                            android:maxLines="1" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 开始配网按钮 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_start_provision"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="32dp"
+                android:text="@{viewModel.isLoading ? `配网中...` : `开始配网`}"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#14B8A6"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"
+                app:layout_constraintTop_toBottomOf="@id/card_wifi_input" />
+
+            <!-- ================= 错误状态 UI (识别失败) ================= -->
+            <LinearLayout
+                android:id="@+id/ll_error_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="@{viewModel.isScanError ? View.VISIBLE : View.GONE}"
+                app:layout_constraintTop_toBottomOf="@id/tv_subtitle">
+
+                <!-- 错误图标背景 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:cardBackgroundColor="#FEE2E2"
+                    app:cardCornerRadius="50dp"
+                    app:strokeWidth="0dp">
+
+                    <!-- 用文本表情或者你的错误矢量图代替 -->
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="4dp"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_warning" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- 重新扫码按钮 -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_rescan"
+                    android:layout_width="200dp"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="40dp"
+                    android:text="重新扫码"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#3B82F6"
+                    app:cornerRadius="16dp"
+                    app:elevation="4dp" />
+            </LinearLayout>
+
+            <!-- 配网加载进度条 (默认隐藏) -->
+            <LinearLayout
+                android:id="@+id/ll_loading_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btn_start_provision">
+
+                <ProgressBar
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:indeterminateTint="#14B8A6" />
+
+                <TextView
+                    android:id="@+id/tv_status_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="正在向设备发送网络凭证..."
+                    android:textColor="#6B7280"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>

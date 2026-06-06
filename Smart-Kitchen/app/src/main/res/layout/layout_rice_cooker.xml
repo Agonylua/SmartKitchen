@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.agonylua.smartKitchen.viewModel.DeviceViewModel" />
+
+        <variable
+            name="device"
+            type="com.agonylua.smartKitchen.database.entity.Device" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_dashboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <View
+                android:id="@+id/circle_bg"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:background="@drawable/bg_circle_outline_faint"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progress_cook"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="@{viewModel.riceCookerProgress}"
+                android:progressDrawable="@drawable/circle_progress_teal"
+                android:rotation="-90"
+                app:layout_constraintBottom_toBottomOf="@+id/circle_bg"
+                app:layout_constraintEnd_toEndOf="@+id/circle_bg"
+                app:layout_constraintStart_toStartOf="@+id/circle_bg"
+                app:layout_constraintTop_toTopOf="@+id/circle_bg" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="@+id/circle_bg"
+                app:layout_constraintEnd_toEndOf="@+id/circle_bg"
+                app:layout_constraintStart_toStartOf="@+id/circle_bg"
+                app:layout_constraintTop_toTopOf="@+id/circle_bg">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="预计用时"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="bottom"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_time_val"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@{viewModel.riceCookerTime}"
+                        android:textColor="@color/primary"
+                        android:textSize="48sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_stage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/bg_capsule_teal_light"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="@{device.deviceStatus}"
+                    android:textColor="@color/primary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:chipItems="@{viewModel.modeTags}"
+            app:chipSpacing="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_dashboard"
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true"
+            app:viewModel="@{viewModel}" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_taste"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/chip_group_mode">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="口感调节"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/taste_soft"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:alpha="@{viewModel.riceCookerTexture.equals(0) ? 1.0f : 0.5f}"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:onClick="@{() -> viewModel.setRiceCookerTexture(0)}"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_launcher_foreground"
+                            app:tint="@{viewModel.riceCookerTexture.equals(0) ? @color/primary : @color/text_secondary}" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="软糯"
+                            android:textColor="@{viewModel.riceCookerTexture.equals(0) ? @color/primary : @color/text_secondary}"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/taste_standard"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:alpha="@{viewModel.riceCookerTexture.equals(1) ? 1.0f : 0.5f}"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:onClick="@{() -> viewModel.setRiceCookerTexture(1)}"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_launcher_foreground"
+                            app:tint="@{viewModel.riceCookerTexture.equals(1) ? @color/primary : @color/text_secondary}" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="适中"
+                            android:textColor="@{viewModel.riceCookerTexture.equals(1) ? @color/primary : @color/text_secondary}"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/taste_hard"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:alpha="@{viewModel.riceCookerTexture.equals(2) ? 1.0f : 0.5f}"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:onClick="@{() -> viewModel.setRiceCookerTexture(2)}"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_launcher_foreground"
+                            app:tint="@{viewModel.riceCookerTexture.equals(2) ? @color/primary : @color/text_secondary}" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="劲道"
+                            android:textColor="@{viewModel.riceCookerTexture.equals(2) ? @color/primary : @color/text_secondary}"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="20dp"
+                    android:background="#F5F5F5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="烹饪完成后自动保温"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_warm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={viewModel.riceCookerInsulation}"
+                        app:thumbTint="@color/white"
+                        app:trackTint="@color/primary" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_start"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="32dp"
+            android:enabled="@{viewModel.status != `离线`}"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            app:iconGravity="textStart"
+            android:text="@{viewModel.subTaskLoading ? `` : device.deviceMode.equals(`IDEA`) ? `停止煮饭` : `开始煮饭`}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card_taste" />
+
+        <ProgressBar
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:elevation="10dp"
+            android:indeterminateTint="#2196F3"
+            android:visibility="@{viewModel.subTaskLoading ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_start"
+            app:layout_constraintEnd_toEndOf="@+id/btn_start"
+            app:layout_constraintStart_toStartOf="@id/btn_start"
+            app:layout_constraintTop_toTopOf="@+id/btn_start" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

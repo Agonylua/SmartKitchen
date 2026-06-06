@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+        <variable
+            name="device"
+            type="com.agonylua.smartKitchen.database.entity.Device" />
+
+        <variable
+            name="viewModel"
+            type="com.agonylua.smartKitchen.viewModel.DeviceViewModel" />
+
+        <variable
+            name="moreSettings"
+            type="android.view.View.OnClickListener" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_app_gradient"
+        android:theme="@style/ThemeOverlay.AppCompat.Light">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navigationIcon="@drawable/ic_left_arrow"
+            app:title="@{viewModel.deviceName}"
+            app:titleTextColor="@color/text_primary" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="26dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp">
+
+                    <ImageView
+                        android:id="@+id/device_image"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitCenter"
+                        android:src="@{viewModel.deviceImage}"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/device_sn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="@id/device_image"
+                        app:layout_constraintStart_toStartOf="@id/device_image"
+                        app:layout_constraintTop_toBottomOf="@id/device_image" />
+
+                    <TextView
+                        android:id="@+id/device_status"
+                        android:layout_width="72dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_status_capsule"
+                        android:paddingVertical="6dp"
+                        android:text="@{viewModel.statusLoading ? `` : viewModel.status}"
+                        android:textColor="@{viewModel.statusColor ? @color/device_online : @color/device_offline}"
+                        android:textSize="16sp"
+                        android:gravity="center"
+                        app:layout_constraintBottom_toTopOf="@+id/device_mode"
+                        app:layout_constraintVertical_chainStyle="packed"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ProgressBar
+                        android:id="@+id/state_loading"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:indeterminateTint="#2196F3"
+                        android:visibility="@{viewModel.statusLoading ? View.VISIBLE : View.GONE}"
+                        app:layout_constraintBottom_toBottomOf="@+id/device_status"
+                        app:layout_constraintEnd_toEndOf="@+id/device_status"
+                        app:layout_constraintStart_toStartOf="@id/device_status"
+                        app:layout_constraintTop_toTopOf="@+id/device_status" />
+
+                    <TextView
+                        android:id="@+id/device_mode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:drawablePadding="2dp"
+                        android:text="@{viewModel.deviceMode+` 模式`}"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:visibility="@{viewModel.status.equals(`离线`) ? View.GONE : View.VISIBLE}"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/device_status"
+                        app:layout_constraintTop_toBottomOf="@+id/device_status" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0" />
+
+                <FrameLayout
+                    android:id="@+id/container_device"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
